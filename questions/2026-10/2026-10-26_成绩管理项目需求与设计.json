@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-26",
+  "topic": "成绩管理项目需求与设计",
+  "stage": "成绩管理系统",
+  "estimatedMinutes": 30,
+  "notePath": "notes/2026-10/2026-10-26_成绩管理项目需求与设计.md",
+  "collectedAt": "2026-10-26",
+  "sources": [
+    {
+      "title": "Python 官方：Data Structures",
+      "url": "https://docs.python.org/3/tutorial/datastructures.html",
+      "kind": "Python 官方教程"
+    },
+    {
+      "title": "Python 官方：Errors and Exceptions",
+      "url": "https://docs.python.org/3/tutorial/errors.html",
+      "kind": "Python 官方教程"
+    },
+    {
+      "title": "Python 官方：unittest",
+      "url": "https://docs.python.org/3/library/unittest.html",
+      "kind": "Python 官方标准库"
+    }
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "type": "mcq",
+      "title": "唯一标识",
+      "difficulty": "基础",
+      "prompt": "为什么更适合用学号而不是姓名作为记录字典的键？",
+      "answer": 1,
+      "explanation": "姓名可能重复，而项目契约要求学号唯一。",
+      "hint": "比较字段是否天然唯一。",
+      "sourceIndex": 0,
+      "attribution": "依据 2026-10-26 实际阅读的官方资料原创，非官方原题",
+      "options": [
+        "姓名不能存字符串",
+        "不同学生可能同名",
+        "字典不允许姓名",
+        "学号总是整数"
+      ]
+    },
+    {
+      "id": "q2",
+      "type": "mcq",
+      "title": "职责分离",
+      "difficulty": "基础",
+      "prompt": "哪种设计最容易单独测试？",
+      "answer": 2,
+      "explanation": "纯粹接收 choice 并返回动作的函数没有交互副作用，边界清晰。",
+      "hint": "把输入输出与计算拆开。",
+      "sourceIndex": 2,
+      "attribution": "依据 2026-10-26 实际阅读的官方资料原创，非官方原题",
+      "options": [
+        "一个函数负责输入、修改、保存、打印",
+        "所有代码写在 while 中",
+        "choose_action(choice) 只返回动作",
+        "每次选择都直接退出程序"
+      ]
+    },
+    {
+      "id": "q3",
+      "type": "short",
+      "title": "菜单边界",
+      "difficulty": "基础",
+      "prompt": "若 COMMANDS 中没有键 \"9\"，`COMMANDS.get(\"9\", \"invalid\")` 返回什么？",
+      "answer": "invalid",
+      "explanation": "dict.get 在键不存在时返回给定默认值。",
+      "hint": "第二个参数是默认值。",
+      "sourceIndex": 0,
+      "attribution": "依据 2026-10-26 实际阅读的官方资料原创，非官方原题"
+    },
+    {
+      "id": "q4",
+      "type": "mcq",
+      "title": "失败契约",
+      "difficulty": "基础",
+      "prompt": "create_student 收到成绩 101 时，最合适的今天契约是什么？",
+      "answer": 0,
+      "explanation": "明确抛出 ValueError，调用方之后可负责提示和重试。",
+      "hint": "不要悄悄保存非法状态。",
+      "sourceIndex": 1,
+      "attribution": "依据 2026-10-26 实际阅读的官方资料原创，非官方原题",
+      "options": [
+        "抛出 ValueError",
+        "自动改成100且不说明",
+        "保存101",
+        "返回任意学生"
+      ]
+    },
+    {
+      "id": "q5",
+      "type": "code",
+      "title": "菜单与记录骨架",
+      "difficulty": "基础",
+      "prompt": "实现 create_student 与 choose_action，并覆盖合法、未知命令、空字段和越界成绩。",
+      "answer": "COMMANDS = {\n    \"1\": \"add\",\n    \"2\": \"find\",\n    \"3\": \"list\",\n    \"4\": \"save\",\n    \"0\": \"quit\",\n}\n\n\ndef create_student(student_id, name, score):\n    if not student_id.strip() or not name.strip():\n        raise ValueError(\"id and name must not be empty\")\n    if not 0 <= score <= 100:\n        raise ValueError(\"score must be between 0 and 100\")\n    return {\"id\": student_id.strip(), \"name\": name.strip(), \"score\": score}\n\n\ndef choose_action(choice):\n    return COMMANDS.get(choice.strip(), \"invalid\")\n\n\ndef run_checks():\n    assert choose_action(\" 1 \") == \"add\"\n    assert choose_action(\"9\") == \"invalid\"\n    assert create_student(\" S01 \", \" Amy \", 95) == {\n        \"id\": \"S01\", \"name\": \"Amy\", \"score\": 95\n    }\n    for args in [(\"\", \"Amy\", 80), (\"S01\", \"\", 80), (\"S01\", \"Amy\", 101)]:\n        try:\n            create_student(*args)\n        except ValueError:\n            pass\n        else:\n            raise AssertionError(args)\n\n\nif __name__ == \"__main__\":\n    run_checks()\n    print(\"design checks: OK\")\n",
+      "explanation": "菜单映射与记录校验分离，后续 CRUD 可复用这两个稳定接口。",
+      "hint": "先 strip，再判断空；分数使用闭区间。",
+      "sourceIndex": 0,
+      "attribution": "依据 2026-10-26 实际阅读的官方资料原创，非官方原题",
+      "language": "python",
+      "starter": "COMMANDS={'1':'add','2':'find','3':'list','4':'save','0':'quit'}\n\ndef create_student(student_id, name, score):\n    pass\n\ndef choose_action(choice):\n    pass\n",
+      "tests": [
+        {
+          "input": "print(choose_action(' 1 ')); print(choose_action('9'))",
+          "output": "add\ninvalid"
+        },
+        {
+          "input": "print(create_student(' S01 ',' Amy ',95))",
+          "output": "{'id': 'S01', 'name': 'Amy', 'score': 95}"
+        },
+        {
+          "input": "create_student('', 'Amy', 80)",
+          "output": "ValueError"
+        },
+        {
+          "input": "create_student('S01', 'Amy', 101)",
+          "output": "ValueError"
+        }
+      ]
+    }
+  ]
+}
