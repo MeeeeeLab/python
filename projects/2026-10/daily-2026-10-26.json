@@ -1,0 +1,121 @@
+{
+  "schemaVersion": 1,
+  "projectId": "daily-2026-10-26",
+  "track": "python",
+  "title": "成绩管理系统的菜单骨架",
+  "goal": "固定菜单动作、学生记录结构与输入校验，为后续 CRUD 和 CSV 保存建立可测试接口。",
+  "prerequisites": [
+    "字典与函数",
+    "异常处理",
+    "边界测试"
+  ],
+  "filename": "grade_system_design.py",
+  "runCommand": "python3 grade_system_design.py",
+  "starter": "COMMANDS={'1':'add','2':'find','3':'list','4':'save','0':'quit'}\n\ndef create_student(student_id,name,score):\n    pass\n\ndef choose_action(choice):\n    pass\n",
+  "solution": "COMMANDS = {\n    \"1\": \"add\",\n    \"2\": \"find\",\n    \"3\": \"list\",\n    \"4\": \"save\",\n    \"0\": \"quit\",\n}\n\n\ndef create_student(student_id, name, score):\n    if not student_id.strip() or not name.strip():\n        raise ValueError(\"id and name must not be empty\")\n    if not 0 <= score <= 100:\n        raise ValueError(\"score must be between 0 and 100\")\n    return {\"id\": student_id.strip(), \"name\": name.strip(), \"score\": score}\n\n\ndef choose_action(choice):\n    return COMMANDS.get(choice.strip(), \"invalid\")\n\n\ndef run_checks():\n    assert choose_action(\" 1 \") == \"add\"\n    assert choose_action(\"9\") == \"invalid\"\n    assert create_student(\" S01 \", \" Amy \", 95) == {\n        \"id\": \"S01\", \"name\": \"Amy\", \"score\": 95\n    }\n    for args in [(\"\", \"Amy\", 80), (\"S01\", \"\", 80), (\"S01\", \"Amy\", 101)]:\n        try:\n            create_student(*args)\n        except ValueError:\n            pass\n        else:\n            raise AssertionError(args)\n\n\nif __name__ == \"__main__\":\n    run_checks()\n    print(\"design checks: OK\")\n",
+  "solutionExplanation": [
+    "菜单映射与记录校验分离。",
+    "学号和姓名去除首尾空白，成绩限制在0到100。",
+    "今天只交付设计骨架，不虚构 CRUD 或持久化已完成。"
+  ],
+  "steps": [
+    {
+      "id": "scope",
+      "day": "2026-10-26",
+      "title": "确定范围",
+      "instruction": "列出菜单、记录、数据容器与保存边界。",
+      "hint": "今天不实现全部系统。",
+      "knowledge": [
+        "需求",
+        "范围"
+      ]
+    },
+    {
+      "id": "menu",
+      "day": "2026-10-26",
+      "title": "菜单映射",
+      "instruction": "把命令编号集中映射为动作。",
+      "hint": "未知命令返回 invalid。",
+      "knowledge": [
+        "字典",
+        "菜单"
+      ]
+    },
+    {
+      "id": "record",
+      "day": "2026-10-26",
+      "title": "记录契约",
+      "instruction": "校验学号、姓名和成绩后返回记录。",
+      "hint": "非法状态应明确拒绝。",
+      "knowledge": [
+        "数据模型",
+        "异常"
+      ]
+    },
+    {
+      "id": "tests",
+      "day": "2026-10-26",
+      "title": "边界测试",
+      "instruction": "覆盖合法、未知命令、空字段和越界成绩。",
+      "hint": "成功与失败都要测。",
+      "knowledge": [
+        "测试",
+        "边界"
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "id": "test-1",
+      "label": "合法命令",
+      "input": "choose_action(' 1 ')",
+      "output": "add",
+      "purpose": "验证规范化"
+    },
+    {
+      "id": "test-2",
+      "label": "未知命令",
+      "input": "choose_action('9')",
+      "output": "invalid",
+      "purpose": "验证失败约定"
+    },
+    {
+      "id": "test-3",
+      "label": "合法记录",
+      "input": "create_student(' S01 ',' Amy ',95)",
+      "output": "{'id': 'S01', 'name': 'Amy', 'score': 95}",
+      "purpose": "验证记录结构"
+    },
+    {
+      "id": "test-4",
+      "label": "非法记录",
+      "input": "create_student('', 'Amy', 101)",
+      "output": "ValueError",
+      "purpose": "验证边界拒绝"
+    }
+  ],
+  "recall": [
+    {
+      "id": "key",
+      "question": "为什么学号适合作字典键？",
+      "answer": "契约要求唯一，而姓名可能重复。"
+    }
+  ],
+  "sources": [
+    {
+      "title": "Python 官方：Data Structures",
+      "url": "https://docs.python.org/3/tutorial/datastructures.html",
+      "attribution": "2026-10-26 实际核对，项目为原创教学练习"
+    },
+    {
+      "title": "Python 官方：Errors and Exceptions",
+      "url": "https://docs.python.org/3/tutorial/errors.html",
+      "attribution": "2026-10-26 实际核对，项目为原创教学练习"
+    },
+    {
+      "title": "Python 官方：unittest",
+      "url": "https://docs.python.org/3/library/unittest.html",
+      "attribution": "2026-10-26 实际核对，项目为原创教学练习"
+    }
+  ]
+}
