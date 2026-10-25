@@ -9,14 +9,14 @@
     "线性查找",
     "sorted、key 与稳定性"
   ],
-  "filename": "score_archive.py",
-  "runCommand": "python3 score_archive.py",
+  "filename": "archive_acceptance.py",
+  "runCommand": "python3 archive_acceptance.py",
   "starter": "def linear_search(records, name):\n    pass\n\n\ndef rank_records(records):\n    pass\n\n\ndef run_checks():\n    pass\n\n\nif __name__ == \"__main__\":\n    run_checks()\n",
-  "solution": "def linear_search(records, name):\n    for index, (student, _score) in enumerate(records):\n        if student == name:\n            return index\n    return -1\n\n\ndef rank_records(records):\n    return sorted(records, key=lambda item: item[1], reverse=True)\n\n\ndef run_checks():\n    assert linear_search([], \"阿青\") == -1\n    assert rank_records([]) == []\n\n    one = [(\"阿青\", 88)]\n    assert linear_search(one, \"阿青\") == 0\n    assert rank_records(one) == one\n\n    records = [(\"阿青\", 88), (\"小林\", 95), (\"阿青\", 91), (\"小周\", 95)]\n    assert linear_search(records, \"阿青\") == 0\n    assert linear_search(records, \"不存在\") == -1\n    assert rank_records(records) == [\n        (\"小林\", 95), (\"小周\", 95), (\"阿青\", 91), (\"阿青\", 88)\n    ]\n    assert records[0] == (\"阿青\", 88)\n\n\nif __name__ == \"__main__\":\n    run_checks()\n    print(\"python checks: OK\")\n",
+  "solution": "def linear_search(records, name):\n    for index, (student, _score) in enumerate(records):\n        if student == name:\n            return index\n    return -1\n\n\ndef rank_records(records):\n    return sorted(records, key=lambda item: item[1], reverse=True)\n\n\ndef run_acceptance():\n    records = [(\"A\", 80), (\"B\", 95), (\"C\", 80), (\"A\", 70)]\n    assert linear_search(records, \"A\") == 0\n    assert linear_search(records, \"Z\") == -1\n    assert rank_records(records) == [(\"B\", 95), (\"A\", 80), (\"C\", 80), (\"A\", 70)]\n    assert records == [(\"A\", 80), (\"B\", 95), (\"C\", 80), (\"A\", 70)]\n    assert linear_search([], \"A\") == -1\n    assert rank_records([]) == []\n\n\nif __name__ == \"__main__\":\n    run_acceptance()\n    print(\"archive acceptance: OK\")\n",
   "solutionExplanation": [
-    "姓名查找首次命中立即返回，最坏 O(n)。",
-    "排名用 sorted 返回新列表，key 只提取成绩并保持同分稳定。",
-    "断言覆盖空、单元素、重复、未命中、同分和输入不变。"
+    "查找首次命中立即返回，最坏 O(n)。",
+    "sorted 返回新列表并保持同分稳定。",
+    "周日验收覆盖空、重复、未命中、稳定性与输入不变；Git 状态另行检查。"
   ],
   "steps": [
     {
@@ -132,17 +132,22 @@
     {
       "title": "Python 官方：Sorting Techniques",
       "url": "https://docs.python.org/3/howto/sorting.html",
-      "attribution": "2026-10-24 实际核对，项目为原创教学练习"
-    },
-    {
-      "title": "Python 官方：Data Structures",
-      "url": "https://docs.python.org/3/tutorial/datastructures.html",
-      "attribution": "2026-10-24 实际核对，项目为原创教学练习"
+      "attribution": "2026-10-25 实际核对，项目为原创教学练习"
     },
     {
       "title": "Python 官方：unittest",
       "url": "https://docs.python.org/3/library/unittest.html",
-      "attribution": "2026-10-24 实际核对，项目为原创教学练习"
+      "attribution": "2026-10-25 实际核对，项目为原创教学练习"
+    },
+    {
+      "title": "Git 官方：git-status",
+      "url": "https://git-scm.com/docs/git-status",
+      "attribution": "2026-10-25 实际核对，项目为原创教学练习"
+    },
+    {
+      "title": "Git 官方：git-log",
+      "url": "https://git-scm.com/docs/git-log",
+      "attribution": "2026-10-25 实际核对，项目为原创教学练习"
     }
   ]
 }
