@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-10-24",
+  "updatedAt": "2026-10-26",
   "projects": [
     {
       "id": "weekend-2026-10-10",
@@ -314,7 +314,7 @@
       "endDate": "2026-10-25",
       "kind": "weekend",
       "title": "可查可排的成绩档案",
-      "description": "周六完成姓名查找、稳定排名与边界断言；周日继续组合流程和独立验收。",
+      "description": "周六完成查找与排名，周日继续同一项目做独立验收、复杂度解释与 Git 状态检查。",
       "concepts": [
         "线性查找",
         "sorted 与 key",
@@ -348,8 +348,10 @@
         "功能职责"
       ],
       "javaConcepts": [
-        "链表按位置插入",
-        "寻找前驱"
+        "Node",
+        "head",
+        "next",
+        "单链表遍历"
       ],
       "minutes": 60,
       "javaMinutes": 20,
@@ -357,7 +359,7 @@
       "javaPath": "projects/2026-10/daily-2026-10-26.json",
       "guidePath": "projects/2026-10/daily-2026-10-26.md",
       "javaGuidePath": "projects/2026-10/daily-2026-10-26.md",
-      "ready": false
+      "ready": true
     },
     {
       "id": "daily-2026-10-27",
