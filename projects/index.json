@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-10-26",
+  "updatedAt": "2026-10-28",
   "projects": [
     {
       "id": "weekend-2026-10-10",
@@ -374,8 +374,9 @@
         "存在性校验"
       ],
       "javaConcepts": [
-        "链表删除",
-        "空链表与单元素"
+        "单链表头插",
+        "遍历查找",
+        "O(1)与O(n)"
       ],
       "minutes": 60,
       "javaMinutes": 20,
@@ -383,7 +384,7 @@
       "javaPath": "projects/2026-10/daily-2026-10-27.json",
       "guidePath": "projects/2026-10/daily-2026-10-27.md",
       "javaGuidePath": "projects/2026-10/daily-2026-10-27.md",
-      "ready": false
+      "ready": true
     },
     {
       "id": "daily-2026-10-28",
@@ -399,8 +400,9 @@
         "空数据"
       ],
       "javaConcepts": [
-        "数组与链表",
-        "访问与插入成本"
+        "单链表尾插",
+        "空链边界",
+        "操作成本"
       ],
       "minutes": 60,
       "javaMinutes": 20,
@@ -408,7 +410,7 @@
       "javaPath": "projects/2026-10/daily-2026-10-28.json",
       "guidePath": "projects/2026-10/daily-2026-10-28.md",
       "javaGuidePath": "projects/2026-10/daily-2026-10-28.md",
-      "ready": false
+      "ready": true
     },
     {
       "id": "daily-2026-10-29",
