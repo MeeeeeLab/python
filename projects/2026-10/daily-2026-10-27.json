@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "projectId": "daily-2026-10-27",
+  "track": "python",
+  "title": "学生记录增删改查",
+  "goal": "用唯一学号实现最小 CRUD，并明确重复与不存在记录的行为。",
+  "prerequisites": [
+    "字典与函数",
+    "边界契约"
+  ],
+  "filename": "student_crud.py",
+  "runCommand": "python3 student_crud.py",
+  "starter": "def add_student(records,student_id,name,score): pass\ndef find_student(records,student_id): pass\ndef update_score(records,student_id,score): pass\ndef delete_student(records,student_id): pass\n",
+  "solution": "def add_student(records, student_id, name, score):\n    if student_id in records:\n        return False\n    records[student_id] = {\"name\": name, \"score\": score}\n    return True\n\n\ndef find_student(records, student_id):\n    return records.get(student_id)\n\n\ndef update_score(records, student_id, score):\n    student = records.get(student_id)\n    if student is None:\n        return False\n    student[\"score\"] = score\n    return True\n\n\ndef delete_student(records, student_id):\n    return records.pop(student_id, None) is not None\n\n\ndef run_checks():\n    records = {}\n    assert add_student(records, \"S01\", \"Amy\", 80)\n    assert not add_student(records, \"S01\", \"Other\", 90)\n    assert find_student(records, \"S01\") == {\"name\": \"Amy\", \"score\": 80}\n    assert find_student(records, \"S99\") is None\n    assert update_score(records, \"S01\", 95)\n    assert not update_score(records, \"S99\", 95)\n    assert delete_student(records, \"S01\")\n    assert not delete_student(records, \"S01\")\n    assert records == {}\n\n\nif __name__ == \"__main__\":\n    run_checks()\n    print(\"CRUD checks: OK\")\n",
+  "solutionExplanation": [
+    "用唯一学号实现最小 CRUD，并明确重复与不存在记录的行为。",
+    "仅使用标准库与一个自检入口。"
+  ],
+  "steps": [
+    {
+      "id": "add",
+      "day": "2026-10-27",
+      "title": "新增",
+      "instruction": "重复学号不覆盖。",
+      "hint": "先用 in。",
+      "knowledge": [
+        "字典",
+        "唯一键"
+      ]
+    },
+    {
+      "id": "find",
+      "day": "2026-10-27",
+      "title": "查询",
+      "instruction": "不存在返回 None。",
+      "hint": "使用 get。",
+      "knowledge": [
+        "get",
+        "边界"
+      ]
+    },
+    {
+      "id": "change",
+      "day": "2026-10-27",
+      "title": "修改与删除",
+      "instruction": "命中返回 True，未命中 False。",
+      "hint": "使用 pop 默认值。",
+      "knowledge": [
+        "CRUD",
+        "契约"
+      ]
+    },
+    {
+      "id": "test",
+      "day": "2026-10-27",
+      "title": "边界自检",
+      "instruction": "覆盖重复和未命中。",
+      "hint": "检查最终状态。",
+      "knowledge": [
+        "assert",
+        "状态"
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "id": "t1",
+      "label": "完整流程",
+      "input": "run_checks()",
+      "output": "CRUD checks: OK",
+      "purpose": "覆盖成功与失败路径"
+    }
+  ],
+  "recall": [
+    {
+      "id": "duplicate",
+      "question": "重复学号为何不能直接赋值？",
+      "answer": "会静默覆盖旧记录。"
+    }
+  ],
+  "sources": [
+    {
+      "title": "Python 官方：Data Structures — Dictionaries",
+      "url": "https://docs.python.org/3/tutorial/datastructures.html#dictionaries",
+      "attribution": "2026-10-27 实际核对，项目为原创教学练习"
+    },
+    {
+      "title": "Python 官方：Built-in Types — Mapping Types",
+      "url": "https://docs.python.org/3/library/stdtypes.html#mapping-types-dict",
+      "attribution": "2026-10-27 实际核对，项目为原创教学练习"
+    },
+    {
+      "title": "Python 官方：Errors and Exceptions",
+      "url": "https://docs.python.org/3/tutorial/errors.html",
+      "attribution": "2026-10-27 实际核对，项目为原创教学练习"
+    }
+  ]
+}
