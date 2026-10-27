@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-28",
+  "topic": "成绩统计与排序查询",
+  "stage": "成绩管理系统",
+  "estimatedMinutes": 30,
+  "notePath": "notes/2026-10/2026-10-28_成绩统计与排序查询.md",
+  "collectedAt": "2026-10-28",
+  "sources": [
+    {
+      "title": "Python 官方：Built-in Functions",
+      "url": "https://docs.python.org/3/library/functions.html",
+      "kind": "Python 官方标准库"
+    },
+    {
+      "title": "Python 官方：Sorting Techniques",
+      "url": "https://docs.python.org/3/howto/sorting.html",
+      "kind": "Python 官方教程"
+    },
+    {
+      "title": "Python 官方：statistics",
+      "url": "https://docs.python.org/3/library/statistics.html",
+      "kind": "Python 官方标准库"
+    }
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "type": "mcq",
+      "title": "空数据边界",
+      "difficulty": "基础",
+      "prompt": "为什么 grade_summary({}) 要先返回 None？",
+      "answer": 0,
+      "explanation": "空序列调用 min/max 会抛 ValueError；先处理空契约。",
+      "hint": "最小值需要至少一个元素。",
+      "sourceIndex": 0,
+      "attribution": "依据 2026-10-28 实际阅读的官方资料原创，非官方原题",
+      "options": [
+        "避免 min/max 的空序列错误",
+        "让排序变慢",
+        "字典不能判空",
+        "为了修改原字典"
+      ]
+    },
+    {
+      "id": "q2",
+      "type": "short",
+      "title": "平均分",
+      "difficulty": "基础",
+      "prompt": "成绩 80、95、80 的平均分是多少？",
+      "answer": "85.0",
+      "explanation": "总和255，除以3得到85.0。",
+      "hint": "255 / 3。",
+      "sourceIndex": 2,
+      "attribution": "依据 2026-10-28 实际阅读的官方资料原创，非官方原题"
+    },
+    {
+      "id": "q3",
+      "type": "mcq",
+      "title": "稳定排名",
+      "difficulty": "基础",
+      "prompt": "S01 80、S02 95、S03 80 按成绩稳定降序，学号顺序是什么？",
+      "answer": 2,
+      "explanation": "S02先；S01和S03同分，保持原插入顺序。",
+      "hint": "同键不交换。",
+      "sourceIndex": 1,
+      "attribution": "依据 2026-10-28 实际阅读的官方资料原创，非官方原题",
+      "options": [
+        "S03,S01,S02",
+        "S01,S03,S02",
+        "S02,S01,S03",
+        "顺序随机"
+      ]
+    },
+    {
+      "id": "q4",
+      "type": "mcq",
+      "title": "状态保护",
+      "difficulty": "基础",
+      "prompt": "使用 sorted(records.items(), ...) 后，原 records 会怎样？",
+      "answer": 1,
+      "explanation": "sorted 返回新列表，不修改原字典。",
+      "hint": "sorted 与 list.sort 不同。",
+      "sourceIndex": 1,
+      "attribution": "依据 2026-10-28 实际阅读的官方资料原创，非官方原题",
+      "options": [
+        "被清空",
+        "保持不变",
+        "变成列表",
+        "按成绩重排键"
+      ]
+    },
+    {
+      "id": "q5",
+      "type": "code",
+      "title": "统计与排名面板",
+      "difficulty": "基础",
+      "prompt": "实现 grade_summary 与 ranking；覆盖空记录、平均值、最值、稳定同分和输入不变。",
+      "answer": "def grade_summary(records):\n    if not records:\n        return None\n    scores = [student[\"score\"] for student in records.values()]\n    return {\n        \"count\": len(scores),\n        \"average\": sum(scores) / len(scores),\n        \"lowest\": min(scores),\n        \"highest\": max(scores),\n    }\n\n\ndef ranking(records):\n    return sorted(\n        records.items(),\n        key=lambda item: item[1][\"score\"],\n        reverse=True,\n    )\n\n\ndef run_checks():\n    assert grade_summary({}) is None\n    assert ranking({}) == []\n    records = {\n        \"S01\": {\"name\": \"Amy\", \"score\": 80},\n        \"S02\": {\"name\": \"Bo\", \"score\": 95},\n        \"S03\": {\"name\": \"Cy\", \"score\": 80},\n    }\n    assert grade_summary(records) == {\n        \"count\": 3,\n        \"average\": 85.0,\n        \"lowest\": 80,\n        \"highest\": 95,\n    }\n    assert [student_id for student_id, _ in ranking(records)] == [\"S02\", \"S01\", \"S03\"]\n\n\nif __name__ == \"__main__\":\n    run_checks()\n    print(\"dashboard checks: OK\")\n",
+      "explanation": "内置函数完成统计，sorted 配合 key 完成稳定排名；不重复造轮子。",
+      "hint": "空数据在提取 min/max 前处理。",
+      "sourceIndex": 0,
+      "attribution": "依据 2026-10-28 实际阅读的官方资料原创，非官方原题",
+      "language": "python",
+      "starter": "def grade_summary(records): pass\ndef ranking(records): pass\n",
+      "tests": [
+        {
+          "input": "print(grade_summary({})); print(ranking({}))",
+          "output": "None\n[]"
+        },
+        {
+          "input": "r={'S01':{'name':'Amy','score':80},'S02':{'name':'Bo','score':95},'S03':{'name':'Cy','score':80}}; print(grade_summary(r)); print([x[0] for x in ranking(r)])",
+          "output": "{'count': 3, 'average': 85.0, 'lowest': 80, 'highest': 95}\n['S02', 'S01', 'S03']"
+        }
+      ]
+    }
+  ]
+}
