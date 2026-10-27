@@ -1,0 +1,105 @@
+{
+  "schemaVersion": 1,
+  "projectId": "daily-2026-10-28",
+  "track": "python",
+  "title": "成绩统计与排名面板",
+  "goal": "为现有记录提供空数据安全的统计和稳定排名，不修改原数据。",
+  "prerequisites": [
+    "字典与函数",
+    "边界契约"
+  ],
+  "filename": "grade_dashboard.py",
+  "runCommand": "python3 grade_dashboard.py",
+  "starter": "def grade_summary(records): pass\ndef ranking(records): pass\n",
+  "solution": "def grade_summary(records):\n    if not records:\n        return None\n    scores = [student[\"score\"] for student in records.values()]\n    return {\n        \"count\": len(scores),\n        \"average\": sum(scores) / len(scores),\n        \"lowest\": min(scores),\n        \"highest\": max(scores),\n    }\n\n\ndef ranking(records):\n    return sorted(\n        records.items(),\n        key=lambda item: item[1][\"score\"],\n        reverse=True,\n    )\n\n\ndef run_checks():\n    assert grade_summary({}) is None\n    assert ranking({}) == []\n    records = {\n        \"S01\": {\"name\": \"Amy\", \"score\": 80},\n        \"S02\": {\"name\": \"Bo\", \"score\": 95},\n        \"S03\": {\"name\": \"Cy\", \"score\": 80},\n    }\n    assert grade_summary(records) == {\n        \"count\": 3,\n        \"average\": 85.0,\n        \"lowest\": 80,\n        \"highest\": 95,\n    }\n    assert [student_id for student_id, _ in ranking(records)] == [\"S02\", \"S01\", \"S03\"]\n\n\nif __name__ == \"__main__\":\n    run_checks()\n    print(\"dashboard checks: OK\")\n",
+  "solutionExplanation": [
+    "为现有记录提供空数据安全的统计和稳定排名，不修改原数据。",
+    "仅使用标准库与一个自检入口。"
+  ],
+  "steps": [
+    {
+      "id": "empty",
+      "day": "2026-10-28",
+      "title": "空数据契约",
+      "instruction": "空统计返回 None，排名返回空列表。",
+      "hint": "先判空。",
+      "knowledge": [
+        "边界",
+        "min/max"
+      ]
+    },
+    {
+      "id": "summary",
+      "day": "2026-10-28",
+      "title": "统计",
+      "instruction": "计算数量、平均、最低、最高。",
+      "hint": "提取一次 scores。",
+      "knowledge": [
+        "sum",
+        "min/max"
+      ]
+    },
+    {
+      "id": "rank",
+      "day": "2026-10-28",
+      "title": "排名",
+      "instruction": "按成绩稳定降序返回新列表。",
+      "hint": "使用 sorted。",
+      "knowledge": [
+        "key",
+        "稳定性"
+      ]
+    },
+    {
+      "id": "test",
+      "day": "2026-10-28",
+      "title": "状态自检",
+      "instruction": "核对同分顺序与原字典。",
+      "hint": "不要用集合比较。",
+      "knowledge": [
+        "assert",
+        "状态保护"
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "id": "t1",
+      "label": "空数据",
+      "input": "grade_summary({}); ranking({})",
+      "output": "None\n[]",
+      "purpose": "空边界"
+    },
+    {
+      "id": "t2",
+      "label": "同分",
+      "input": "run_checks()",
+      "output": "dashboard checks: OK",
+      "purpose": "统计与稳定性"
+    }
+  ],
+  "recall": [
+    {
+      "id": "empty",
+      "question": "为何先判空？",
+      "answer": "空序列不能直接求 min/max。"
+    }
+  ],
+  "sources": [
+    {
+      "title": "Python 官方：Built-in Functions",
+      "url": "https://docs.python.org/3/library/functions.html",
+      "attribution": "2026-10-28 实际核对，项目为原创教学练习"
+    },
+    {
+      "title": "Python 官方：Sorting Techniques",
+      "url": "https://docs.python.org/3/howto/sorting.html",
+      "attribution": "2026-10-28 实际核对，项目为原创教学练习"
+    },
+    {
+      "title": "Python 官方：statistics",
+      "url": "https://docs.python.org/3/library/statistics.html",
+      "attribution": "2026-10-28 实际核对，项目为原创教学练习"
+    }
+  ]
+}
