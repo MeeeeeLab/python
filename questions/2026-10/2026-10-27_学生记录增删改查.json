@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-27",
+  "topic": "学生记录增删改查",
+  "stage": "成绩管理系统",
+  "estimatedMinutes": 30,
+  "notePath": "notes/2026-10/2026-10-27_学生记录增删改查.md",
+  "collectedAt": "2026-10-27",
+  "sources": [
+    {
+      "title": "Python 官方：Data Structures — Dictionaries",
+      "url": "https://docs.python.org/3/tutorial/datastructures.html#dictionaries",
+      "kind": "Python 官方教程"
+    },
+    {
+      "title": "Python 官方：Built-in Types — Mapping Types",
+      "url": "https://docs.python.org/3/library/stdtypes.html#mapping-types-dict",
+      "kind": "Python 官方标准库"
+    },
+    {
+      "title": "Python 官方：Errors and Exceptions",
+      "url": "https://docs.python.org/3/tutorial/errors.html",
+      "kind": "Python 官方教程"
+    }
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "type": "mcq",
+      "title": "重复学号",
+      "difficulty": "基础",
+      "prompt": "新增学生时学号已经存在，按今日契约应怎样处理？",
+      "answer": 1,
+      "explanation": "返回 False 且保持原记录，避免静默覆盖。",
+      "hint": "字典再次赋值会覆盖旧值。",
+      "sourceIndex": 0,
+      "attribution": "依据 2026-10-27 实际阅读的官方资料原创，非官方原题",
+      "options": [
+        "覆盖旧记录",
+        "返回 False，不修改",
+        "删除旧记录",
+        "自动改学号"
+      ]
+    },
+    {
+      "id": "q2",
+      "type": "short",
+      "title": "安全查询",
+      "difficulty": "基础",
+      "prompt": "`{'S01': 80}.get('S99')` 的结果是什么？",
+      "answer": "None",
+      "explanation": "get 在键不存在且未提供默认值时返回 None。",
+      "hint": "它不会像下标访问那样抛 KeyError。",
+      "sourceIndex": 1,
+      "attribution": "依据 2026-10-27 实际阅读的官方资料原创，非官方原题"
+    },
+    {
+      "id": "q3",
+      "type": "mcq",
+      "title": "删除契约",
+      "difficulty": "基础",
+      "prompt": "哪种写法最简洁地实现“不存在则返回 False，不抛异常”？",
+      "answer": 2,
+      "explanation": "pop(key, None) 在缺少键时返回默认值。",
+      "hint": "使用带默认值的 pop。",
+      "sourceIndex": 1,
+      "attribution": "依据 2026-10-27 实际阅读的官方资料原创，非官方原题",
+      "options": [
+        "del records[id]",
+        "records[id] = None",
+        "records.pop(id, None) is not None",
+        "records.clear()"
+      ]
+    },
+    {
+      "id": "q4",
+      "type": "short",
+      "title": "操作追踪",
+      "difficulty": "基础",
+      "prompt": "空字典先成功新增 S01，再重复新增 S01，两个返回值依次是什么？",
+      "answer": "True, False",
+      "explanation": "第一次写入；第二次检测到键已存在且不覆盖。",
+      "hint": "唯一键。",
+      "sourceIndex": 0,
+      "attribution": "依据 2026-10-27 实际阅读的官方资料原创，非官方原题"
+    },
+    {
+      "id": "q5",
+      "type": "code",
+      "title": "最小 CRUD",
+      "difficulty": "基础",
+      "prompt": "实现 add/find/update/delete 四个函数，按契约处理重复和不存在记录，并运行边界断言。",
+      "answer": "def add_student(records, student_id, name, score):\n    if student_id in records:\n        return False\n    records[student_id] = {\"name\": name, \"score\": score}\n    return True\n\n\ndef find_student(records, student_id):\n    return records.get(student_id)\n\n\ndef update_score(records, student_id, score):\n    student = records.get(student_id)\n    if student is None:\n        return False\n    student[\"score\"] = score\n    return True\n\n\ndef delete_student(records, student_id):\n    return records.pop(student_id, None) is not None\n\n\ndef run_checks():\n    records = {}\n    assert add_student(records, \"S01\", \"Amy\", 80)\n    assert not add_student(records, \"S01\", \"Other\", 90)\n    assert find_student(records, \"S01\") == {\"name\": \"Amy\", \"score\": 80}\n    assert find_student(records, \"S99\") is None\n    assert update_score(records, \"S01\", 95)\n    assert not update_score(records, \"S99\", 95)\n    assert delete_student(records, \"S01\")\n    assert not delete_student(records, \"S01\")\n    assert records == {}\n\n\nif __name__ == \"__main__\":\n    run_checks()\n    print(\"CRUD checks: OK\")\n",
+      "explanation": "使用 in、get 与 pop 默认值完成最小实现；每个函数只有一个职责。",
+      "hint": "不要捕获不需要的异常。",
+      "sourceIndex": 0,
+      "attribution": "依据 2026-10-27 实际阅读的官方资料原创，非官方原题",
+      "language": "python",
+      "starter": "def add_student(records,student_id,name,score): pass\ndef find_student(records,student_id): pass\ndef update_score(records,student_id,score): pass\ndef delete_student(records,student_id): pass\n",
+      "tests": [
+        {
+          "input": "r={}; print(add_student(r,'S01','Amy',80)); print(add_student(r,'S01','Other',90)); print(r)",
+          "output": "True\nFalse\n{'S01': {'name': 'Amy', 'score': 80}}"
+        },
+        {
+          "input": "print(find_student({},'S99'))",
+          "output": "None"
+        },
+        {
+          "input": "r={'S01':{'name':'Amy','score':80}}; print(update_score(r,'S01',95)); print(delete_student(r,'S01')); print(r)",
+          "output": "True\nTrue\n{}"
+        }
+      ]
+    }
+  ]
+}
