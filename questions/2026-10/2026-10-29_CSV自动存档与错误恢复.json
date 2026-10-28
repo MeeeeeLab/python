@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-29",
+  "topic": "CSV自动存档与错误恢复",
+  "stage": "成绩管理系统",
+  "estimatedMinutes": 30,
+  "notePath": "notes/2026-10/2026-10-29_CSV自动存档与错误恢复.md",
+  "collectedAt": "2026-10-29",
+  "sources": [
+    {
+      "title": "Python 官方：csv",
+      "url": "https://docs.python.org/3/library/csv.html",
+      "kind": "Python 官方标准库"
+    },
+    {
+      "title": "Python 官方：pathlib",
+      "url": "https://docs.python.org/3/library/pathlib.html",
+      "kind": "Python 官方标准库"
+    },
+    {
+      "title": "Python 官方：Errors and Exceptions",
+      "url": "https://docs.python.org/3/tutorial/errors.html",
+      "kind": "Python 官方教程"
+    }
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "type": "mcq",
+      "title": "CSV 打开方式",
+      "difficulty": "基础",
+      "prompt": "Python 官方 csv 文档建议打开 CSV 文件时使用哪个参数？",
+      "answer": 2,
+      "explanation": "`newline=''` 让 csv 模块正确处理换行，并避免某些平台写出额外回车。",
+      "hint": "交给 csv 模块管理换行。",
+      "sourceIndex": 0,
+      "attribution": "依据 2026-10-29 实际阅读的官方资料原创，非官方原题",
+      "options": [
+        "errors='ignore'",
+        "buffering=0",
+        "newline=''",
+        "mode='binary'"
+      ]
+    },
+    {
+      "id": "q2",
+      "type": "mcq",
+      "title": "缺文件契约",
+      "difficulty": "基础",
+      "prompt": "首次运行时 CSV 文件不存在，今日 load_students 契约返回什么？",
+      "answer": 0,
+      "explanation": "缺文件代表尚无存档，不是损坏行。",
+      "hint": "空记录、无错误行。",
+      "sourceIndex": 1,
+      "attribution": "依据 2026-10-29 实际阅读的官方资料原创，非官方原题",
+      "options": [
+        "({}, [])",
+        "抛出 KeyError",
+        "None",
+        "({'error':1},[1])"
+      ]
+    },
+    {
+      "id": "q3",
+      "type": "short",
+      "title": "错误行号",
+      "difficulty": "基础",
+      "prompt": "表头是第1行，第2行合法，第3行 score='bad'。error_lines 应是什么？",
+      "answer": "[3]",
+      "explanation": "枚举数据行从2开始，损坏的是物理第3行。",
+      "hint": "表头也占一行。",
+      "sourceIndex": 0,
+      "attribution": "依据 2026-10-29 实际阅读的官方资料原创，非官方原题"
+    },
+    {
+      "id": "q4",
+      "type": "mcq",
+      "title": "异常边界",
+      "difficulty": "基础",
+      "prompt": "为什么不应捕获所有 Exception 后直接返回空字典？",
+      "answer": 1,
+      "explanation": "权限或磁盘错误不应伪装成“没有数据”，否则可能掩盖数据风险。",
+      "hint": "只处理预期的数据格式错误。",
+      "sourceIndex": 2,
+      "attribution": "依据 2026-10-29 实际阅读的官方资料原创，非官方原题",
+      "options": [
+        "代码会更短",
+        "会掩盖非预期文件错误",
+        "CSV 不支持异常",
+        "字典不能为空"
+      ]
+    },
+    {
+      "id": "q5",
+      "type": "code",
+      "title": "CSV 存档与恢复",
+      "difficulty": "综合",
+      "prompt": "实现 save_students/load_students，覆盖缺文件、正常往返、坏成绩、重复学号，并返回错误行号。",
+      "answer": "import csv\nfrom pathlib import Path\nfrom tempfile import TemporaryDirectory\n\nFIELDS = [\"id\", \"name\", \"score\"]\n\n\ndef save_students(path, records):\n    with open(path, \"w\", encoding=\"utf-8\", newline=\"\") as file:\n        writer = csv.DictWriter(file, fieldnames=FIELDS)\n        writer.writeheader()\n        for student_id, student in records.items():\n            writer.writerow({\"id\": student_id, **student})\n\n\ndef load_students(path):\n    if not Path(path).exists():\n        return {}, []\n    records = {}\n    errors = []\n    with open(path, encoding=\"utf-8\", newline=\"\") as file:\n        for line_number, row in enumerate(csv.DictReader(file), start=2):\n            try:\n                student_id = row[\"id\"].strip()\n                name = row[\"name\"].strip()\n                score = int(row[\"score\"])\n                if not student_id or not name or not 0 <= score <= 100:\n                    raise ValueError\n                if student_id in records:\n                    raise ValueError\n                records[student_id] = {\"name\": name, \"score\": score}\n            except (KeyError, TypeError, ValueError):\n                errors.append(line_number)\n    return records, errors\n\n\ndef run_checks():\n    with TemporaryDirectory() as folder:\n        path = Path(folder) / \"students.csv\"\n        assert load_students(path) == ({}, [])\n        original = {\"S01\": {\"name\": \"Amy\", \"score\": 95}}\n        save_students(path, original)\n        assert load_students(path) == (original, [])\n        path.write_text(\"id,name,score\\nS01,Amy,95\\nS02,Bo,bad\\nS01,Cy,80\\n\", encoding=\"utf-8\")\n        assert load_students(path) == (original, [3, 4])\n\n\nif __name__ == \"__main__\":\n    run_checks()\n    print(\"CSV checks: OK\")\n",
+      "explanation": "使用标准库 DictReader/DictWriter；只捕获行级格式错误，其他文件错误继续暴露。",
+      "hint": "不要静默覆盖重复 ID。",
+      "sourceIndex": 0,
+      "attribution": "依据 2026-10-29 实际阅读的官方资料原创，非官方原题",
+      "language": "python",
+      "starter": "def save_students(path,records): pass\ndef load_students(path): pass\n",
+      "tests": [
+        {
+          "input": "load_students(missing_path)",
+          "output": "({}, [])"
+        },
+        {
+          "input": "save then load {'S01': {'name':'Amy','score':95}}",
+          "output": "({'S01': {'name': 'Amy', 'score': 95}}, [])"
+        },
+        {
+          "input": "id,name,score\\nS01,Amy,95\\nS02,Bo,bad\\nS01,Cy,80",
+          "output": "({'S01': {'name': 'Amy', 'score': 95}}, [3, 4])"
+        }
+      ]
+    }
+  ]
+}
