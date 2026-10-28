@@ -1,0 +1,107 @@
+{
+  "schemaVersion": 1,
+  "projectId": "daily-2026-10-29",
+  "track": "python",
+  "title": "自动存档与错误恢复",
+  "goal": "用标准库把学生记录写入 CSV，并在缺文件或部分坏行时返回可解释结果。",
+  "prerequisites": [
+    "字典记录",
+    "文件读写",
+    "异常处理"
+  ],
+  "filename": "csv_storage.py",
+  "runCommand": "python3 csv_storage.py",
+  "starter": "def save_students(path,records): pass\ndef load_students(path): pass\n",
+  "solution": "import csv\nfrom pathlib import Path\nfrom tempfile import TemporaryDirectory\n\nFIELDS = [\"id\", \"name\", \"score\"]\n\n\ndef save_students(path, records):\n    with open(path, \"w\", encoding=\"utf-8\", newline=\"\") as file:\n        writer = csv.DictWriter(file, fieldnames=FIELDS)\n        writer.writeheader()\n        for student_id, student in records.items():\n            writer.writerow({\"id\": student_id, **student})\n\n\ndef load_students(path):\n    if not Path(path).exists():\n        return {}, []\n    records = {}\n    errors = []\n    with open(path, encoding=\"utf-8\", newline=\"\") as file:\n        for line_number, row in enumerate(csv.DictReader(file), start=2):\n            try:\n                student_id = row[\"id\"].strip()\n                name = row[\"name\"].strip()\n                score = int(row[\"score\"])\n                if not student_id or not name or not 0 <= score <= 100:\n                    raise ValueError\n                if student_id in records:\n                    raise ValueError\n                records[student_id] = {\"name\": name, \"score\": score}\n            except (KeyError, TypeError, ValueError):\n                errors.append(line_number)\n    return records, errors\n\n\ndef run_checks():\n    with TemporaryDirectory() as folder:\n        path = Path(folder) / \"students.csv\"\n        assert load_students(path) == ({}, [])\n        original = {\"S01\": {\"name\": \"Amy\", \"score\": 95}}\n        save_students(path, original)\n        assert load_students(path) == (original, [])\n        path.write_text(\"id,name,score\\nS01,Amy,95\\nS02,Bo,bad\\nS01,Cy,80\\n\", encoding=\"utf-8\")\n        assert load_students(path) == (original, [3, 4])\n\n\nif __name__ == \"__main__\":\n    run_checks()\n    print(\"CSV checks: OK\")\n",
+  "solutionExplanation": [
+    "DictWriter/DictReader 直接匹配字典记录。",
+    "缺文件返回空状态；坏行保留行号，不静默吞错。",
+    "没有加入数据库、备份轮换或自定义序列化。"
+  ],
+  "steps": [
+    {
+      "id": "save",
+      "day": "2026-10-29",
+      "title": "保存",
+      "instruction": "写表头与全部记录。",
+      "hint": "使用 newline=''。",
+      "knowledge": [
+        "csv",
+        "DictWriter"
+      ]
+    },
+    {
+      "id": "missing",
+      "day": "2026-10-29",
+      "title": "缺文件",
+      "instruction": "首次启动返回空状态。",
+      "hint": "使用 Path.exists。",
+      "knowledge": [
+        "pathlib",
+        "边界"
+      ]
+    },
+    {
+      "id": "load",
+      "day": "2026-10-29",
+      "title": "加载与校验",
+      "instruction": "保留合法行并报告坏行号。",
+      "hint": "只捕获行级格式错误。",
+      "knowledge": [
+        "DictReader",
+        "异常"
+      ]
+    },
+    {
+      "id": "test",
+      "day": "2026-10-29",
+      "title": "临时目录自检",
+      "instruction": "测试缺文件、往返、坏行与重复ID。",
+      "hint": "不污染真实数据。",
+      "knowledge": [
+        "TemporaryDirectory",
+        "assert"
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "id": "t1",
+      "label": "缺文件",
+      "input": "load_students(missing)",
+      "output": "({}, [])",
+      "purpose": "首次启动"
+    },
+    {
+      "id": "t2",
+      "label": "正常往返",
+      "input": "run_checks()",
+      "output": "CSV checks: OK",
+      "purpose": "保存加载与错误恢复"
+    }
+  ],
+  "recall": [
+    {
+      "id": "newline",
+      "question": "为何使用 newline=''？",
+      "answer": "让 csv 模块正确管理换行。"
+    }
+  ],
+  "sources": [
+    {
+      "title": "Python 官方：csv",
+      "url": "https://docs.python.org/3/library/csv.html",
+      "attribution": "2026-10-29 实际核对，项目为原创教学练习"
+    },
+    {
+      "title": "Python 官方：pathlib",
+      "url": "https://docs.python.org/3/library/pathlib.html",
+      "attribution": "2026-10-29 实际核对，项目为原创教学练习"
+    },
+    {
+      "title": "Python 官方：Errors and Exceptions",
+      "url": "https://docs.python.org/3/tutorial/errors.html",
+      "attribution": "2026-10-29 实际核对，项目为原创教学练习"
+    }
+  ]
+}
