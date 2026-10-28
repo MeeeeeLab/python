@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-10-28",
+  "updatedAt": "2026-10-29",
   "projects": [
     {
       "id": "weekend-2026-10-10",
@@ -426,8 +426,9 @@
         "错误恢复"
       ],
       "javaConcepts": [
-        "集合选型",
-        "ArrayList/Deque"
+        "单链表删除",
+        "前驱节点",
+        "空链与未命中边界"
       ],
       "minutes": 60,
       "javaMinutes": 20,
@@ -435,7 +436,7 @@
       "javaPath": "projects/2026-10/daily-2026-10-29.json",
       "guidePath": "projects/2026-10/daily-2026-10-29.md",
       "javaGuidePath": "projects/2026-10/daily-2026-10-29.md",
-      "ready": false
+      "ready": true
     },
     {
       "id": "daily-2026-10-30",
