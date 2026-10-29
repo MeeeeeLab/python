@@ -1,0 +1,107 @@
+{
+  "schemaVersion": 1,
+  "projectId": "daily-2026-10-30",
+  "track": "python",
+  "title": "给系统做一次体检",
+  "goal": "用最小自检覆盖成绩管理核心流程，并把重复成绩校验收敛到一个函数。",
+  "prerequisites": [
+    "字典记录",
+    "异常处理",
+    "函数与返回值"
+  ],
+  "filename": "grade_system_check.py",
+  "runCommand": "python3 grade_system_check.py",
+  "starter": "def require_score(score): pass\n\ndef add_student(records,student_id,name,score): pass\n\ndef update_score(records,student_id,score): pass\n\ndef delete_student(records,student_id): pass\n\ndef statistics(records): pass\n",
+  "solution": "def require_score(score):\n    if isinstance(score, bool) or not isinstance(score, int) or not 0 <= score <= 100:\n        raise ValueError(\"score must be an integer from 0 to 100\")\n    return score\n\n\ndef add_student(records, student_id, name, score):\n    student_id = student_id.strip()\n    name = name.strip()\n    if not student_id or not name:\n        raise ValueError(\"id and name are required\")\n    if student_id in records:\n        return False\n    records[student_id] = {\"name\": name, \"score\": require_score(score)}\n    return True\n\n\ndef update_score(records, student_id, score):\n    if student_id not in records:\n        return False\n    score = require_score(score)\n    records[student_id][\"score\"] = score\n    return True\n\n\ndef delete_student(records, student_id):\n    return records.pop(student_id, None) is not None\n\n\ndef statistics(records):\n    if not records:\n        return None\n    scores = [student[\"score\"] for student in records.values()]\n    return {\n        \"count\": len(scores),\n        \"average\": sum(scores) / len(scores),\n        \"highest\": max(scores),\n        \"lowest\": min(scores),\n    }\n\n\ndef run_checks():\n    records = {}\n    assert statistics(records) is None\n    assert add_student(records, \" S01 \", \" Amy \", 95)\n    assert not add_student(records, \"S01\", \"Again\", 80)\n    assert update_score(records, \"S01\", 100)\n    assert not update_score(records, \"S99\", 70)\n    assert statistics(records) == {\n        \"count\": 1,\n        \"average\": 100.0,\n        \"highest\": 100,\n        \"lowest\": 100,\n    }\n    try:\n        update_score(records, \"S01\", 101)\n    except ValueError:\n        pass\n    else:\n        raise AssertionError(\"invalid score was accepted\")\n    assert records[\"S01\"][\"score\"] == 100\n    assert delete_student(records, \"S01\")\n    assert not delete_student(records, \"S01\")\n\n\nif __name__ == \"__main__\":\n    run_checks()\n    print(\"project checks: OK\")\n",
+  "solutionExplanation": [
+    "先写明契约，再为正常与边界建立可重复检查。",
+    "成绩规则只保留一份，修改在验证成功后发生。",
+    "只用标准库和一个自检入口，不引入测试依赖或新架构。"
+  ],
+  "steps": [
+    {
+      "id": "contract",
+      "day": "2026-10-30",
+      "title": "列出契约",
+      "instruction": "写清空、重复、缺失与非法输入的预期。",
+      "hint": "同时考虑返回值与状态。",
+      "knowledge": [
+        "边界",
+        "函数契约"
+      ]
+    },
+    {
+      "id": "checks",
+      "day": "2026-10-30",
+      "title": "建立自检",
+      "instruction": "先为已有行为写 assert。",
+      "hint": "正常与失败路径都要覆盖。",
+      "knowledge": [
+        "assert",
+        "回归测试"
+      ]
+    },
+    {
+      "id": "refactor",
+      "day": "2026-10-30",
+      "title": "集中校验",
+      "instruction": "把重复成绩规则移入 require_score。",
+      "hint": "先验证再修改。",
+      "knowledge": [
+        "重构",
+        "单一职责"
+      ]
+    },
+    {
+      "id": "run",
+      "day": "2026-10-30",
+      "title": "运行复核",
+      "instruction": "运行全部检查并观察失败信息。",
+      "hint": "临时制造一次错误再恢复。",
+      "knowledge": [
+        "调试",
+        "边界测试"
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "id": "t1",
+      "label": "正常流程",
+      "input": "add/update/statistics/delete",
+      "output": "project checks: OK",
+      "purpose": "验证核心流程"
+    },
+    {
+      "id": "t2",
+      "label": "边界流程",
+      "input": "empty/duplicate/missing/score=101",
+      "output": "project checks: OK",
+      "purpose": "验证失败不改状态"
+    }
+  ],
+  "recall": [
+    {
+      "id": "assert-role",
+      "question": "为什么 assert 不能代替用户输入校验？",
+      "answer": "优化模式可移除断言；输入校验应显式抛出异常。"
+    }
+  ],
+  "sources": [
+    {
+      "title": "Python 官方：assert 语句",
+      "url": "https://docs.python.org/3/reference/simple_stmts.html#the-assert-statement",
+      "attribution": "2026-10-30 实际核对，项目为原创教学练习"
+    },
+    {
+      "title": "Python 官方：unittest",
+      "url": "https://docs.python.org/3/library/unittest.html",
+      "attribution": "2026-10-30 实际核对，项目为原创教学练习"
+    },
+    {
+      "title": "CS50P：Unit Tests",
+      "url": "https://cs50.harvard.edu/python/notes/5/",
+      "attribution": "2026-10-30 实际核对，项目为原创教学练习"
+    }
+  ]
+}
