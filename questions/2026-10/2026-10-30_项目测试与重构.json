@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-30",
+  "topic": "项目测试与重构",
+  "stage": "成绩管理系统",
+  "estimatedMinutes": 30,
+  "notePath": "notes/2026-10/2026-10-30_项目测试与重构.md",
+  "collectedAt": "2026-10-30",
+  "sources": [
+    {
+      "title": "Python 官方：assert 语句",
+      "url": "https://docs.python.org/3/reference/simple_stmts.html#the-assert-statement",
+      "kind": "Python 官方语言参考"
+    },
+    {
+      "title": "Python 官方：unittest",
+      "url": "https://docs.python.org/3/library/unittest.html",
+      "kind": "Python 官方标准库"
+    },
+    {
+      "title": "CS50P：Unit Tests",
+      "url": "https://cs50.harvard.edu/python/notes/5/",
+      "kind": "Harvard 官方课程"
+    }
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "type": "mcq",
+      "title": "断言的职责",
+      "difficulty": "基础",
+      "prompt": "哪种做法最合适？",
+      "answer": 1,
+      "explanation": "assert 适合表达测试预期；优化模式可能移除断言，所以用户输入校验应显式抛出异常。",
+      "hint": "考虑 python -O。",
+      "sourceIndex": 0,
+      "attribution": "依据 2026-10-30 实际阅读的官方/课程资料原创，非官方原题",
+      "options": [
+        "用 assert 代替所有输入校验",
+        "用 assert 检查测试预期，用 ValueError 拒绝非法输入",
+        "完全不用检查",
+        "捕获所有 Exception"
+      ]
+    },
+    {
+      "id": "q2",
+      "type": "mcq",
+      "title": "边界分类",
+      "difficulty": "基础",
+      "prompt": "测试 add_student 时，哪一项最直接验证“重复学号不覆盖旧记录”？",
+      "answer": 2,
+      "explanation": "先成功新增，再用同一学号新增不同内容，应返回 False 且原记录保持不变。",
+      "hint": "同时检查返回值和状态。",
+      "sourceIndex": 2,
+      "attribution": "依据 2026-10-30 实际阅读的官方/课程资料原创，非官方原题",
+      "options": [
+        "只测空字典",
+        "只测成绩 100",
+        "连续新增同一学号并检查旧值",
+        "只运行语法检查"
+      ]
+    },
+    {
+      "id": "q3",
+      "type": "mcq",
+      "title": "失败不改状态",
+      "difficulty": "基础",
+      "prompt": "update_score 应按什么顺序执行？",
+      "answer": 0,
+      "explanation": "先验证新值，再写入；否则异常发生时可能已经污染旧数据。",
+      "hint": "修改应是最后一步。",
+      "sourceIndex": 1,
+      "attribution": "依据 2026-10-30 实际阅读的官方/课程资料原创，非官方原题",
+      "options": [
+        "确认学号存在 → 验证成绩 → 赋值",
+        "赋值 → 验证成绩",
+        "删除记录 → 验证",
+        "捕获异常后保留非法值"
+      ]
+    },
+    {
+      "id": "q4",
+      "type": "short",
+      "title": "统计输出",
+      "difficulty": "基础",
+      "prompt": "records 只有 S01，score 为 100。statistics(records)[\"average\"] 的值是什么？",
+      "answer": "100.0",
+      "explanation": "sum 为 100，len 为 1，Python 的 / 返回浮点数。",
+      "hint": "使用真除法 /。",
+      "sourceIndex": 2,
+      "attribution": "依据 2026-10-30 实际阅读的官方/课程资料原创，非官方原题"
+    },
+    {
+      "id": "q5",
+      "type": "code",
+      "title": "核心流程自检",
+      "difficulty": "综合",
+      "prompt": "实现成绩校验、新增、改分、删除和统计，并覆盖空数据、重复、缺失、非法成绩失败不改状态。",
+      "answer": "def require_score(score):\n    if isinstance(score, bool) or not isinstance(score, int) or not 0 <= score <= 100:\n        raise ValueError(\"score must be an integer from 0 to 100\")\n    return score\n\n\ndef add_student(records, student_id, name, score):\n    student_id = student_id.strip()\n    name = name.strip()\n    if not student_id or not name:\n        raise ValueError(\"id and name are required\")\n    if student_id in records:\n        return False\n    records[student_id] = {\"name\": name, \"score\": require_score(score)}\n    return True\n\n\ndef update_score(records, student_id, score):\n    if student_id not in records:\n        return False\n    score = require_score(score)\n    records[student_id][\"score\"] = score\n    return True\n\n\ndef delete_student(records, student_id):\n    return records.pop(student_id, None) is not None\n\n\ndef statistics(records):\n    if not records:\n        return None\n    scores = [student[\"score\"] for student in records.values()]\n    return {\n        \"count\": len(scores),\n        \"average\": sum(scores) / len(scores),\n        \"highest\": max(scores),\n        \"lowest\": min(scores),\n    }\n\n\ndef run_checks():\n    records = {}\n    assert statistics(records) is None\n    assert add_student(records, \" S01 \", \" Amy \", 95)\n    assert not add_student(records, \"S01\", \"Again\", 80)\n    assert update_score(records, \"S01\", 100)\n    assert not update_score(records, \"S99\", 70)\n    assert statistics(records) == {\n        \"count\": 1,\n        \"average\": 100.0,\n        \"highest\": 100,\n        \"lowest\": 100,\n    }\n    try:\n        update_score(records, \"S01\", 101)\n    except ValueError:\n        pass\n    else:\n        raise AssertionError(\"invalid score was accepted\")\n    assert records[\"S01\"][\"score\"] == 100\n    assert delete_student(records, \"S01\")\n    assert not delete_student(records, \"S01\")\n\n\nif __name__ == \"__main__\":\n    run_checks()\n    print(\"project checks: OK\")\n",
+      "explanation": "集中校验消除重复；所有修改在验证之后进行；一个最小 run_checks 覆盖核心分支。",
+      "hint": "assert 只放在自检里，输入规则用 ValueError。",
+      "sourceIndex": 1,
+      "attribution": "依据 2026-10-30 实际阅读的官方/课程资料原创，非官方原题",
+      "language": "python",
+      "starter": "def require_score(score): pass\n\ndef add_student(records,student_id,name,score): pass\n\ndef update_score(records,student_id,score): pass\n\ndef delete_student(records,student_id): pass\n\ndef statistics(records): pass\n",
+      "tests": [
+        {
+          "input": "statistics({})",
+          "output": "None"
+        },
+        {
+          "input": "add S01/Amy/95; add S01/Again/80",
+          "output": "True; False; old record unchanged"
+        },
+        {
+          "input": "update S01 to 101",
+          "output": "ValueError; old score unchanged"
+        },
+        {
+          "input": "python3 grade_system_check.py",
+          "output": "project checks: OK"
+        }
+      ]
+    }
+  ]
+}
