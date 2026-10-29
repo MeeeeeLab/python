@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-10-29",
+  "updatedAt": "2026-10-30",
   "projects": [
     {
       "id": "weekend-2026-10-10",
@@ -452,8 +452,9 @@
         "函数职责"
       ],
       "javaConcepts": [
-        "记录列表",
-        "任务队列"
+        "单链表综合操作",
+        "边界测试",
+        "复杂度说明"
       ],
       "minutes": 55,
       "javaMinutes": 20,
@@ -461,7 +462,7 @@
       "javaPath": "projects/2026-10/daily-2026-10-30.json",
       "guidePath": "projects/2026-10/daily-2026-10-30.md",
       "javaGuidePath": "projects/2026-10/daily-2026-10-30.md",
-      "ready": false
+      "ready": true
     },
     {
       "id": "weekend-2026-10-31",
