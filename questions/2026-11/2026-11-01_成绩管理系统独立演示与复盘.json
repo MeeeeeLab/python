@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-01",
+  "topic": "成绩管理系统独立演示与复盘",
+  "stage": "成绩管理系统发布版",
+  "estimatedMinutes": 30,
+  "notePath": "notes/2026-11/2026-11-01_成绩管理系统独立演示与复盘.md",
+  "collectedAt": "2026-11-01",
+  "sources": [
+    {
+      "title": "Python 官方：csv",
+      "url": "https://docs.python.org/3/library/csv.html",
+      "kind": "Python 官方标准库"
+    },
+    {
+      "title": "Python 官方：Sorting Techniques",
+      "url": "https://docs.python.org/3/howto/sorting.html",
+      "kind": "Python 官方指南"
+    },
+    {
+      "title": "Python 官方：unittest",
+      "url": "https://docs.python.org/3/library/unittest.html",
+      "kind": "Python 官方标准库"
+    }
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "type": "mcq",
+      "title": "独立演示顺序",
+      "difficulty": "基础",
+      "prompt": "哪种演示最能证明持久化有效？",
+      "answer": 2,
+      "explanation": "保存后重新加载并比较，才能验证跨文件往返。",
+      "hint": "不能只检查内存。",
+      "sourceIndex": 0,
+      "attribution": "依据当日实际阅读的官方/课程资料原创，非官方原题",
+      "options": [
+        "只打印原字典",
+        "只确认文件存在",
+        "保存后加载并比较记录",
+        "只写 README"
+      ]
+    },
+    {
+      "id": "q2",
+      "type": "mcq",
+      "title": "坏行恢复",
+      "difficulty": "基础",
+      "prompt": "CSV 中一行成绩为 bad，合理结果是什么？",
+      "answer": 1,
+      "explanation": "保留合法行并报告坏行号，既不丢好数据也不静默。",
+      "hint": "恢复与报告同时发生。",
+      "sourceIndex": 0,
+      "attribution": "依据当日实际阅读的官方/课程资料原创，非官方原题",
+      "options": [
+        "返回全部空数据",
+        "跳过坏行并报告行号",
+        "把 bad 当0",
+        "覆盖原文件"
+      ]
+    },
+    {
+      "id": "q3",
+      "type": "mcq",
+      "title": "排序复杂度",
+      "difficulty": "基础",
+      "prompt": "对 n 条学生记录使用 sorted 排名，通常应按什么量级说明？",
+      "answer": 2,
+      "explanation": "比较排序通常为 O(n log n)；生成 key 还需 O(n)，不改变主阶。",
+      "hint": "排序比单次扫描高一阶。",
+      "sourceIndex": 1,
+      "attribution": "依据当日实际阅读的官方/课程资料原创，非官方原题",
+      "options": [
+        "O(1)",
+        "O(n)",
+        "O(n log n)",
+        "O(n²)"
+      ]
+    },
+    {
+      "id": "q4",
+      "type": "short",
+      "title": "演示输出",
+      "difficulty": "基础",
+      "prompt": "记录 S02=88、S01=95，按 key=(-score,id) 排名后的学号列表是什么？",
+      "answer": "['S01', 'S02']",
+      "explanation": "95分排在88分之前。",
+      "hint": "先比较成绩。",
+      "sourceIndex": 1,
+      "attribution": "依据当日实际阅读的官方/课程资料原创，非官方原题"
+    },
+    {
+      "id": "q5",
+      "type": "code",
+      "title": "独立验收复现",
+      "difficulty": "综合",
+      "prompt": "不看昨日答案，重新实现发布版，并让完整正常与边界自检输出 release checks: OK。",
+      "answer": "import csv\nfrom pathlib import Path\nfrom tempfile import TemporaryDirectory\n\nFIELDS = [\"id\", \"name\", \"score\"]\n\n\ndef require_score(score):\n    if isinstance(score, bool) or not isinstance(score, int) or not 0 <= score <= 100:\n        raise ValueError(\"score must be an integer from 0 to 100\")\n    return score\n\n\ndef add_student(records, student_id, name, score):\n    student_id = student_id.strip()\n    name = name.strip()\n    if not student_id or not name:\n        raise ValueError(\"id and name are required\")\n    if student_id in records:\n        return False\n    records[student_id] = {\"name\": name, \"score\": require_score(score)}\n    return True\n\n\ndef update_score(records, student_id, score):\n    if student_id not in records:\n        return False\n    records[student_id][\"score\"] = require_score(score)\n    return True\n\n\ndef delete_student(records, student_id):\n    return records.pop(student_id, None) is not None\n\n\ndef statistics(records):\n    if not records:\n        return None\n    scores = [student[\"score\"] for student in records.values()]\n    return {\n        \"count\": len(scores),\n        \"average\": sum(scores) / len(scores),\n        \"highest\": max(scores),\n        \"lowest\": min(scores),\n    }\n\n\ndef ranking(records):\n    return sorted(\n        records.items(),\n        key=lambda item: (-item[1][\"score\"], item[0]),\n    )\n\n\ndef save_students(path, records):\n    with open(path, \"w\", encoding=\"utf-8\", newline=\"\") as file:\n        writer = csv.DictWriter(file, fieldnames=FIELDS)\n        writer.writeheader()\n        for student_id, student in records.items():\n            writer.writerow({\"id\": student_id, **student})\n\n\ndef load_students(path):\n    if not Path(path).exists():\n        return {}, []\n    records = {}\n    errors = []\n    with open(path, encoding=\"utf-8\", newline=\"\") as file:\n        for line_number, row in enumerate(csv.DictReader(file), start=2):\n            try:\n                if not add_student(records, row[\"id\"], row[\"name\"], int(row[\"score\"])):\n                    raise ValueError(\"duplicate id\")\n            except (KeyError, TypeError, ValueError):\n                errors.append(line_number)\n    return records, errors\n\n\ndef run_checks():\n    records = {}\n    assert statistics(records) is None\n    assert add_student(records, \"S02\", \"Bo\", 88)\n    assert add_student(records, \"S01\", \"Amy\", 95)\n    assert not add_student(records, \"S01\", \"Again\", 70)\n    assert update_score(records, \"S02\", 95)\n    assert not update_score(records, \"S99\", 80)\n    assert [student_id for student_id, _ in ranking(records)] == [\"S01\", \"S02\"]\n    assert statistics(records) == {\n        \"count\": 2,\n        \"average\": 95.0,\n        \"highest\": 95,\n        \"lowest\": 95,\n    }\n    with TemporaryDirectory() as folder:\n        path = Path(folder) / \"students.csv\"\n        save_students(path, records)\n        assert load_students(path) == (records, [])\n        path.write_text(\n            \"id,name,score\\nS01,Amy,95\\nS02,Bo,bad\\nS01,Cy,80\\n\",\n            encoding=\"utf-8\",\n        )\n        assert load_students(path) == (\n            {\"S01\": {\"name\": \"Amy\", \"score\": 95}},\n            [3, 4],\n        )\n    assert delete_student(records, \"S01\")\n    assert not delete_student(records, \"S01\")\n\n\nif __name__ == \"__main__\":\n    run_checks()\n    print(\"release checks: OK\")\n",
+      "explanation": "独立实现应覆盖 CRUD、统计、排名、保存加载、空/重复/缺失/坏行。",
+      "hint": "把自检当作不可缺少的验收契约。",
+      "sourceIndex": 2,
+      "attribution": "依据当日实际阅读的官方/课程资料原创，非官方原题",
+      "language": "python",
+      "starter": "# 从空文件开始独立实现；先列出函数签名和边界契约。\n",
+      "tests": [
+        {
+          "input": "normal CRUD + ranking + save/load",
+          "output": "release checks: OK"
+        },
+        {
+          "input": "empty/duplicate/missing/corrupt rows",
+          "output": "release checks: OK"
+        }
+      ]
+    }
+  ]
+}
