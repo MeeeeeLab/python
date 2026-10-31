@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "projectId": "weekend-2026-10-31",
+  "track": "python",
+  "title": "成绩管理系统发布版",
+  "goal": "周六整合十月核心功能，周日继续同一项目完成独立演示、边界验收与复盘。",
+  "prerequisites": [
+    "字典与函数",
+    "异常与 CSV",
+    "查找排序",
+    "边界测试"
+  ],
+  "filename": "grade_system_release.py",
+  "runCommand": "python3 grade_system_release.py",
+  "starter": "def add_student(records,student_id,name,score): pass\ndef update_score(records,student_id,score): pass\ndef delete_student(records,student_id): pass\ndef statistics(records): pass\ndef ranking(records): pass\ndef save_students(path,records): pass\ndef load_students(path): pass\n",
+  "solution": "import csv\nfrom pathlib import Path\nfrom tempfile import TemporaryDirectory\n\nFIELDS = [\"id\", \"name\", \"score\"]\n\n\ndef require_score(score):\n    if isinstance(score, bool) or not isinstance(score, int) or not 0 <= score <= 100:\n        raise ValueError(\"score must be an integer from 0 to 100\")\n    return score\n\n\ndef add_student(records, student_id, name, score):\n    student_id = student_id.strip()\n    name = name.strip()\n    if not student_id or not name:\n        raise ValueError(\"id and name are required\")\n    if student_id in records:\n        return False\n    records[student_id] = {\"name\": name, \"score\": require_score(score)}\n    return True\n\n\ndef update_score(records, student_id, score):\n    if student_id not in records:\n        return False\n    records[student_id][\"score\"] = require_score(score)\n    return True\n\n\ndef delete_student(records, student_id):\n    return records.pop(student_id, None) is not None\n\n\ndef statistics(records):\n    if not records:\n        return None\n    scores = [student[\"score\"] for student in records.values()]\n    return {\n        \"count\": len(scores),\n        \"average\": sum(scores) / len(scores),\n        \"highest\": max(scores),\n        \"lowest\": min(scores),\n    }\n\n\ndef ranking(records):\n    return sorted(\n        records.items(),\n        key=lambda item: (-item[1][\"score\"], item[0]),\n    )\n\n\ndef save_students(path, records):\n    with open(path, \"w\", encoding=\"utf-8\", newline=\"\") as file:\n        writer = csv.DictWriter(file, fieldnames=FIELDS)\n        writer.writeheader()\n        for student_id, student in records.items():\n            writer.writerow({\"id\": student_id, **student})\n\n\ndef load_students(path):\n    if not Path(path).exists():\n        return {}, []\n    records = {}\n    errors = []\n    with open(path, encoding=\"utf-8\", newline=\"\") as file:\n        for line_number, row in enumerate(csv.DictReader(file), start=2):\n            try:\n                if not add_student(records, row[\"id\"], row[\"name\"], int(row[\"score\"])):\n                    raise ValueError(\"duplicate id\")\n            except (KeyError, TypeError, ValueError):\n                errors.append(line_number)\n    return records, errors\n\n\ndef run_checks():\n    records = {}\n    assert statistics(records) is None\n    assert add_student(records, \"S02\", \"Bo\", 88)\n    assert add_student(records, \"S01\", \"Amy\", 95)\n    assert not add_student(records, \"S01\", \"Again\", 70)\n    assert update_score(records, \"S02\", 95)\n    assert not update_score(records, \"S99\", 80)\n    assert [student_id for student_id, _ in ranking(records)] == [\"S01\", \"S02\"]\n    assert statistics(records) == {\n        \"count\": 2,\n        \"average\": 95.0,\n        \"highest\": 95,\n        \"lowest\": 95,\n    }\n    with TemporaryDirectory() as folder:\n        path = Path(folder) / \"students.csv\"\n        save_students(path, records)\n        assert load_students(path) == (records, [])\n        path.write_text(\n            \"id,name,score\\nS01,Amy,95\\nS02,Bo,bad\\nS01,Cy,80\\n\",\n            encoding=\"utf-8\",\n        )\n        assert load_students(path) == (\n            {\"S01\": {\"name\": \"Amy\", \"score\": 95}},\n            [3, 4],\n        )\n    assert delete_student(records, \"S01\")\n    assert not delete_student(records, \"S01\")\n\n\nif __name__ == \"__main__\":\n    run_checks()\n    print(\"release checks: OK\")\n",
+  "solutionExplanation": [
+    "字典以唯一学号组织记录，函数返回值区分成功与未命中。",
+    "CSV 负责跨运行持久化；坏行保留物理行号。",
+    "周日沿用同一项目做独立演示，不更换 ID 或添加第三方依赖。"
+  ],
+  "steps": [
+    {
+      "id": "model-contracts",
+      "day": "2026-10-31",
+      "title": "数据模型与契约",
+      "instruction": "列出 CRUD、统计、排名与文件函数的输入输出。",
+      "hint": "先定义失败时状态是否改变。",
+      "knowledge": [
+        "dict",
+        "函数契约"
+      ]
+    },
+    {
+      "id": "core-features",
+      "day": "2026-10-31",
+      "title": "核心功能",
+      "instruction": "实现 CRUD、统计与稳定排名。",
+      "hint": "排序键用 (-score,id)。",
+      "knowledge": [
+        "CRUD",
+        "sorted",
+        "key"
+      ]
+    },
+    {
+      "id": "persistence",
+      "day": "2026-10-31",
+      "title": "保存与恢复",
+      "instruction": "实现 CSV 往返和坏行报告。",
+      "hint": "使用 newline=''。",
+      "knowledge": [
+        "csv",
+        "异常"
+      ]
+    },
+    {
+      "id": "demo",
+      "day": "2026-11-01",
+      "title": "独立演示",
+      "instruction": "从空记录走完新增、查询、排名、保存加载和删除。",
+      "hint": "不要只走正常路径。",
+      "knowledge": [
+        "演示",
+        "README"
+      ]
+    },
+    {
+      "id": "acceptance",
+      "day": "2026-11-01",
+      "title": "边界验收",
+      "instruction": "覆盖空、重复、缺失、越界和坏文件行。",
+      "hint": "失败不改旧状态。",
+      "knowledge": [
+        "测试",
+        "复杂度"
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "id": "t1",
+      "label": "完整自检",
+      "input": "python3 grade_system_release.py",
+      "output": "release checks: OK",
+      "purpose": "覆盖核心正常与边界流程"
+    },
+    {
+      "id": "t2",
+      "label": "CSV 损坏行",
+      "input": "valid + bad score + duplicate id",
+      "output": "合法记录保留；返回 [3, 4]",
+      "purpose": "验证部分恢复"
+    }
+  ],
+  "recall": [
+    {
+      "id": "stable-ranking",
+      "question": "如何让同分排名可复现？",
+      "answer": "使用 (-score,student_id) 作为排序键。"
+    },
+    {
+      "id": "safe-update",
+      "question": "为什么先校验再修改？",
+      "answer": "避免失败时污染旧记录。"
+    }
+  ],
+  "sources": [
+    {
+      "title": "Python 官方：csv",
+      "url": "https://docs.python.org/3/library/csv.html",
+      "attribution": "2026-11-01 实际核对，项目为原创教学练习"
+    },
+    {
+      "title": "Python 官方：Sorting Techniques",
+      "url": "https://docs.python.org/3/howto/sorting.html",
+      "attribution": "2026-11-01 实际核对，项目为原创教学练习"
+    },
+    {
+      "title": "Python 官方：unittest",
+      "url": "https://docs.python.org/3/library/unittest.html",
+      "attribution": "2026-11-01 实际核对，项目为原创教学练习"
+    }
+  ]
+}
