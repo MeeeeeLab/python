@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-10-30",
+  "updatedAt": "2026-11-01",
   "projects": [
     {
       "id": "weekend-2026-10-10",
@@ -479,18 +479,18 @@
         "README"
       ],
       "javaConcepts": [
-        "数组",
-        "栈与队列",
-        "链表",
-        "选型说明"
+        "单链表节点与遍历",
+        "尾插与查找",
+        "删除与边界",
+        "章节验收"
       ],
       "minutes": 180,
-      "javaMinutes": 45,
+      "javaMinutes": 100,
       "pythonPath": "projects/2026-10/weekend-2026-10-31.json",
       "javaPath": "projects/2026-10/weekend-2026-10-31.json",
       "guidePath": "projects/2026-10/weekend-2026-10-31.md",
       "javaGuidePath": "projects/2026-10/weekend-2026-10-31.md",
-      "ready": false
+      "ready": true
     }
   ]
 }
