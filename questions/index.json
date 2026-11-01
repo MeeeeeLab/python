@@ -144,6 +144,12 @@
       "topic": "成绩管理系统独立演示与复盘",
       "path": "questions/2026-11/2026-11-01_成绩管理系统独立演示与复盘.json",
       "count": 5
+    },
+    {
+      "date": "2026-11-02",
+      "topic": "Python类与对象入门",
+      "path": "questions/2026-11/2026-11-02_Python类与对象入门.json",
+      "count": 5
     }
   ]
 }
