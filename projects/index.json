@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-11-01",
+  "updatedAt": "2026-11-02",
   "projects": [
     {
       "id": "weekend-2026-10-10",
@@ -490,6 +490,32 @@
       "javaPath": "projects/2026-10/weekend-2026-10-31.json",
       "guidePath": "projects/2026-10/weekend-2026-10-31.md",
       "javaGuidePath": "projects/2026-10/weekend-2026-10-31.md",
+      "ready": true
+    },
+    {
+      "id": "daily-2026-11-02",
+      "startDate": "2026-11-02",
+      "endDate": "2026-11-02",
+      "kind": "daily",
+      "title": "把成绩册封装成对象",
+      "description": "用类封装成绩记录与相关操作，并验证不同实例状态互不共享。",
+      "concepts": [
+        "class",
+        "__init__",
+        "self",
+        "实例属性"
+      ],
+      "javaConcepts": [
+        "双链表节点",
+        "prev/next",
+        "双向遍历"
+      ],
+      "minutes": 55,
+      "javaMinutes": 25,
+      "pythonPath": "projects/2026-11/daily-2026-11-02.json",
+      "javaPath": "projects/2026-11/daily-2026-11-02.json",
+      "guidePath": "projects/2026-11/daily-2026-11-02.md",
+      "javaGuidePath": "projects/2026-11/daily-2026-11-02.md",
       "ready": true
     }
   ]
