@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-02",
+  "topic": "Python类与对象入门",
+  "stage": "主线延伸：类与对象",
+  "estimatedMinutes": 30,
+  "notePath": "notes/2026-11/2026-11-02_Python类与对象入门.md",
+  "collectedAt": "2026-11-02",
+  "sources": [
+    {
+      "title": "Python 官方教程：Classes",
+      "url": "https://docs.python.org/3/tutorial/classes.html",
+      "kind": "Python 官方教程"
+    },
+    {
+      "title": "Python 官方参考：Data model",
+      "url": "https://docs.python.org/3/reference/datamodel.html",
+      "kind": "Python 官方参考"
+    },
+    {
+      "title": "CS50P：Classes",
+      "url": "https://cs50.harvard.edu/python/notes/8/",
+      "kind": "Harvard 课程"
+    }
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "type": "mcq",
+      "title": "self 的含义",
+      "difficulty": "基础",
+      "prompt": "实例方法中的 self 通常表示什么？",
+      "answer": 1,
+      "explanation": "self 指向当前实例，实例方法调用时由 Python 绑定。",
+      "hint": "想想 book.add(...) 操作的是哪个成绩册。",
+      "sourceIndex": 0,
+      "attribution": "依据当日实际阅读的官方/课程资料原创，非官方原题",
+      "options": [
+        "类名",
+        "当前实例",
+        "所有实例的列表",
+        "返回值"
+      ]
+    },
+    {
+      "id": "q2",
+      "type": "mcq",
+      "title": "初始化方法",
+      "difficulty": "基础",
+      "prompt": "关于 __init__，哪项正确？",
+      "answer": 2,
+      "explanation": "__init__ 用于初始化已创建的实例，并应返回 None。",
+      "hint": "它不是普通的结果计算函数。",
+      "sourceIndex": 1,
+      "attribution": "依据当日实际阅读的官方/课程资料原创，非官方原题",
+      "options": [
+        "必须返回新实例",
+        "只能有 self 一个参数",
+        "初始化实例且不返回非 None 值",
+        "每个类只能调用一次"
+      ]
+    },
+    {
+      "id": "q3",
+      "type": "mcq",
+      "title": "实例状态隔离",
+      "difficulty": "基础",
+      "prompt": "要让每个 GradeBook 拥有独立字典，records 最适合写在哪里？",
+      "answer": 1,
+      "explanation": "在 __init__ 中赋给 self.records，每个实例各自初始化。",
+      "hint": "避免把可变字典放成共享类属性。",
+      "sourceIndex": 0,
+      "attribution": "依据当日实际阅读的官方/课程资料原创，非官方原题",
+      "options": [
+        "模块全局变量",
+        "__init__ 中的 self.records",
+        "类体中的 records = {}",
+        "add 方法的默认参数"
+      ]
+    },
+    {
+      "id": "q4",
+      "type": "short",
+      "title": "排名输出",
+      "difficulty": "基础",
+      "prompt": "S02=88、S01=95，按 key=(-score,id) 排名后的学号列表是什么？",
+      "answer": "['S01', 'S02']",
+      "explanation": "先按成绩降序，95 分在 88 分之前。",
+      "hint": "负分数让较高分排在前面。",
+      "sourceIndex": 2,
+      "attribution": "依据当日实际阅读的官方/课程资料原创，非官方原题"
+    },
+    {
+      "id": "q5",
+      "type": "code",
+      "title": "成绩册对象自检",
+      "difficulty": "综合",
+      "prompt": "实现 GradeBook，并通过空、重复、越界、排名和两个实例互不共享状态的检查。",
+      "answer": "class GradeBook:\n    def __init__(self):\n        self.records = {}\n\n    def add(self, student_id, name, score):\n        student_id = student_id.strip()\n        name = name.strip()\n        if not student_id or not name:\n            raise ValueError(\"student_id and name must not be empty\")\n        if isinstance(score, bool) or not isinstance(score, int) or not 0 <= score <= 100:\n            raise ValueError(\"score must be an integer from 0 to 100\")\n        if student_id in self.records:\n            return False\n        self.records[student_id] = {\"name\": name, \"score\": score}\n        return True\n\n    def average(self):\n        if not self.records:\n            return None\n        return sum(record[\"score\"] for record in self.records.values()) / len(self.records)\n\n    def ranking(self):\n        return sorted(\n            self.records.items(),\n            key=lambda item: (-item[1][\"score\"], item[0]),\n        )\n\n\ndef run_checks():\n    empty = GradeBook()\n    assert empty.average() is None\n    assert empty.ranking() == []\n\n    book = GradeBook()\n    assert book.add(\" S02 \", \" Bo \", 88)\n    assert book.add(\"S01\", \"Amy\", 95)\n    assert not book.add(\"S01\", \"Again\", 70)\n    assert book.average() == 91.5\n    assert [student_id for student_id, _ in book.ranking()] == [\"S01\", \"S02\"]\n\n    other = GradeBook()\n    assert other.add(\"S03\", \"Cy\", 77)\n    assert \"S03\" not in book.records\n\n    try:\n        book.add(\"S04\", \"Dee\", 101)\n    except ValueError:\n        pass\n    else:\n        raise AssertionError(\"out-of-range score must be rejected\")\n\n\nif __name__ == \"__main__\":\n    run_checks()\n    print(\"class checks: OK\")",
+      "explanation": "把 records 放入 __init__，方法通过 self 访问当前实例状态；边界由一个可运行自检覆盖。",
+      "hint": "先写 __init__、add、average、ranking，再创建两个实例。",
+      "sourceIndex": 0,
+      "attribution": "依据当日实际阅读的官方/课程资料原创，非官方原题",
+      "language": "python",
+      "starter": "class GradeBook:\n    def __init__(self):\n        pass\n",
+      "tests": [
+        {
+          "input": "empty/normal/duplicate/ranking",
+          "output": "class checks: OK"
+        },
+        {
+          "input": "two instances + score=101",
+          "output": "class checks: OK"
+        }
+      ]
+    }
+  ]
+}
