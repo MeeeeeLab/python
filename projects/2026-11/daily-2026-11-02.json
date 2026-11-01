@@ -1,0 +1,108 @@
+{
+  "schemaVersion": 1,
+  "projectId": "daily-2026-11-02",
+  "track": "python",
+  "title": "把成绩册封装成对象",
+  "goal": "把成绩记录与统计操作封装进 GradeBook，并证明不同实例状态互不共享。",
+  "prerequisites": [
+    "字典",
+    "函数与返回值",
+    "排序键"
+  ],
+  "filename": "grade_book.py",
+  "runCommand": "python3 grade_book.py",
+  "starter": "class GradeBook:\n    def __init__(self):\n        pass\n\n    def add(self, student_id, name, score):\n        pass\n",
+  "solution": "class GradeBook:\n    def __init__(self):\n        self.records = {}\n\n    def add(self, student_id, name, score):\n        student_id = student_id.strip()\n        name = name.strip()\n        if not student_id or not name:\n            raise ValueError(\"student_id and name must not be empty\")\n        if isinstance(score, bool) or not isinstance(score, int) or not 0 <= score <= 100:\n            raise ValueError(\"score must be an integer from 0 to 100\")\n        if student_id in self.records:\n            return False\n        self.records[student_id] = {\"name\": name, \"score\": score}\n        return True\n\n    def average(self):\n        if not self.records:\n            return None\n        return sum(record[\"score\"] for record in self.records.values()) / len(self.records)\n\n    def ranking(self):\n        return sorted(\n            self.records.items(),\n            key=lambda item: (-item[1][\"score\"], item[0]),\n        )\n\n\ndef run_checks():\n    empty = GradeBook()\n    assert empty.average() is None\n    assert empty.ranking() == []\n\n    book = GradeBook()\n    assert book.add(\" S02 \", \" Bo \", 88)\n    assert book.add(\"S01\", \"Amy\", 95)\n    assert not book.add(\"S01\", \"Again\", 70)\n    assert book.average() == 91.5\n    assert [student_id for student_id, _ in book.ranking()] == [\"S01\", \"S02\"]\n\n    other = GradeBook()\n    assert other.add(\"S03\", \"Cy\", 77)\n    assert \"S03\" not in book.records\n\n    try:\n        book.add(\"S04\", \"Dee\", 101)\n    except ValueError:\n        pass\n    else:\n        raise AssertionError(\"out-of-range score must be rejected\")\n\n\nif __name__ == \"__main__\":\n    run_checks()\n    print(\"class checks: OK\")",
+  "solutionExplanation": [
+    "records 在 __init__ 中创建，使每个实例持有独立状态。",
+    "方法只用 self 访问当前实例；输入失败不修改状态。",
+    "只用标准库与一个自检入口，先掌握最小对象模型。"
+  ],
+  "steps": [
+    {
+      "id": "model",
+      "day": "2026-11-02",
+      "title": "建立实例状态",
+      "instruction": "实现 __init__，创建 self.records。",
+      "hint": "不要把可变字典写成类属性。",
+      "knowledge": [
+        "class",
+        "__init__",
+        "实例属性"
+      ]
+    },
+    {
+      "id": "methods",
+      "day": "2026-11-02",
+      "title": "迁移操作",
+      "instruction": "实现 add、average 与 ranking。",
+      "hint": "每个方法都从 self.records 读取或修改。",
+      "knowledge": [
+        "self",
+        "实例方法"
+      ]
+    },
+    {
+      "id": "isolation",
+      "day": "2026-11-02",
+      "title": "验证隔离",
+      "instruction": "创建两个实例，只向其中一个写入记录。",
+      "hint": "检查另一个实例仍为空。",
+      "knowledge": [
+        "实例",
+        "状态隔离"
+      ]
+    },
+    {
+      "id": "boundaries",
+      "day": "2026-11-02",
+      "title": "运行边界自检",
+      "instruction": "覆盖空、重复、越界与排序。",
+      "hint": "一次运行应输出 class checks: OK。",
+      "knowledge": [
+        "assert",
+        "边界"
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "id": "t1",
+      "label": "正常流程",
+      "input": "add/average/ranking",
+      "output": "class checks: OK",
+      "purpose": "验证对象方法"
+    },
+    {
+      "id": "t2",
+      "label": "边界流程",
+      "input": "empty/duplicate/score=101/two instances",
+      "output": "class checks: OK",
+      "purpose": "验证失败与实例隔离"
+    }
+  ],
+  "recall": [
+    {
+      "id": "instance-state",
+      "question": "为什么 records 应在 __init__ 中赋给 self？",
+      "answer": "这样每个 GradeBook 实例都得到自己的字典，不共享可变状态。"
+    }
+  ],
+  "sources": [
+    {
+      "title": "Python 官方教程：Classes",
+      "url": "https://docs.python.org/3/tutorial/classes.html",
+      "attribution": "2026-11-02 实际核对，项目为原创教学练习"
+    },
+    {
+      "title": "Python 官方参考：Data model",
+      "url": "https://docs.python.org/3/reference/datamodel.html",
+      "attribution": "2026-11-02 实际核对，项目为原创教学练习"
+    },
+    {
+      "title": "CS50P：Classes",
+      "url": "https://cs50.harvard.edu/python/notes/8/",
+      "attribution": "2026-11-02 实际核对，项目为原创教学练习"
+    }
+  ]
+}
