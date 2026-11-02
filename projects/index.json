@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-11-02",
+  "updatedAt": "2026-11-03",
   "projects": [
     {
       "id": "weekend-2026-10-10",
@@ -516,6 +516,33 @@
       "javaPath": "projects/2026-11/daily-2026-11-02.json",
       "guidePath": "projects/2026-11/daily-2026-11-02.md",
       "javaGuidePath": "projects/2026-11/daily-2026-11-02.md",
+      "ready": true
+    },
+    {
+      "id": "daily-2026-11-03",
+      "startDate": "2026-11-03",
+      "endDate": "2026-11-03",
+      "kind": "daily",
+      "title": "保护成绩册对象的状态",
+      "description": "用实例方法集中维护成绩记录，并通过副本保护内部可变状态。",
+      "concepts": [
+        "实例方法",
+        "状态封装",
+        "非公开约定",
+        "可变对象复制"
+      ],
+      "javaConcepts": [
+        "双链表头插",
+        "双链表尾插",
+        "head/tail",
+        "O(1)"
+      ],
+      "minutes": 55,
+      "javaMinutes": 25,
+      "pythonPath": "projects/2026-11/daily-2026-11-03.json",
+      "javaPath": "projects/2026-11/daily-2026-11-03.json",
+      "guidePath": "projects/2026-11/daily-2026-11-03.md",
+      "javaGuidePath": "projects/2026-11/daily-2026-11-03.md",
       "ready": true
     }
   ]
