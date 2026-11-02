@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-03",
+  "topic": "对象方法与状态封装",
+  "stage": "主线延伸：类与对象",
+  "estimatedMinutes": 30,
+  "notePath": "notes/2026-11/2026-11-03_对象方法与状态封装.md",
+  "collectedAt": "2026-11-03",
+  "sources": [
+    {
+      "title": "Python 官方教程：Classes",
+      "url": "https://docs.python.org/3/tutorial/classes.html",
+      "kind": "Python 官方教程"
+    },
+    {
+      "title": "Python 官方参考：Data model",
+      "url": "https://docs.python.org/3/reference/datamodel.html",
+      "kind": "Python 官方参考"
+    },
+    {
+      "title": "CS50P：Classes",
+      "url": "https://cs50.harvard.edu/python/notes/8/",
+      "kind": "Harvard 课程"
+    }
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "type": "mcq",
+      "title": "实例方法绑定",
+      "difficulty": "基础",
+      "prompt": "调用 registry.remove(\"S01\") 时，方法中的 self 通常指向什么？",
+      "answer": 1,
+      "explanation": "通过实例访问方法时，该实例会绑定为 self。",
+      "hint": "谁在点号左边？",
+      "sourceIndex": 1,
+      "attribution": "依据 2026-11-03 实际阅读的官方/课程资料原创，非官方原题",
+      "options": [
+        "StudentRegistry 类本身",
+        "registry 实例",
+        "字符串 S01",
+        "remove 的返回值"
+      ]
+    },
+    {
+      "id": "q2",
+      "type": "mcq",
+      "title": "下划线约定",
+      "difficulty": "基础",
+      "prompt": "属性名 _records 的前导下划线主要表示什么？",
+      "answer": 2,
+      "explanation": "它表示非公开使用约定，但 Python 不强制禁止外部访问。",
+      "hint": "这是约定，不是访问权限。",
+      "sourceIndex": 0,
+      "attribution": "依据 2026-11-03 实际阅读的官方/课程资料原创，非官方原题",
+      "options": [
+        "属性只能读取",
+        "属性属于类而非实例",
+        "调用者应把它视为非公开实现细节",
+        "属性会自动深复制"
+      ]
+    },
+    {
+      "id": "q3",
+      "type": "mcq",
+      "title": "返回副本",
+      "difficulty": "基础",
+      "prompt": "find 返回内部记录的副本，主要避免什么问题？",
+      "answer": 1,
+      "explanation": "副本避免调用者通过返回值直接改动对象内部字典。",
+      "hint": "考虑 find(...)[\"score\"] = 0。",
+      "sourceIndex": 2,
+      "attribution": "依据 2026-11-03 实际阅读的官方/课程资料原创，非官方原题",
+      "options": [
+        "方法无法返回 None",
+        "外部绕过方法修改内部状态",
+        "字典无法保存整数",
+        "实例方法不能访问属性"
+      ]
+    },
+    {
+      "id": "q4",
+      "type": "short",
+      "title": "状态保护输出",
+      "difficulty": "基础",
+      "prompt": "内部 S01 分数为95；取得 snapshot 后把快照分数改为0，再调用 find(\"S01\")，返回记录中的 score 是多少？",
+      "answer": "95",
+      "explanation": "快照复制了每条内部记录，外部修改不会回写对象。",
+      "hint": "快照与内部记录不是同一个字典。",
+      "sourceIndex": 0,
+      "attribution": "依据 2026-11-03 实际阅读的官方/课程资料原创，非官方原题"
+    },
+    {
+      "id": "q5",
+      "type": "code",
+      "title": "对象状态封装自检",
+      "difficulty": "综合",
+      "prompt": "实现 StudentRegistry 的增查改删与快照，并验证非法成绩和外部快照修改不会破坏内部状态。",
+      "answer": "class StudentRegistry:\n    def __init__(self):\n        self._records = {}\n\n    @staticmethod\n    def _valid_score(score):\n        return isinstance(score, int) and not isinstance(score, bool) and 0 <= score <= 100\n\n    def add(self, student_id, name, score):\n        student_id = student_id.strip()\n        name = name.strip()\n        if not student_id or not name or not self._valid_score(score):\n            raise ValueError(\"invalid student record\")\n        if student_id in self._records:\n            return False\n        self._records[student_id] = {\"name\": name, \"score\": score}\n        return True\n\n    def update_score(self, student_id, score):\n        if not self._valid_score(score):\n            raise ValueError(\"score must be an integer from 0 to 100\")\n        if student_id not in self._records:\n            return False\n        self._records[student_id][\"score\"] = score\n        return True\n\n    def remove(self, student_id):\n        return self._records.pop(student_id, None) is not None\n\n    def find(self, student_id):\n        record = self._records.get(student_id)\n        return None if record is None else record.copy()\n\n    def snapshot(self):\n        return {student_id: record.copy() for student_id, record in self._records.items()}\n\n\ndef run_checks():\n    registry = StudentRegistry()\n    assert registry.find(\"S01\") is None\n    assert not registry.remove(\"S01\")\n    assert registry.add(\" S01 \", \" Amy \", 90)\n    assert not registry.add(\"S01\", \"Again\", 70)\n    assert registry.update_score(\"S01\", 95)\n    assert not registry.update_score(\"S99\", 80)\n    assert registry.find(\"S01\") == {\"name\": \"Amy\", \"score\": 95}\n\n    outside = registry.snapshot()\n    outside[\"S01\"][\"score\"] = 0\n    assert registry.find(\"S01\")[\"score\"] == 95\n\n    try:\n        registry.update_score(\"S01\", 101)\n    except ValueError:\n        pass\n    else:\n        raise AssertionError(\"out-of-range score must be rejected\")\n\n    assert registry.remove(\"S01\")\n    assert registry.snapshot() == {}\n\n\nif __name__ == \"__main__\":\n    run_checks()\n    print(\"registry checks: OK\")",
+      "explanation": "所有修改先验证再写入；查询和快照返回副本，一个入口完成正常与边界自检。",
+      "hint": "先完成 add/update/remove/find，再处理嵌套副本。",
+      "sourceIndex": 0,
+      "attribution": "依据 2026-11-03 实际阅读的官方/课程资料原创，非官方原题",
+      "language": "python",
+      "starter": "class StudentRegistry:\n    def __init__(self):\n        self._records = {}\n\n    def add(self, student_id, name, score):\n        pass\n",
+      "tests": [
+        {
+          "input": "add/find/update/remove",
+          "output": "registry checks: OK"
+        },
+        {
+          "input": "empty/duplicate/missing/score=101/snapshot mutation",
+          "output": "registry checks: OK"
+        }
+      ]
+    }
+  ]
+}
