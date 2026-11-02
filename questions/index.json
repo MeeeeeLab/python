@@ -150,6 +150,12 @@
       "topic": "Python类与对象入门",
       "path": "questions/2026-11/2026-11-02_Python类与对象入门.json",
       "count": 5
+    },
+    {
+      "date": "2026-11-03",
+      "topic": "对象方法与状态封装",
+      "path": "questions/2026-11/2026-11-03_对象方法与状态封装.json",
+      "count": 5
     }
   ]
 }
