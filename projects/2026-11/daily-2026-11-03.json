@@ -1,0 +1,112 @@
+{
+  "schemaVersion": 1,
+  "projectId": "daily-2026-11-03",
+  "track": "python",
+  "title": "保护成绩册对象的状态",
+  "goal": "用实例方法集中维护成绩记录，并通过返回副本阻止外部绕过接口修改内部状态。",
+  "prerequisites": [
+    "class 与实例",
+    "字典",
+    "输入校验"
+  ],
+  "filename": "student_registry.py",
+  "runCommand": "python3 student_registry.py",
+  "starter": "class StudentRegistry:\n    def __init__(self):\n        self._records = {}\n\n    def add(self, student_id, name, score):\n        pass\n",
+  "solution": "class StudentRegistry:\n    def __init__(self):\n        self._records = {}\n\n    @staticmethod\n    def _valid_score(score):\n        return isinstance(score, int) and not isinstance(score, bool) and 0 <= score <= 100\n\n    def add(self, student_id, name, score):\n        student_id = student_id.strip()\n        name = name.strip()\n        if not student_id or not name or not self._valid_score(score):\n            raise ValueError(\"invalid student record\")\n        if student_id in self._records:\n            return False\n        self._records[student_id] = {\"name\": name, \"score\": score}\n        return True\n\n    def update_score(self, student_id, score):\n        if not self._valid_score(score):\n            raise ValueError(\"score must be an integer from 0 to 100\")\n        if student_id not in self._records:\n            return False\n        self._records[student_id][\"score\"] = score\n        return True\n\n    def remove(self, student_id):\n        return self._records.pop(student_id, None) is not None\n\n    def find(self, student_id):\n        record = self._records.get(student_id)\n        return None if record is None else record.copy()\n\n    def snapshot(self):\n        return {student_id: record.copy() for student_id, record in self._records.items()}\n\n\ndef run_checks():\n    registry = StudentRegistry()\n    assert registry.find(\"S01\") is None\n    assert not registry.remove(\"S01\")\n    assert registry.add(\" S01 \", \" Amy \", 90)\n    assert not registry.add(\"S01\", \"Again\", 70)\n    assert registry.update_score(\"S01\", 95)\n    assert not registry.update_score(\"S99\", 80)\n    assert registry.find(\"S01\") == {\"name\": \"Amy\", \"score\": 95}\n\n    outside = registry.snapshot()\n    outside[\"S01\"][\"score\"] = 0\n    assert registry.find(\"S01\")[\"score\"] == 95\n\n    try:\n        registry.update_score(\"S01\", 101)\n    except ValueError:\n        pass\n    else:\n        raise AssertionError(\"out-of-range score must be rejected\")\n\n    assert registry.remove(\"S01\")\n    assert registry.snapshot() == {}\n\n\nif __name__ == \"__main__\":\n    run_checks()\n    print(\"registry checks: OK\")",
+  "solutionExplanation": [
+    "所有状态变化经实例方法完成，先验证再写入。",
+    "find 与 snapshot 返回副本，不暴露内部可变字典。",
+    "只使用标准库和一个 assert 自检入口。"
+  ],
+  "steps": [
+    {
+      "id": "state",
+      "day": "2026-11-03",
+      "title": "建立内部状态",
+      "instruction": "在 __init__ 中创建 self._records。",
+      "hint": "下划线表达非公开约定。",
+      "knowledge": [
+        "实例属性",
+        "命名约定"
+      ]
+    },
+    {
+      "id": "mutations",
+      "day": "2026-11-03",
+      "title": "集中修改",
+      "instruction": "实现 add、update_score 与 remove。",
+      "hint": "验证必须发生在写入之前。",
+      "knowledge": [
+        "实例方法",
+        "状态不变量"
+      ]
+    },
+    {
+      "id": "copies",
+      "day": "2026-11-03",
+      "title": "安全查询",
+      "instruction": "实现 find 与 snapshot，返回复制的记录。",
+      "hint": "嵌套字典需要逐条复制。",
+      "knowledge": [
+        "copy",
+        "可变对象"
+      ]
+    },
+    {
+      "id": "checks",
+      "day": "2026-11-03",
+      "title": "边界自检",
+      "instruction": "覆盖空、重复、缺失、越界和快照修改。",
+      "hint": "最终只输出 registry checks: OK。",
+      "knowledge": [
+        "assert",
+        "边界"
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "id": "t1",
+      "label": "正常增查改删",
+      "input": "S01/Amy/90 -> 95 -> remove",
+      "output": "registry checks: OK",
+      "purpose": "验证对象方法"
+    },
+    {
+      "id": "t2",
+      "label": "状态保护边界",
+      "input": "empty/duplicate/missing/101/snapshot mutation",
+      "output": "registry checks: OK",
+      "purpose": "验证失败不破坏状态"
+    }
+  ],
+  "recall": [
+    {
+      "id": "underscore",
+      "question": "前导下划线是否能阻止外部访问？",
+      "answer": "不能；它只是非公开使用约定。"
+    },
+    {
+      "id": "copy",
+      "question": "为什么 snapshot 要复制内部记录？",
+      "answer": "否则外部修改嵌套字典仍会改变对象内部状态。"
+    }
+  ],
+  "sources": [
+    {
+      "title": "Python 官方教程：Classes",
+      "url": "https://docs.python.org/3/tutorial/classes.html",
+      "attribution": "2026-11-03 实际核对，项目为原创教学练习"
+    },
+    {
+      "title": "Python 官方参考：Data model",
+      "url": "https://docs.python.org/3/reference/datamodel.html",
+      "attribution": "2026-11-03 实际核对，项目为原创教学练习"
+    },
+    {
+      "title": "CS50P：Classes",
+      "url": "https://cs50.harvard.edu/python/notes/8/",
+      "attribution": "2026-11-03 实际核对，项目为原创教学练习"
+    }
+  ]
+}
