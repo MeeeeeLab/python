@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 1,
+  "projectId": "daily-2026-11-04",
+  "track": "python",
+  "title": "让成绩对象会自我展示",
+  "goal": "为成绩记录实现稳定的可读文本，同时保留构造边界校验。",
+  "prerequisites": [
+    "类与对象",
+    "构造方法",
+    "f-string"
+  ],
+  "filename": "student_display.py",
+  "runCommand": "python3 student_display.py",
+  "starter": "class StudentRecord:\n    def __init__(self, student_id, name, score):\n        pass\n\n    def __str__(self):\n        pass\n",
+  "solution": "class StudentRecord:\n    def __init__(self, student_id, name, score):\n        student_id = student_id.strip()\n        name = name.strip()\n        if not student_id or not name:\n            raise ValueError(\"id and name are required\")\n        if isinstance(score, bool) or not isinstance(score, int) or not 0 <= score <= 100:\n            raise ValueError(\"score must be an integer from 0 to 100\")\n        self.student_id = student_id\n        self.name = name\n        self.score = score\n\n    def __str__(self):\n        return f\"{self.student_id} | {self.name} | {self.score}\"\n\n\ndef run_checks():\n    student = StudentRecord(\" S01 \", \" Amy \", 95)\n    assert str(student) == \"S01 | Amy | 95\"\n    assert f\"Student: {student}\" == \"Student: S01 | Amy | 95\"\n    try:\n        StudentRecord(\"S02\", \"\", 80)\n    except ValueError:\n        pass\n    else:\n        raise AssertionError(\"empty name must be rejected\")\n    try:\n        StudentRecord(\"S03\", \"Bo\", 101)\n    except ValueError:\n        pass\n    else:\n        raise AssertionError(\"out-of-range score must be rejected\")\n\n\nif __name__ == \"__main__\":\n    run_checks()\n    print(\"display checks: OK\")",
+  "solutionExplanation": [
+    "构造器保证对象一创建就有效。",
+    "__str__ 只读取字段并返回字符串。",
+    "一个 assert 自检覆盖正常与边界。"
+  ],
+  "steps": [
+    {
+      "id": "validate",
+      "day": "2026-11-04",
+      "title": "建立有效对象",
+      "instruction": "在构造器中清理并验证字段。",
+      "hint": "成绩只接受0至100整数。",
+      "knowledge": [
+        "__init__",
+        "ValueError"
+      ]
+    },
+    {
+      "id": "display",
+      "day": "2026-11-04",
+      "title": "定义展示",
+      "instruction": "实现 __str__ 返回固定格式。",
+      "hint": "返回字符串，不要直接 print。",
+      "knowledge": [
+        "__str__",
+        "f-string"
+      ]
+    },
+    {
+      "id": "checks",
+      "day": "2026-11-04",
+      "title": "运行自检",
+      "instruction": "覆盖正常、空姓名与越界成绩。",
+      "hint": "最终只输出 display checks: OK。",
+      "knowledge": [
+        "assert",
+        "边界"
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "id": "t1",
+      "label": "正常展示",
+      "input": "S01,Amy,95",
+      "output": "display checks: OK",
+      "purpose": "验证 str 与 f-string"
+    },
+    {
+      "id": "t2",
+      "label": "非法对象",
+      "input": "empty name / 101",
+      "output": "display checks: OK",
+      "purpose": "验证构造边界"
+    }
+  ],
+  "recall": [
+    {
+      "id": "return",
+      "question": "为什么 __str__ 不能只执行 print？",
+      "answer": "协议要求它返回 str，调用者再决定如何显示。"
+    }
+  ],
+  "sources": [
+    {
+      "title": "Python 官方参考：object.__str__",
+      "url": "https://docs.python.org/3/reference/datamodel.html#object.__str__",
+      "attribution": "2026-11-04 实际核对，项目为原创教学练习"
+    },
+    {
+      "title": "Python 官方教程：Classes",
+      "url": "https://docs.python.org/3/tutorial/classes.html",
+      "attribution": "2026-11-04 实际核对，项目为原创教学练习"
+    },
+    {
+      "title": "CS50P：Classes",
+      "url": "https://cs50.harvard.edu/python/notes/8/",
+      "attribution": "2026-11-04 实际核对，项目为原创教学练习"
+    }
+  ]
+}
