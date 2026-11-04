@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 1,
+  "projectId": "daily-2026-11-05",
+  "track": "python",
+  "title": "从文本行创建成绩对象",
+  "goal": "用 classmethod 提供备用构造入口，并复用原构造器的全部验证。",
+  "prerequisites": [
+    "类与对象",
+    "__init__",
+    "字符串 split/strip"
+  ],
+  "filename": "student_from_row.py",
+  "runCommand": "python3 student_from_row.py",
+  "starter": "class StudentRecord:\n    @classmethod\n    def from_csv_row(cls, row):\n        pass\n",
+  "solution": "class StudentRecord:\n    def __init__(self, student_id, name, score):\n        student_id = student_id.strip()\n        name = name.strip()\n        if not student_id or not name:\n            raise ValueError(\"id and name are required\")\n        if isinstance(score, bool) or not isinstance(score, int) or not 0 <= score <= 100:\n            raise ValueError(\"score must be an integer from 0 to 100\")\n        self.student_id = student_id\n        self.name = name\n        self.score = score\n\n    @classmethod\n    def from_csv_row(cls, row):\n        parts = [part.strip() for part in row.split(\",\")]\n        if len(parts) != 3:\n            raise ValueError(\"row must contain id,name,score\")\n        student_id, name, score_text = parts\n        return cls(student_id, name, int(score_text))\n\n    def __str__(self):\n        return f\"{self.student_id} | {self.name} | {self.score}\"\n\n\ndef run_checks():\n    student = StudentRecord.from_csv_row(\" S01, Amy, 95 \")\n    assert isinstance(student, StudentRecord)\n    assert str(student) == \"S01 | Amy | 95\"\n    for bad_row in (\"S02,Bo\", \"S02,Bo,bad\", \"S02,Bo,101\"):\n        try:\n            StudentRecord.from_csv_row(bad_row)\n        except ValueError:\n            pass\n        else:\n            raise AssertionError(f\"invalid row accepted: {bad_row}\")\n\n\nif __name__ == \"__main__\":\n    run_checks()\n    print(\"factory checks: OK\")",
+  "solutionExplanation": [
+    "类方法在对象创建前由类调用。",
+    "解析只负责字段拆分和类型转换。",
+    "return cls(...) 复用构造器校验。"
+  ],
+  "steps": [
+    {
+      "id": "constructor",
+      "day": "2026-11-05",
+      "title": "保留主构造器",
+      "instruction": "先确保 __init__ 负责全部合法性。",
+      "hint": "不要在两个入口复制规则。",
+      "knowledge": [
+        "__init__",
+        "校验"
+      ]
+    },
+    {
+      "id": "factory",
+      "day": "2026-11-05",
+      "title": "添加类方法",
+      "instruction": "拆分三段并调用 cls。",
+      "hint": "装饰器是 @classmethod。",
+      "knowledge": [
+        "classmethod",
+        "cls"
+      ]
+    },
+    {
+      "id": "checks",
+      "day": "2026-11-05",
+      "title": "验证坏行",
+      "instruction": "覆盖少字段、非数字和越界。",
+      "hint": "都应抛 ValueError。",
+      "knowledge": [
+        "ValueError",
+        "边界"
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "id": "t1",
+      "label": "正常文本行",
+      "input": "S01,Amy,95",
+      "output": "factory checks: OK",
+      "purpose": "验证备用构造"
+    },
+    {
+      "id": "t2",
+      "label": "坏行",
+      "input": "missing/bad/101",
+      "output": "factory checks: OK",
+      "purpose": "验证解析与构造边界"
+    }
+  ],
+  "recall": [
+    {
+      "id": "cls",
+      "question": "为什么备用构造方法使用 cls 而不是 self？",
+      "answer": "调用时对象尚未创建，方法接收的是类并负责创建实例。"
+    }
+  ],
+  "sources": [
+    {
+      "title": "Python 官方：classmethod",
+      "url": "https://docs.python.org/3/library/functions.html#classmethod",
+      "attribution": "2026-11-05 实际核对，项目为原创教学练习"
+    },
+    {
+      "title": "Python 官方教程：Classes",
+      "url": "https://docs.python.org/3/tutorial/classes.html",
+      "attribution": "2026-11-05 实际核对，项目为原创教学练习"
+    },
+    {
+      "title": "CS50P：Class Methods",
+      "url": "https://cs50.harvard.edu/python/notes/8/#class-methods",
+      "attribution": "2026-11-05 实际核对，项目为原创教学练习"
+    }
+  ]
+}
