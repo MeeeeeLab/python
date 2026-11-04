@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-04",
+  "topic": "__str__与对象展示",
+  "stage": "主线延伸：类与对象",
+  "estimatedMinutes": 25,
+  "notePath": "notes/2026-11/2026-11-04___str__与对象展示.md",
+  "collectedAt": "2026-11-04",
+  "sources": [
+    {
+      "title": "Python 官方参考：object.__str__",
+      "url": "https://docs.python.org/3/reference/datamodel.html#object.__str__",
+      "kind": "Python 官方参考"
+    },
+    {
+      "title": "Python 官方教程：Classes",
+      "url": "https://docs.python.org/3/tutorial/classes.html",
+      "kind": "Python 官方教程"
+    },
+    {
+      "title": "CS50P：Classes",
+      "url": "https://cs50.harvard.edu/python/notes/8/",
+      "kind": "Harvard 课程"
+    }
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "type": "mcq",
+      "title": "__str__ 的用途",
+      "difficulty": "基础",
+      "prompt": "print(student) 需要可读文本时，主要会使用哪个方法？",
+      "answer": 2,
+      "explanation": "print 会通过 str(student) 获取可读字符串，进而调用 __str__。",
+      "hint": "方法名含 str。",
+      "sourceIndex": 0,
+      "attribution": "依据 2026-11-04 实际阅读的官方/课程资料原创，非官方原题",
+      "options": [
+        "__init__",
+        "add",
+        "__str__",
+        "copy"
+      ]
+    },
+    {
+      "id": "q2",
+      "type": "mcq",
+      "title": "返回类型",
+      "difficulty": "基础",
+      "prompt": "自定义 __str__ 应返回什么？",
+      "answer": 1,
+      "explanation": "__str__ 必须返回字符串。",
+      "hint": "不要在方法里只打印。",
+      "sourceIndex": 0,
+      "attribution": "依据 2026-11-04 实际阅读的官方/课程资料原创，非官方原题",
+      "options": [
+        "任意对象",
+        "str",
+        "int",
+        "None"
+      ]
+    },
+    {
+      "id": "q3",
+      "type": "mcq",
+      "title": "展示职责",
+      "difficulty": "基础",
+      "prompt": "哪种 __str__ 设计最合理？",
+      "answer": 3,
+      "explanation": "展示方法应读取已有状态并返回简洁文本，不改变状态。",
+      "hint": "查询不应产生副作用。",
+      "sourceIndex": 2,
+      "attribution": "依据 2026-11-04 实际阅读的官方/课程资料原创，非官方原题",
+      "options": [
+        "每次调用都加1分",
+        "清空姓名后返回",
+        "只执行 print 不返回",
+        "读取字段并返回格式化字符串"
+      ]
+    },
+    {
+      "id": "q4",
+      "type": "short",
+      "title": "对象输出",
+      "difficulty": "基础",
+      "prompt": "S01、Amy、95 使用格式 f\"{id} | {name} | {score}\"，str(student) 的精确输出是什么？",
+      "answer": "S01 | Amy | 95",
+      "explanation": "三个字段按竖线和空格连接。",
+      "hint": "保留竖线两侧空格。",
+      "sourceIndex": 1,
+      "attribution": "依据 2026-11-04 实际阅读的官方/课程资料原创，非官方原题"
+    },
+    {
+      "id": "q5",
+      "type": "code",
+      "title": "对象展示自检",
+      "difficulty": "综合",
+      "prompt": "实现带输入校验和 __str__ 的 StudentRecord，并覆盖正常对象、空姓名和101分。",
+      "answer": "class StudentRecord:\n    def __init__(self, student_id, name, score):\n        student_id = student_id.strip()\n        name = name.strip()\n        if not student_id or not name:\n            raise ValueError(\"id and name are required\")\n        if isinstance(score, bool) or not isinstance(score, int) or not 0 <= score <= 100:\n            raise ValueError(\"score must be an integer from 0 to 100\")\n        self.student_id = student_id\n        self.name = name\n        self.score = score\n\n    def __str__(self):\n        return f\"{self.student_id} | {self.name} | {self.score}\"\n\n\ndef run_checks():\n    student = StudentRecord(\" S01 \", \" Amy \", 95)\n    assert str(student) == \"S01 | Amy | 95\"\n    assert f\"Student: {student}\" == \"Student: S01 | Amy | 95\"\n    try:\n        StudentRecord(\"S02\", \"\", 80)\n    except ValueError:\n        pass\n    else:\n        raise AssertionError(\"empty name must be rejected\")\n    try:\n        StudentRecord(\"S03\", \"Bo\", 101)\n    except ValueError:\n        pass\n    else:\n        raise AssertionError(\"out-of-range score must be rejected\")\n\n\nif __name__ == \"__main__\":\n    run_checks()\n    print(\"display checks: OK\")",
+      "explanation": "构造器保护对象有效性，__str__ 只负责返回可读字符串。",
+      "hint": "先校验字段，再实现一个 return。",
+      "sourceIndex": 0,
+      "attribution": "依据 2026-11-04 实际阅读的官方/课程资料原创，非官方原题",
+      "language": "python",
+      "starter": "class StudentRecord:\n    def __init__(self, student_id, name, score):\n        pass\n\n    def __str__(self):\n        pass\n",
+      "tests": [
+        {
+          "input": "S01,Amy,95",
+          "output": "display checks: OK"
+        },
+        {
+          "input": "empty name / score=101",
+          "output": "display checks: OK"
+        }
+      ]
+    }
+  ]
+}
