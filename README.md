@@ -28,9 +28,9 @@
 
 工作日每天一个 Python 小项目；周六、周日合做一个综合项目。Java 数据结构作为同一场景的可选加练。笔记依旧每天更新，原练习网站继续可用；项目的代码、步骤与复盘按账号保存，个人记录不上传到公开仓库。
 
-今日项目：[保护成绩册对象的状态](projects/2026-11/daily-2026-11-03.md)（主线延伸安排；实例方法与可变状态保护）。
+今日项目：[从文本行创建成绩对象](projects/2026-11/daily-2026-11-05.md)（主线延伸安排；classmethod 与备用构造）。
 
-上一项目：[把成绩册封装成对象](projects/2026-11/daily-2026-11-02.md)（历史资料与项目 ID 保留）。
+上一项目：[让成绩对象会自我展示](projects/2026-11/daily-2026-11-04.md)（历史资料与项目 ID 保留）。
 
 上个周末项目：[我的 CSV 成绩账本](projects/2026-10/weekend-2026-10-17.md)（历史资料与项目 ID 保留）。
 
@@ -73,6 +73,8 @@
 | 2026-11-01 | [成绩管理系统独立演示与复盘](notes/2026-11/2026-11-01_成绩管理系统独立演示与复盘.md) | [打开每日练习](https://python-daily-lab.sillywood.chatgpt.site/) · [题目数据](questions/2026-11/2026-11-01_成绩管理系统独立演示与复盘.json) |
 | 2026-11-02 | [Python 类与对象入门](notes/2026-11/2026-11-02_Python类与对象入门.md) | [打开每日练习](https://python-daily-lab.sillywood.chatgpt.site/) · [题目数据](questions/2026-11/2026-11-02_Python类与对象入门.json) |
 | 2026-11-03 | [对象方法与状态封装](notes/2026-11/2026-11-03_对象方法与状态封装.md) | [打开每日练习](https://python-daily-lab.sillywood.chatgpt.site/) · [题目数据](questions/2026-11/2026-11-03_对象方法与状态封装.json) |
+| 2026-11-04 | [__str__ 与对象展示](notes/2026-11/2026-11-04___str__与对象展示.md) | [打开每日练习](https://python-daily-lab.sillywood.chatgpt.site/) · [题目数据](questions/2026-11/2026-11-04___str__与对象展示.json) |
+| 2026-11-05 | [类方法与备用构造](notes/2026-11/2026-11-05_类方法与备用构造.md) | [打开每日练习](https://python-daily-lab.sillywood.chatgpt.site/) · [题目数据](questions/2026-11/2026-11-05_类方法与备用构造.json) |
 <!-- DAILY_NOTES_END -->
 
 ## ✅ 学习方法
