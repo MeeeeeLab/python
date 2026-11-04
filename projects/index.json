@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-11-03",
+  "updatedAt": "2026-11-05",
   "projects": [
     {
       "id": "weekend-2026-10-10",
@@ -543,6 +543,57 @@
       "javaPath": "projects/2026-11/daily-2026-11-03.json",
       "guidePath": "projects/2026-11/daily-2026-11-03.md",
       "javaGuidePath": "projects/2026-11/daily-2026-11-03.md",
+      "ready": true
+    },
+    {
+      "id": "daily-2026-11-04",
+      "startDate": "2026-11-04",
+      "endDate": "2026-11-04",
+      "kind": "daily",
+      "title": "让成绩对象会自我展示",
+      "description": "用 __str__ 输出稳定的可读成绩记录，并保留构造边界校验。",
+      "concepts": [
+        "__str__",
+        "对象展示",
+        "f-string"
+      ],
+      "javaConcepts": [
+        "双链表中间插入",
+        "prev/next",
+        "tail边界"
+      ],
+      "minutes": 45,
+      "javaMinutes": 25,
+      "pythonPath": "projects/2026-11/daily-2026-11-04.json",
+      "javaPath": "projects/2026-11/daily-2026-11-04.json",
+      "guidePath": "projects/2026-11/daily-2026-11-04.md",
+      "javaGuidePath": "projects/2026-11/daily-2026-11-04.md",
+      "ready": true
+    },
+    {
+      "id": "daily-2026-11-05",
+      "startDate": "2026-11-05",
+      "endDate": "2026-11-05",
+      "kind": "daily",
+      "title": "从文本行创建成绩对象",
+      "description": "用 classmethod 提供备用构造入口，并复用原构造器验证。",
+      "concepts": [
+        "classmethod",
+        "cls",
+        "备用构造",
+        "字符串解析"
+      ],
+      "javaConcepts": [
+        "双链表删除",
+        "head/tail",
+        "删除边界"
+      ],
+      "minutes": 50,
+      "javaMinutes": 25,
+      "pythonPath": "projects/2026-11/daily-2026-11-05.json",
+      "javaPath": "projects/2026-11/daily-2026-11-05.json",
+      "guidePath": "projects/2026-11/daily-2026-11-05.md",
+      "javaGuidePath": "projects/2026-11/daily-2026-11-05.md",
       "ready": true
     }
   ]
