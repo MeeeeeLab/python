@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-05",
+  "topic": "类方法与备用构造",
+  "stage": "主线延伸：类与对象",
+  "estimatedMinutes": 25,
+  "notePath": "notes/2026-11/2026-11-05_类方法与备用构造.md",
+  "collectedAt": "2026-11-05",
+  "sources": [
+    {
+      "title": "Python 官方：classmethod",
+      "url": "https://docs.python.org/3/library/functions.html#classmethod",
+      "kind": "Python 官方标准库"
+    },
+    {
+      "title": "Python 官方教程：Classes",
+      "url": "https://docs.python.org/3/tutorial/classes.html",
+      "kind": "Python 官方教程"
+    },
+    {
+      "title": "CS50P：Class Methods",
+      "url": "https://cs50.harvard.edu/python/notes/8/#class-methods",
+      "kind": "Harvard 课程"
+    }
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "type": "mcq",
+      "title": "cls 的含义",
+      "difficulty": "基础",
+      "prompt": "类方法中的 cls 通常指向什么？",
+      "answer": 1,
+      "explanation": "classmethod 会把类绑定为第一个参数。",
+      "hint": "它不是某个已创建实例。",
+      "sourceIndex": 0,
+      "attribution": "依据 2026-11-05 实际阅读的官方/课程资料原创，非官方原题",
+      "options": [
+        "当前实例",
+        "类本身",
+        "输入字符串",
+        "返回对象"
+      ]
+    },
+    {
+      "id": "q2",
+      "type": "mcq",
+      "title": "备用构造入口",
+      "difficulty": "基础",
+      "prompt": "哪个调用适合从一行文本创建对象？",
+      "answer": 2,
+      "explanation": "类方法在对象存在前由类调用。",
+      "hint": "方法名为 from_csv_row。",
+      "sourceIndex": 2,
+      "attribution": "依据 2026-11-05 实际阅读的官方/课程资料原创，非官方原题",
+      "options": [
+        "student.from_csv_row(row)",
+        "row.StudentRecord()",
+        "StudentRecord.from_csv_row(row)",
+        "StudentRecord.__str__(row)"
+      ]
+    },
+    {
+      "id": "q3",
+      "type": "mcq",
+      "title": "复用验证",
+      "difficulty": "基础",
+      "prompt": "from_csv_row 最后使用 return cls(id,name,score) 的主要好处是什么？",
+      "answer": 3,
+      "explanation": "合法性规则仍集中在 __init__，避免两份规则漂移。",
+      "hint": "不要复制校验。",
+      "sourceIndex": 1,
+      "attribution": "依据 2026-11-05 实际阅读的官方/课程资料原创，非官方原题",
+      "options": [
+        "跳过构造器",
+        "自动保存文件",
+        "把所有值变成字符串",
+        "复用构造器与其校验"
+      ]
+    },
+    {
+      "id": "q4",
+      "type": "short",
+      "title": "解析输出",
+      "difficulty": "基础",
+      "prompt": "from_csv_row(\" S01, Amy, 95 \") 后，__str__ 格式为 id | name | score，精确输出是什么？",
+      "answer": "S01 | Amy | 95",
+      "explanation": "每段先 strip，再将95转为整数并构造对象。",
+      "hint": "外侧空格被去除。",
+      "sourceIndex": 0,
+      "attribution": "依据 2026-11-05 实际阅读的官方/课程资料原创，非官方原题"
+    },
+    {
+      "id": "q5",
+      "type": "code",
+      "title": "备用构造自检",
+      "difficulty": "综合",
+      "prompt": "实现 from_csv_row 类方法，并拒绝字段不足、非数字和101分。",
+      "answer": "class StudentRecord:\n    def __init__(self, student_id, name, score):\n        student_id = student_id.strip()\n        name = name.strip()\n        if not student_id or not name:\n            raise ValueError(\"id and name are required\")\n        if isinstance(score, bool) or not isinstance(score, int) or not 0 <= score <= 100:\n            raise ValueError(\"score must be an integer from 0 to 100\")\n        self.student_id = student_id\n        self.name = name\n        self.score = score\n\n    @classmethod\n    def from_csv_row(cls, row):\n        parts = [part.strip() for part in row.split(\",\")]\n        if len(parts) != 3:\n            raise ValueError(\"row must contain id,name,score\")\n        student_id, name, score_text = parts\n        return cls(student_id, name, int(score_text))\n\n    def __str__(self):\n        return f\"{self.student_id} | {self.name} | {self.score}\"\n\n\ndef run_checks():\n    student = StudentRecord.from_csv_row(\" S01, Amy, 95 \")\n    assert isinstance(student, StudentRecord)\n    assert str(student) == \"S01 | Amy | 95\"\n    for bad_row in (\"S02,Bo\", \"S02,Bo,bad\", \"S02,Bo,101\"):\n        try:\n            StudentRecord.from_csv_row(bad_row)\n        except ValueError:\n            pass\n        else:\n            raise AssertionError(f\"invalid row accepted: {bad_row}\")\n\n\nif __name__ == \"__main__\":\n    run_checks()\n    print(\"factory checks: OK\")",
+      "explanation": "类方法只负责拆分转换，构造器继续负责字段合法性。",
+      "hint": "检查 len(parts)==3 后 return cls(...)。",
+      "sourceIndex": 0,
+      "attribution": "依据 2026-11-05 实际阅读的官方/课程资料原创，非官方原题",
+      "language": "python",
+      "starter": "class StudentRecord:\n    @classmethod\n    def from_csv_row(cls, row):\n        pass\n",
+      "tests": [
+        {
+          "input": "S01,Amy,95",
+          "output": "factory checks: OK"
+        },
+        {
+          "input": "missing/bad/101",
+          "output": "factory checks: OK"
+        }
+      ]
+    }
+  ]
+}
