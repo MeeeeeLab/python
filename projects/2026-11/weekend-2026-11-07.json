@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 1,
+  "projectId": "weekend-2026-11-07",
+  "track": "python",
+  "title": "面向对象成绩册重构",
+  "goal": "周六完成记录模型、容器、重复校验、平均值和稳定展示；周日继续同一项目。",
+  "prerequisites": [
+    "本周类与对象笔记",
+    "字典",
+    "异常处理"
+  ],
+  "filename": "oop_gradebook.py",
+  "runCommand": "python3 oop_gradebook.py",
+  "starter": "# 按步骤补全最小类和自检\n",
+  "solution": "class StudentRecord:\n    def __init__(self, student_id, name, score):\n        student_id, name = student_id.strip(), name.strip()\n        if not student_id or not name or isinstance(score, bool) or not isinstance(score, int) or not 0 <= score <= 100:\n            raise ValueError(\"invalid student record\")\n        self.student_id, self.name, self.score = student_id, name, score\n\n    @classmethod\n    def from_csv_row(cls, row):\n        parts = [part.strip() for part in row.split(\",\")]\n        if len(parts) != 3:\n            raise ValueError(\"row must contain id,name,score\")\n        return cls(parts[0], parts[1], int(parts[2]))\n\n    def __str__(self):\n        return f\"{self.student_id} | {self.name} | {self.score}\"\n\n\nclass GradeBook:\n    def __init__(self):\n        self._records = {}\n\n    def add(self, record):\n        if record.student_id in self._records:\n            return False\n        self._records[record.student_id] = record\n        return True\n\n    def average(self):\n        return None if not self._records else sum(r.score for r in self._records.values()) / len(self._records)\n\n    def lines(self):\n        return [str(self._records[key]) for key in sorted(self._records)]\n\n\ndef run_checks():\n    book = GradeBook()\n    assert book.average() is None and book.lines() == []\n    assert book.add(StudentRecord.from_csv_row(\"S02, Bo, 80\"))\n    assert book.add(StudentRecord(\"S01\", \"Amy\", 100))\n    assert not book.add(StudentRecord(\"S01\", \"Other\", 60))\n    assert book.average() == 90\n    assert book.lines() == [\"S01 | Amy | 100\", \"S02 | Bo | 80\"]\n    other = GradeBook()\n    assert other.lines() == []\n    for bad in (\"S03,Cat\", \"S03,Cat,101\"):\n        try:\n            StudentRecord.from_csv_row(bad)\n        except ValueError:\n            pass\n        else:\n            raise AssertionError(\"invalid row accepted\")\n\n\nif __name__ == \"__main__\":\n    run_checks()\n    print(\"oop-gradebook checks: OK\")\n",
+  "solutionExplanation": [
+    "只使用标准库和最小数据模型。",
+    "先处理正常流程，再覆盖空、重复或首尾边界。",
+    "运行一个可重复的 assert/check 自检。"
+  ],
+  "steps": [
+    {
+      "id": "record-model",
+      "day": "2026-11-07",
+      "title": "建立记录类",
+      "instruction": "集中字段验证、文本构造和展示。",
+      "hint": "复用本周知识。",
+      "knowledge": [
+        "__init__",
+        "classmethod",
+        "__str__"
+      ]
+    },
+    {
+      "id": "book-core",
+      "day": "2026-11-07",
+      "title": "建立成绩册",
+      "instruction": "实现add、average、lines。",
+      "hint": "容器是实例属性。",
+      "knowledge": [
+        "实例方法",
+        "字典"
+      ]
+    },
+    {
+      "id": "saturday-checks",
+      "day": "2026-11-07",
+      "title": "周六边界自检",
+      "instruction": "覆盖空、重复、非法行和实例隔离。",
+      "hint": "不要提前扩展框架。",
+      "knowledge": [
+        "边界测试",
+        "职责"
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "id": "t1",
+      "label": "正常两条记录",
+      "input": "S01/100,S02/80",
+      "output": "oop-gradebook checks: OK",
+      "purpose": "验证添加统计展示"
+    },
+    {
+      "id": "t2",
+      "label": "边界",
+      "input": "empty/duplicate/bad row",
+      "output": "oop-gradebook checks: OK",
+      "purpose": "验证项目边界"
+    }
+  ],
+  "recall": [
+    {
+      "id": "responsibility",
+      "question": "为什么拆成StudentRecord和GradeBook？",
+      "answer": "一类维护单条记录有效性，一类管理记录集合与统计。"
+    }
+  ],
+  "sources": [
+    {
+      "title": "Python 官方教程：Class and Instance Variables",
+      "url": "https://docs.python.org/3/tutorial/classes.html#class-and-instance-variables",
+      "attribution": "2026-11-07 实际核对，项目为原创教学练习"
+    },
+    {
+      "title": "Python 官方：classmethod",
+      "url": "https://docs.python.org/3/library/functions.html#classmethod",
+      "attribution": "2026-11-07 实际核对，项目为原创教学练习"
+    },
+    {
+      "title": "CS50P：Object-Oriented Programming",
+      "url": "https://cs50.harvard.edu/python/notes/8/",
+      "attribution": "2026-11-07 实际核对，项目为原创教学练习"
+    }
+  ]
+}
