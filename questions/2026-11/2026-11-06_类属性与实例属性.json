@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-06",
+  "topic": "类属性与实例属性",
+  "stage": "主线延伸：类与对象",
+  "estimatedMinutes": 25,
+  "notePath": "notes/2026-11/2026-11-06_类属性与实例属性.md",
+  "collectedAt": "2026-11-07",
+  "sources": [
+    {
+      "title": "Python 官方教程：Class and Instance Variables",
+      "url": "https://docs.python.org/3/tutorial/classes.html#class-and-instance-variables",
+      "kind": "Python 官方教程"
+    },
+    {
+      "title": "Python 官方：classmethod",
+      "url": "https://docs.python.org/3/library/functions.html#classmethod",
+      "kind": "Python 官方标准库"
+    },
+    {
+      "title": "CS50P：Object-Oriented Programming",
+      "url": "https://cs50.harvard.edu/python/notes/8/",
+      "kind": "Harvard 课程"
+    }
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "type": "mcq",
+      "title": "共享计数",
+      "difficulty": "基础",
+      "prompt": "哪个属性最适合记录所有 StudentRecord 成功创建的总数？",
+      "answer": 1,
+      "explanation": "总数属于类整体，应放在类属性。",
+      "hint": "它不是某位学生独有的数据。",
+      "sourceIndex": 0,
+      "attribution": "依据 2026-11-07 实际阅读的官方/课程资料原创，非官方原题",
+      "options": [
+        "self.name",
+        "StudentRecord.total_created",
+        "self.student_id",
+        "局部变量name"
+      ]
+    },
+    {
+      "id": "q2",
+      "type": "mcq",
+      "title": "实例独有数据",
+      "difficulty": "基础",
+      "prompt": "哪个写法能让每个对象拥有独立姓名？",
+      "answer": 2,
+      "explanation": "在构造器中赋给 self.name 会形成实例属性。",
+      "hint": "留意 self。",
+      "sourceIndex": 0,
+      "attribution": "依据 2026-11-07 实际阅读的官方/课程资料原创，非官方原题",
+      "options": [
+        "name = value",
+        "StudentRecord.name = value",
+        "self.name = value",
+        "global name"
+      ]
+    },
+    {
+      "id": "q3",
+      "type": "mcq",
+      "title": "可变共享陷阱",
+      "difficulty": "基础",
+      "prompt": "把 tags=[] 直接写在类体中的主要风险是什么？",
+      "answer": 0,
+      "explanation": "同一个列表会被所有实例共享。",
+      "hint": "列表原地修改不会自动复制。",
+      "sourceIndex": 0,
+      "attribution": "依据 2026-11-07 实际阅读的官方/课程资料原创，非官方原题",
+      "options": [
+        "所有实例共享同一列表",
+        "列表不能append",
+        "实例无法读取",
+        "Python自动报错"
+      ]
+    },
+    {
+      "id": "q4",
+      "type": "short",
+      "title": "计数边界",
+      "difficulty": "基础",
+      "prompt": "先成功创建两个对象，再尝试用空学号创建而抛出 ValueError；若先校验后计数，total_created 精确值是多少？",
+      "answer": "2",
+      "explanation": "失败构造不应增加成功创建数。",
+      "hint": "只数成功对象。",
+      "sourceIndex": 2,
+      "attribution": "依据 2026-11-07 实际阅读的官方/课程资料原创，非官方原题"
+    },
+    {
+      "id": "q5",
+      "type": "code",
+      "title": "类属性与实例属性自检",
+      "difficulty": "综合",
+      "prompt": "实现成功创建计数，验证两个实例姓名独立且非法输入不增加计数。",
+      "answer": "class StudentRecord:\n    total_created = 0\n\n    def __init__(self, student_id, name):\n        student_id, name = student_id.strip(), name.strip()\n        if not student_id or not name:\n            raise ValueError(\"id and name are required\")\n        self.student_id = student_id\n        self.name = name\n        StudentRecord.total_created += 1\n\n    def __str__(self):\n        return f\"{self.student_id} | {self.name}\"\n\n\ndef run_checks():\n    assert StudentRecord.total_created == 0\n    first = StudentRecord(\" S01 \", \" Amy \")\n    second = StudentRecord(\"S02\", \"Bo\")\n    assert StudentRecord.total_created == 2\n    assert first.total_created == second.total_created == 2\n    first.name = \"Ann\"\n    assert second.name == \"Bo\"\n    try:\n        StudentRecord(\"\", \"Nobody\")\n    except ValueError:\n        pass\n    else:\n        raise AssertionError(\"empty id accepted\")\n    assert StudentRecord.total_created == 2\n\n\nif __name__ == \"__main__\":\n    run_checks()\n    print(\"attribute checks: OK\")\n",
+      "explanation": "类属性负责共享计数，实例属性保存各自字段。",
+      "hint": "在字段验证之后执行 StudentRecord.total_created += 1。",
+      "sourceIndex": 0,
+      "attribution": "依据 2026-11-07 实际阅读的官方/课程资料原创，非官方原题",
+      "language": "python",
+      "starter": "class StudentRecord:\n    total_created = 0\n\n    def __init__(self, student_id, name):\n        pass\n",
+      "tests": [
+        {
+          "input": "S01/Amy, S02/Bo",
+          "output": "attribute checks: OK"
+        },
+        {
+          "input": "empty id",
+          "output": "attribute checks: OK"
+        }
+      ]
+    }
+  ]
+}
