@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-11-05",
+  "updatedAt": "2026-11-07",
   "projects": [
     {
       "id": "weekend-2026-10-10",
@@ -594,6 +594,59 @@
       "javaPath": "projects/2026-11/daily-2026-11-05.json",
       "guidePath": "projects/2026-11/daily-2026-11-05.md",
       "javaGuidePath": "projects/2026-11/daily-2026-11-05.md",
+      "ready": true
+    },
+    {
+      "id": "daily-2026-11-06",
+      "startDate": "2026-11-06",
+      "endDate": "2026-11-06",
+      "kind": "daily",
+      "title": "统计创建的成绩对象",
+      "description": "区分类属性与实例属性；Java 短练习比较单链表与双链表的遍历和删除。",
+      "concepts": [
+        "类属性",
+        "实例属性",
+        "共享计数"
+      ],
+      "javaConcepts": [
+        "单链表",
+        "双链表",
+        "正反向遍历",
+        "操作成本"
+      ],
+      "minutes": 50,
+      "javaMinutes": 25,
+      "pythonPath": "projects/2026-11/daily-2026-11-06.json",
+      "javaPath": "projects/2026-11/daily-2026-11-06.json",
+      "guidePath": "projects/2026-11/daily-2026-11-06.md",
+      "javaGuidePath": "projects/2026-11/daily-2026-11-06.md",
+      "ready": true
+    },
+    {
+      "id": "weekend-2026-11-07",
+      "startDate": "2026-11-07",
+      "endDate": "2026-11-08",
+      "kind": "weekend",
+      "title": "面向对象成绩册重构",
+      "description": "周六完成面向对象成绩册核心；Java 用双链表完成浏览历史访问与前后移动，周日继续同一项目。",
+      "concepts": [
+        "类与对象",
+        "classmethod",
+        "实例属性",
+        "边界测试"
+      ],
+      "javaConcepts": [
+        "双链表",
+        "前后移动",
+        "首尾边界",
+        "链表章节验收"
+      ],
+      "minutes": 170,
+      "javaMinutes": 100,
+      "pythonPath": "projects/2026-11/weekend-2026-11-07.json",
+      "javaPath": "projects/2026-11/weekend-2026-11-07.json",
+      "guidePath": "projects/2026-11/weekend-2026-11-07.md",
+      "javaGuidePath": "projects/2026-11/weekend-2026-11-07.md",
       "ready": true
     }
   ]
