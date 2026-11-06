@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "projectId": "daily-2026-11-06",
+  "track": "python",
+  "title": "统计创建的成绩对象",
+  "goal": "用类属性统计成功创建总数，用实例属性保存每条记录。",
+  "prerequisites": [
+    "类与对象",
+    "__init__",
+    "ValueError"
+  ],
+  "filename": "student_class_attributes.py",
+  "runCommand": "python3 student_class_attributes.py",
+  "starter": "# 按步骤补全最小类和自检\n",
+  "solution": "class StudentRecord:\n    total_created = 0\n\n    def __init__(self, student_id, name):\n        student_id, name = student_id.strip(), name.strip()\n        if not student_id or not name:\n            raise ValueError(\"id and name are required\")\n        self.student_id = student_id\n        self.name = name\n        StudentRecord.total_created += 1\n\n    def __str__(self):\n        return f\"{self.student_id} | {self.name}\"\n\n\ndef run_checks():\n    assert StudentRecord.total_created == 0\n    first = StudentRecord(\" S01 \", \" Amy \")\n    second = StudentRecord(\"S02\", \"Bo\")\n    assert StudentRecord.total_created == 2\n    assert first.total_created == second.total_created == 2\n    first.name = \"Ann\"\n    assert second.name == \"Bo\"\n    try:\n        StudentRecord(\"\", \"Nobody\")\n    except ValueError:\n        pass\n    else:\n        raise AssertionError(\"empty id accepted\")\n    assert StudentRecord.total_created == 2\n\n\nif __name__ == \"__main__\":\n    run_checks()\n    print(\"attribute checks: OK\")\n",
+  "solutionExplanation": [
+    "只使用标准库和最小数据模型。",
+    "先处理正常流程，再覆盖空、重复或首尾边界。",
+    "运行一个可重复的 assert/check 自检。"
+  ],
+  "steps": [
+    {
+      "id": "model",
+      "day": "2026-11-06",
+      "title": "区分属性",
+      "instruction": "将总数放类上，字段放实例上。",
+      "hint": "共享与独有。",
+      "knowledge": [
+        "类属性",
+        "实例属性"
+      ]
+    },
+    {
+      "id": "boundary",
+      "day": "2026-11-06",
+      "title": "先校验再计数",
+      "instruction": "非法输入不增加计数。",
+      "hint": "计数语句放在校验后。",
+      "knowledge": [
+        "ValueError",
+        "边界"
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "id": "t1",
+      "label": "两个合法对象",
+      "input": "S01/Amy,S02/Bo",
+      "output": "attribute checks: OK",
+      "purpose": "验证共享计数与实例隔离"
+    },
+    {
+      "id": "t2",
+      "label": "空学号",
+      "input": "empty id",
+      "output": "attribute checks: OK",
+      "purpose": "验证失败不计数"
+    }
+  ],
+  "recall": [
+    {
+      "id": "shared",
+      "question": "什么数据适合类属性？",
+      "answer": "属于整个类且应被所有实例共享的数据。"
+    }
+  ],
+  "sources": [
+    {
+      "title": "Python 官方教程：Class and Instance Variables",
+      "url": "https://docs.python.org/3/tutorial/classes.html#class-and-instance-variables",
+      "attribution": "2026-11-07 实际核对，项目为原创教学练习"
+    },
+    {
+      "title": "Python 官方：classmethod",
+      "url": "https://docs.python.org/3/library/functions.html#classmethod",
+      "attribution": "2026-11-07 实际核对，项目为原创教学练习"
+    },
+    {
+      "title": "CS50P：Object-Oriented Programming",
+      "url": "https://cs50.harvard.edu/python/notes/8/",
+      "attribution": "2026-11-07 实际核对，项目为原创教学练习"
+    }
+  ]
+}
