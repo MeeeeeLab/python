@@ -77,6 +77,7 @@
 | 2026-11-05 | [类方法与备用构造](notes/2026-11/2026-11-05_类方法与备用构造.md) | [打开每日练习](https://python-daily-lab.sillywood.chatgpt.site/) · [题目数据](questions/2026-11/2026-11-05_类方法与备用构造.json) |
 | 2026-11-06 | [类属性与实例属性](notes/2026-11/2026-11-06_类属性与实例属性.md) | [打开每日练习](https://python-daily-lab.sillywood.chatgpt.site/) · [题目数据](questions/2026-11/2026-11-06_类属性与实例属性.json) |
 | 2026-11-07 | [周末项目：面向对象成绩册重构](notes/2026-11/2026-11-07_周末项目面向对象成绩册重构.md) | [打开每日练习](https://python-daily-lab.sillywood.chatgpt.site/) · [题目数据](questions/2026-11/2026-11-07_周末项目面向对象成绩册重构.json) |
+| 2026-11-08 | [周末项目：成绩册查询、修改、删除与报告](notes/2026-11/2026-11-08_周末项目成绩册查询修改删除与报告.md) | [打开每日练习](https://python-daily-lab.sillywood.chatgpt.site) · [题目数据](questions/2026-11/2026-11-08_周末项目成绩册查询修改删除与报告.json) |
 <!-- DAILY_NOTES_END -->
 
 ## ✅ 学习方法
