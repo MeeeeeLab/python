@@ -130,7 +130,7 @@
       "id": "t3",
       "label": "修改失败不污染旧值",
       "input": "S02=90; attempt update to 101",
-      "output": "oop-gradebook Sunday checks: OK",
+      "output": "S02 | Bo | 90\n平均分：90.0\noop-gradebook Sunday checks: OK",
       "purpose": "验证先校验再赋值"
     }
   ],
