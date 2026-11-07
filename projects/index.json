@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-11-07",
+  "updatedAt": "2026-11-08",
   "projects": [
     {
       "id": "weekend-2026-10-10",
@@ -628,7 +628,7 @@
       "endDate": "2026-11-08",
       "kind": "weekend",
       "title": "面向对象成绩册重构",
-      "description": "周六完成面向对象成绩册核心；Java 用双链表完成浏览历史访问与前后移动，周日继续同一项目。",
+      "description": "周六完成面向对象成绩册核心；周日继续同一项目，补查找、修改、删除、报告和边界验收。",
       "concepts": [
         "类与对象",
         "classmethod",
