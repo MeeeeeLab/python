@@ -1,0 +1,113 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-08",
+  "topic": "周末项目成绩册查询修改删除与报告",
+  "stage": "主线延伸：面向对象成绩册周末综合·周日阶段",
+  "estimatedMinutes": 30,
+  "notePath": "notes/2026-11/2026-11-08_周末项目成绩册查询修改删除与报告.md",
+  "collectedAt": "2026-11-08",
+  "sources": [
+    {
+      "title": "Python 3.13 官方教程：Classes",
+      "url": "https://docs.python.org/3.13/tutorial/classes.html",
+      "kind": "Python 官方教程"
+    },
+    {
+      "title": "Python 3.13 官方文档：Mapping Types — dict",
+      "url": "https://docs.python.org/3.13/library/stdtypes.html#mapping-types-dict",
+      "kind": "Python 官方标准库文档"
+    }
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "type": "mcq",
+      "title": "实例数据归属",
+      "difficulty": "基础",
+      "prompt": "为什么 GradeBook 的 _records 应在 __init__ 中写成 self._records = {}？",
+      "options": [
+        "让所有成绩册共享同一个字典",
+        "让每个 GradeBook 实例拥有独立记录",
+        "让字典自动排序",
+        "让类方法可以直接访问"
+      ],
+      "answer": 1,
+      "explanation": "实例属性属于各自实例，多个成绩册不会意外共享记录。",
+      "hint": "回想类属性与实例属性的区别。",
+      "sourceIndex": 0,
+      "attribution": "依据 2026-11-08 实际阅读的 Python 官方文档原创，非官方原题"
+    },
+    {
+      "id": "q2",
+      "type": "mcq",
+      "title": "安全查找",
+      "difficulty": "基础",
+      "prompt": "records = {\"S01\": \"Amy\"}。调用 records.get(\"S99\") 且不提供默认值，会得到什么？",
+      "options": [
+        "KeyError",
+        "空字符串",
+        "None",
+        "自动创建 S99"
+      ],
+      "answer": 2,
+      "explanation": "dict.get 在键不存在时返回默认值；未提供默认值时默认为 None，不抛 KeyError。",
+      "hint": "区分 records[key] 与 records.get(key)。",
+      "sourceIndex": 1,
+      "attribution": "依据 Python 官方 dict 文档原创改编，非官方原题"
+    },
+    {
+      "id": "q3",
+      "type": "mcq",
+      "title": "删除未命中记录",
+      "difficulty": "基础",
+      "prompt": "records.pop(\"S99\", None) 在 S99 不存在时会怎样？",
+      "options": [
+        "删除最后一条记录",
+        "返回 None 且字典不变",
+        "抛出 KeyError",
+        "自动插入 S99"
+      ],
+      "answer": 1,
+      "explanation": "pop 的第二个参数是缺失键时返回的默认值；它不会删除其他键。",
+      "hint": "第二个参数是 default。",
+      "sourceIndex": 1,
+      "attribution": "依据 Python 官方 dict 文档原创改编，非官方原题"
+    },
+    {
+      "id": "q4",
+      "type": "short",
+      "title": "周日报告输出",
+      "difficulty": "基础",
+      "prompt": "完成周日项目后，成绩册只剩 S02/Bo/90。report() 的精确输出是什么？保留两行。",
+      "answer": "S02 | Bo | 90\n平均分：90.0",
+      "explanation": "报告先按学号排序输出记录，再追加一位小数格式的平均分。",
+      "hint": "只剩一条记录，因此平均分就是 90.0。",
+      "sourceIndex": 1,
+      "attribution": "依据官方字典和类文档编写的原创输出题"
+    },
+    {
+      "id": "q5",
+      "type": "code",
+      "title": "完成成绩册 CRUD",
+      "difficulty": "综合",
+      "prompt": "继续周六的 StudentRecord 与 GradeBook，实现 find、update_score、remove、average、report。必须处理空成绩册、重复学号、不存在学号、非法分数和实例隔离；非法分数不得改变旧值。保存为 oop_gradebook.py 并本地运行。",
+      "starter": "class GradeBook:\n    def __init__(self):\n        self._records = {}\n\n    def find(self, student_id):\n        # TODO\n        pass\n\n    def update_score(self, student_id, score):\n        # TODO\n        pass\n\n    def remove(self, student_id):\n        # TODO\n        pass\n",
+      "answer": "class StudentRecord:\n    def __init__(self, student_id, name, score):\n        student_id = student_id.strip()\n        name = name.strip()\n        if not student_id or not name:\n            raise ValueError(\"id and name are required\")\n        self.student_id = student_id\n        self.name = name\n        self.set_score(score)\n\n    def set_score(self, score):\n        if isinstance(score, bool) or not isinstance(score, int) or not 0 <= score <= 100:\n            raise ValueError(\"score must be an integer from 0 to 100\")\n        self.score = score\n\n    @classmethod\n    def from_csv_row(cls, row):\n        parts = [part.strip() for part in row.split(\",\")]\n        if len(parts) != 3:\n            raise ValueError(\"row must contain id,name,score\")\n        return cls(parts[0], parts[1], int(parts[2]))\n\n    def __str__(self):\n        return f\"{self.student_id} | {self.name} | {self.score}\"\n\n\nclass GradeBook:\n    def __init__(self):\n        self._records = {}\n\n    def add(self, record):\n        if record.student_id in self._records:\n            return False\n        self._records[record.student_id] = record\n        return True\n\n    def find(self, student_id):\n        return self._records.get(student_id.strip())\n\n    def update_score(self, student_id, score):\n        record = self.find(student_id)\n        if record is None:\n            return False\n        record.set_score(score)\n        return True\n\n    def remove(self, student_id):\n        return self._records.pop(student_id.strip(), None) is not None\n\n    def average(self):\n        if not self._records:\n            return None\n        return sum(record.score for record in self._records.values()) / len(self._records)\n\n    def report(self):\n        if not self._records:\n            return \"暂无记录\"\n        lines = [str(self._records[key]) for key in sorted(self._records)]\n        lines.append(f\"平均分：{self.average():.1f}\")\n        return \"\\n\".join(lines)\n\n\ndef run_checks():\n    book = GradeBook()\n    assert book.average() is None\n    assert book.report() == \"暂无记录\"\n    assert book.add(StudentRecord.from_csv_row(\"S02, Bo, 80\"))\n    assert book.add(StudentRecord(\"S01\", \"Amy\", 100))\n    assert not book.add(StudentRecord(\"S01\", \"Other\", 60))\n    assert book.find(\"S02\").name == \"Bo\"\n    assert book.find(\"S99\") is None\n    assert book.update_score(\"S02\", 90)\n    assert not book.update_score(\"S99\", 70)\n    try:\n        book.update_score(\"S02\", 101)\n    except ValueError:\n        pass\n    else:\n        raise AssertionError(\"invalid score accepted\")\n    assert book.find(\"S02\").score == 90\n    assert book.remove(\"S01\")\n    assert not book.remove(\"S01\")\n    assert book.average() == 90\n    assert book.report() == \"S02 | Bo | 90\\n平均分：90.0\"\n    other = GradeBook()\n    assert other.report() == \"暂无记录\"\n    for bad in (\"S03,Cat\", \"S03,Cat,101\"):\n        try:\n            StudentRecord.from_csv_row(bad)\n        except (ValueError, TypeError):\n            pass\n        else:\n            raise AssertionError(\"invalid row accepted\")\n\n\nif __name__ == \"__main__\":\n    run_checks()\n    demo = GradeBook()\n    demo.add(StudentRecord(\"S02\", \"Bo\", 90))\n    print(demo.report())\n    print(\"oop-gradebook Sunday checks: OK\")",
+      "explanation": "先用 get 处理查找未命中，再用 pop(key, None) 删除；分数先验证再赋值。",
+      "hint": "不要把 records 设为类属性。",
+      "sourceIndex": 1,
+      "attribution": "依据 Python 官方类与字典文档编写的原创综合题",
+      "language": "python",
+      "tests": [
+        {
+          "input": "S01/Amy/100; S02/Bo/80; update S02 to 90; remove S01",
+          "output": "S02 | Bo | 90\n平均分：90.0\noop-gradebook Sunday checks: OK"
+        },
+        {
+          "input": "empty book; missing id; score 101; second GradeBook",
+          "output": "S02 | Bo | 90\n平均分：90.0\noop-gradebook Sunday checks: OK"
+        }
+      ]
+    }
+  ]
+}
