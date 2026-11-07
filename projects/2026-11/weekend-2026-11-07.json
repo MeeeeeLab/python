@@ -3,7 +3,7 @@
   "projectId": "weekend-2026-11-07",
   "track": "python",
   "title": "面向对象成绩册重构",
-  "goal": "周六完成记录模型、容器、重复校验、平均值和稳定展示；周日继续同一项目。",
+  "goal": "周六完成记录模型、容器、重复校验和平均值；周日继续同一项目，补查找、修改、删除、报告与边界验收。",
   "prerequisites": [
     "本周类与对象笔记",
     "字典",
@@ -12,11 +12,13 @@
   "filename": "oop_gradebook.py",
   "runCommand": "python3 oop_gradebook.py",
   "starter": "# 按步骤补全最小类和自检\n",
-  "solution": "class StudentRecord:\n    def __init__(self, student_id, name, score):\n        student_id, name = student_id.strip(), name.strip()\n        if not student_id or not name or isinstance(score, bool) or not isinstance(score, int) or not 0 <= score <= 100:\n            raise ValueError(\"invalid student record\")\n        self.student_id, self.name, self.score = student_id, name, score\n\n    @classmethod\n    def from_csv_row(cls, row):\n        parts = [part.strip() for part in row.split(\",\")]\n        if len(parts) != 3:\n            raise ValueError(\"row must contain id,name,score\")\n        return cls(parts[0], parts[1], int(parts[2]))\n\n    def __str__(self):\n        return f\"{self.student_id} | {self.name} | {self.score}\"\n\n\nclass GradeBook:\n    def __init__(self):\n        self._records = {}\n\n    def add(self, record):\n        if record.student_id in self._records:\n            return False\n        self._records[record.student_id] = record\n        return True\n\n    def average(self):\n        return None if not self._records else sum(r.score for r in self._records.values()) / len(self._records)\n\n    def lines(self):\n        return [str(self._records[key]) for key in sorted(self._records)]\n\n\ndef run_checks():\n    book = GradeBook()\n    assert book.average() is None and book.lines() == []\n    assert book.add(StudentRecord.from_csv_row(\"S02, Bo, 80\"))\n    assert book.add(StudentRecord(\"S01\", \"Amy\", 100))\n    assert not book.add(StudentRecord(\"S01\", \"Other\", 60))\n    assert book.average() == 90\n    assert book.lines() == [\"S01 | Amy | 100\", \"S02 | Bo | 80\"]\n    other = GradeBook()\n    assert other.lines() == []\n    for bad in (\"S03,Cat\", \"S03,Cat,101\"):\n        try:\n            StudentRecord.from_csv_row(bad)\n        except ValueError:\n            pass\n        else:\n            raise AssertionError(\"invalid row accepted\")\n\n\nif __name__ == \"__main__\":\n    run_checks()\n    print(\"oop-gradebook checks: OK\")\n",
+  "solution": "class StudentRecord:\n    def __init__(self, student_id, name, score):\n        student_id = student_id.strip()\n        name = name.strip()\n        if not student_id or not name:\n            raise ValueError(\"id and name are required\")\n        self.student_id = student_id\n        self.name = name\n        self.set_score(score)\n\n    def set_score(self, score):\n        if isinstance(score, bool) or not isinstance(score, int) or not 0 <= score <= 100:\n            raise ValueError(\"score must be an integer from 0 to 100\")\n        self.score = score\n\n    @classmethod\n    def from_csv_row(cls, row):\n        parts = [part.strip() for part in row.split(\",\")]\n        if len(parts) != 3:\n            raise ValueError(\"row must contain id,name,score\")\n        return cls(parts[0], parts[1], int(parts[2]))\n\n    def __str__(self):\n        return f\"{self.student_id} | {self.name} | {self.score}\"\n\n\nclass GradeBook:\n    def __init__(self):\n        self._records = {}\n\n    def add(self, record):\n        if record.student_id in self._records:\n            return False\n        self._records[record.student_id] = record\n        return True\n\n    def find(self, student_id):\n        return self._records.get(student_id.strip())\n\n    def update_score(self, student_id, score):\n        record = self.find(student_id)\n        if record is None:\n            return False\n        record.set_score(score)\n        return True\n\n    def remove(self, student_id):\n        return self._records.pop(student_id.strip(), None) is not None\n\n    def average(self):\n        if not self._records:\n            return None\n        return sum(record.score for record in self._records.values()) / len(self._records)\n\n    def report(self):\n        if not self._records:\n            return \"暂无记录\"\n        lines = [str(self._records[key]) for key in sorted(self._records)]\n        lines.append(f\"平均分：{self.average():.1f}\")\n        return \"\\n\".join(lines)\n\n\ndef run_checks():\n    book = GradeBook()\n    assert book.average() is None\n    assert book.report() == \"暂无记录\"\n    assert book.add(StudentRecord.from_csv_row(\"S02, Bo, 80\"))\n    assert book.add(StudentRecord(\"S01\", \"Amy\", 100))\n    assert not book.add(StudentRecord(\"S01\", \"Other\", 60))\n    assert book.find(\"S02\").name == \"Bo\"\n    assert book.find(\"S99\") is None\n    assert book.update_score(\"S02\", 90)\n    assert not book.update_score(\"S99\", 70)\n    try:\n        book.update_score(\"S02\", 101)\n    except ValueError:\n        pass\n    else:\n        raise AssertionError(\"invalid score accepted\")\n    assert book.find(\"S02\").score == 90\n    assert book.remove(\"S01\")\n    assert not book.remove(\"S01\")\n    assert book.average() == 90\n    assert book.report() == \"S02 | Bo | 90\\n平均分：90.0\"\n    other = GradeBook()\n    assert other.report() == \"暂无记录\"\n    for bad in (\"S03,Cat\", \"S03,Cat,101\"):\n        try:\n            StudentRecord.from_csv_row(bad)\n        except (ValueError, TypeError):\n            pass\n        else:\n            raise AssertionError(\"invalid row accepted\")\n\n\nif __name__ == \"__main__\":\n    run_checks()\n    demo = GradeBook()\n    demo.add(StudentRecord(\"S02\", \"Bo\", 90))\n    print(demo.report())\n    print(\"oop-gradebook Sunday checks: OK\")",
   "solutionExplanation": [
     "只使用标准库和最小数据模型。",
     "先处理正常流程，再覆盖空、重复或首尾边界。",
-    "运行一个可重复的 assert/check 自检。"
+    "运行一个可重复的 assert/check 自检。",
+    "周日新增 find、update_score、remove 和 report，继续复用原有记录类与字典。",
+    "修改成绩先校验再赋值；删除用 pop(key, None) 安全处理未命中。"
   ],
   "steps": [
     {
@@ -52,22 +54,84 @@
         "边界测试",
         "职责"
       ]
+    },
+    {
+      "id": "sunday-find",
+      "day": "2026-11-08",
+      "title": "按学号查找",
+      "instruction": "实现 find，学号不存在时返回 None。",
+      "hint": "使用字典 get。",
+      "knowledge": [
+        "实例方法",
+        "dict.get"
+      ]
+    },
+    {
+      "id": "sunday-update",
+      "day": "2026-11-08",
+      "title": "安全修改成绩",
+      "instruction": "实现 update_score，先验证新分数再修改原记录。",
+      "hint": "校验失败时原值不能变化。",
+      "knowledge": [
+        "方法复用",
+        "输入校验"
+      ]
+    },
+    {
+      "id": "sunday-remove",
+      "day": "2026-11-08",
+      "title": "删除与未命中",
+      "instruction": "实现 remove，删除成功返回 True，未找到返回 False。",
+      "hint": "使用 pop(key, None)。",
+      "knowledge": [
+        "dict.pop",
+        "返回值"
+      ]
+    },
+    {
+      "id": "sunday-report",
+      "day": "2026-11-08",
+      "title": "稳定成绩报告",
+      "instruction": "空册显示暂无记录；非空按学号排序并输出平均分。",
+      "hint": "先处理空，再遍历记录。",
+      "knowledge": [
+        "字典遍历",
+        "排序与格式化"
+      ]
+    },
+    {
+      "id": "sunday-checks",
+      "day": "2026-11-08",
+      "title": "周日综合自检",
+      "instruction": "从空册开始验证重复、缺失、非法分数、删除和实例隔离。",
+      "hint": "非法更新后再读一次原分数。",
+      "knowledge": [
+        "边界测试",
+        "独立实现验收"
+      ]
     }
   ],
   "tests": [
     {
       "id": "t1",
-      "label": "正常两条记录",
-      "input": "S01/100,S02/80",
-      "output": "oop-gradebook checks: OK",
-      "purpose": "验证添加统计展示"
+      "label": "正常记录更新与删除",
+      "input": "S01/Amy/100; S02/Bo/80; update S02 to 90; remove S01",
+      "output": "S02 | Bo | 90\n平均分：90.0\noop-gradebook Sunday checks: OK",
+      "purpose": "验证查找、修改、删除与报告"
     },
     {
       "id": "t2",
-      "label": "边界",
-      "input": "empty/duplicate/bad row",
-      "output": "oop-gradebook checks: OK",
-      "purpose": "验证项目边界"
+      "label": "空、未命中与非法分数",
+      "input": "empty book; missing id; score 101; second GradeBook",
+      "output": "S02 | Bo | 90\n平均分：90.0\noop-gradebook Sunday checks: OK",
+      "purpose": "验证边界与实例隔离"
+    },
+    {
+      "id": "t3",
+      "label": "修改失败不污染旧值",
+      "input": "S02=90; attempt update to 101",
+      "output": "oop-gradebook Sunday checks: OK",
+      "purpose": "验证先校验再赋值"
     }
   ],
   "recall": [
@@ -75,6 +139,16 @@
       "id": "responsibility",
       "question": "为什么拆成StudentRecord和GradeBook？",
       "answer": "一类维护单条记录有效性，一类管理记录集合与统计。"
+    },
+    {
+      "id": "sunday-pop",
+      "question": "为什么 remove 用 pop(student_id, None)，而不是直接 records[student_id]？",
+      "answer": "pop 可以删除并返回值；传入 None 后，未命中不会抛 KeyError。"
+    },
+    {
+      "id": "sunday-validation",
+      "question": "非法分数为什么必须在赋给 record.score 之前验证？",
+      "answer": "先验证可保证失败时原成绩不变，维护记录有效性。"
     }
   ],
   "sources": [
@@ -92,6 +166,11 @@
       "title": "CS50P：Object-Oriented Programming",
       "url": "https://cs50.harvard.edu/python/notes/8/",
       "attribution": "2026-11-07 实际核对，项目为原创教学练习"
+    },
+    {
+      "title": "Python 3.13 官方文档：Mapping Types — dict",
+      "url": "https://docs.python.org/3.13/library/stdtypes.html#mapping-types-dict",
+      "attribution": "2026-11-08 实际阅读；补充 get 与 pop 的语义，项目为原创教学练习"
     }
   ]
 }
