@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 1,
+  "projectId": "daily-2026-11-09",
+  "track": "python",
+  "title": "受控修改学生成绩",
+  "goal": "用 property 集中约束成绩读取与修改，避免无效分数进入对象。",
+  "prerequisites": [
+    "类与对象",
+    "实例属性",
+    "ValueError"
+  ],
+  "filename": "property_record.py",
+  "runCommand": "python3 property_record.py",
+  "starter": "class StudentRecord:\n    @property\n    def score(self):\n        pass\n\n    @score.setter\n    def score(self, value):\n        pass\n",
+  "solution": "class StudentRecord:\n    def __init__(self, student_id, name, score):\n        student_id, name = student_id.strip(), name.strip()\n        if not student_id or not name:\n            raise ValueError(\"id and name are required\")\n        self.student_id = student_id\n        self.name = name\n        self.score = score\n\n    @property\n    def score(self):\n        return self._score\n\n    @score.setter\n    def score(self, value):\n        if isinstance(value, bool) or not isinstance(value, int) or not 0 <= value <= 100:\n            raise ValueError(\"score must be an integer from 0 to 100\")\n        self._score = value\n\n    def __str__(self):\n        return f\"{self.student_id} | {self.name} | {self.score}\"\n\n\ndef run_checks():\n    student = StudentRecord(\" S01 \", \" Amy \", 95)\n    assert student.score == 95\n    student.score = 88\n    assert str(student) == \"S01 | Amy | 88\"\n    for bad_score in (-1, 101, True, 88.5):\n        try:\n            student.score = bad_score\n        except ValueError:\n            pass\n        else:\n            raise AssertionError(f\"invalid score accepted: {bad_score}\")\n    assert student.score == 88\n\n\nif __name__ == \"__main__\":\n    run_checks()\n    print(\"property checks: OK\")\n",
+  "solutionExplanation": [
+    "只使用标准库和一个清楚的数据模型。",
+    "先统一正常路径，再覆盖失败后状态不被破坏。",
+    "保留一个可重复运行的最小自检。"
+  ],
+  "steps": [
+    {
+      "id": "getter",
+      "day": "2026-11-09",
+      "title": "建立读取入口",
+      "instruction": "getter返回内部_score。",
+      "hint": "不要返回self.score。",
+      "knowledge": [
+        "property",
+        "getter"
+      ]
+    },
+    {
+      "id": "setter",
+      "day": "2026-11-09",
+      "title": "统一修改校验",
+      "instruction": "拒绝bool、非整数与越界分数。",
+      "hint": "验证后再赋值。",
+      "knowledge": [
+        "setter",
+        "ValueError"
+      ]
+    },
+    {
+      "id": "checks",
+      "day": "2026-11-09",
+      "title": "验证失败不改旧值",
+      "instruction": "合法修改后连续尝试非法值。",
+      "hint": "最后分数仍为88。",
+      "knowledge": [
+        "边界测试",
+        "对象不变量"
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "id": "t1",
+      "label": "正常读取与修改",
+      "input": "95 -> 88",
+      "output": "property checks: OK",
+      "purpose": "验证getter/setter"
+    },
+    {
+      "id": "t2",
+      "label": "非法分数",
+      "input": "-1,101,True,88.5",
+      "output": "property checks: OK",
+      "purpose": "验证拒绝并保留旧状态"
+    }
+  ],
+  "recall": [
+    {
+      "id": "reuse",
+      "question": "构造器为何也使用self.score=score？",
+      "answer": "构造和后续修改共用同一套校验，避免规则分叉。"
+    }
+  ],
+  "sources": [
+    {
+      "title": "Python 官方：property",
+      "url": "https://docs.python.org/3/library/functions.html#property",
+      "attribution": "2026-11-09 实际核对，项目为原创教学练习"
+    },
+    {
+      "title": "Python 官方教程：Classes",
+      "url": "https://docs.python.org/3/tutorial/classes.html",
+      "attribution": "2026-11-09 实际核对，项目为原创教学练习"
+    },
+    {
+      "title": "CS50P：Properties",
+      "url": "https://cs50.harvard.edu/python/notes/8/#properties",
+      "attribution": "2026-11-09 实际核对，项目为原创教学练习"
+    }
+  ]
+}
