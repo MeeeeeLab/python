@@ -186,6 +186,12 @@
       "topic": "周末项目成绩册查询修改删除与报告",
       "path": "questions/2026-11/2026-11-08_周末项目成绩册查询修改删除与报告.json",
       "count": 5
+    },
+    {
+      "date": "2026-11-09",
+      "topic": "属性访问与property入门",
+      "path": "questions/2026-11/2026-11-09_属性访问与property入门.json",
+      "count": 5
     }
   ]
 }
