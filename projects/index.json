@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-11-08",
+  "updatedAt": "2026-11-09",
   "projects": [
     {
       "id": "weekend-2026-10-10",
@@ -628,7 +628,7 @@
       "endDate": "2026-11-08",
       "kind": "weekend",
       "title": "面向对象成绩册重构",
-      "description": "周六完成面向对象成绩册核心；周日继续同一项目，补查找、修改、删除、报告和边界验收。",
+      "description": "Python 周末完成面向对象成绩册查询、修改、删除与报告；Java 周末完成浏览历史记录器和双链表章节验收。",
       "concepts": [
         "类与对象",
         "classmethod",
@@ -647,6 +647,34 @@
       "javaPath": "projects/2026-11/weekend-2026-11-07.json",
       "guidePath": "projects/2026-11/weekend-2026-11-07.md",
       "javaGuidePath": "projects/2026-11/weekend-2026-11-07.md",
+      "ready": true
+    },
+    {
+      "id": "daily-2026-11-09",
+      "startDate": "2026-11-09",
+      "endDate": "2026-11-09",
+      "kind": "daily",
+      "title": "受控修改学生成绩",
+      "description": "Python 用 property 统一成绩校验；Java 用 Deque 完成 LIFO 动作撤销短练习。",
+      "concepts": [
+        "property",
+        "getter",
+        "setter",
+        "对象状态校验"
+      ],
+      "javaConcepts": [
+        "栈",
+        "LIFO",
+        "push",
+        "pop/poll",
+        "peek"
+      ],
+      "minutes": 50,
+      "javaMinutes": 25,
+      "pythonPath": "projects/2026-11/daily-2026-11-09.json",
+      "javaPath": "projects/2026-11/daily-2026-11-09.json",
+      "guidePath": "projects/2026-11/daily-2026-11-09.md",
+      "javaGuidePath": "projects/2026-11/daily-2026-11-09.md",
       "ready": true
     }
   ]
