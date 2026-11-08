@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-09",
+  "topic": "属性访问与property入门",
+  "stage": "主线延伸：类与对象",
+  "estimatedMinutes": 25,
+  "notePath": "notes/2026-11/2026-11-09_属性访问与property入门.md",
+  "collectedAt": "2026-11-09",
+  "sources": [
+    {
+      "title": "Python 官方：property",
+      "url": "https://docs.python.org/3/library/functions.html#property",
+      "kind": "Python 官方标准库"
+    },
+    {
+      "title": "Python 官方教程：Classes",
+      "url": "https://docs.python.org/3/tutorial/classes.html",
+      "kind": "Python 官方教程"
+    },
+    {
+      "title": "CS50P：Properties",
+      "url": "https://cs50.harvard.edu/python/notes/8/#properties",
+      "kind": "Harvard 课程"
+    }
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "type": "mcq",
+      "title": "property 的作用",
+      "difficulty": "基础",
+      "prompt": "在成绩对象中使用 property 的主要目的是什么？",
+      "answer": 1,
+      "explanation": "外部仍像访问属性一样读写，但赋值会经过统一校验。",
+      "hint": "兼顾简单接口与状态有效性。",
+      "sourceIndex": 0,
+      "attribution": "依据 2026-11-09 实际阅读的官方/课程资料原创，非官方原题",
+      "options": [
+        "自动保存CSV",
+        "让属性读写经过方法控制",
+        "创建多个实例",
+        "把整数转成字符串"
+      ]
+    },
+    {
+      "id": "q2",
+      "type": "mcq",
+      "title": "getter 的返回值",
+      "difficulty": "基础",
+      "prompt": "score getter 应返回哪个值以避免递归？",
+      "answer": 2,
+      "explanation": "返回 self.score 会再次触发 getter，应返回底层 self._score。",
+      "hint": "读取内部存储字段。",
+      "sourceIndex": 0,
+      "attribution": "依据 2026-11-09 实际阅读的官方/课程资料原创，非官方原题",
+      "options": [
+        "score",
+        "StudentRecord.score",
+        "self._score",
+        "self.score"
+      ]
+    },
+    {
+      "id": "q3",
+      "type": "mcq",
+      "title": "复用校验",
+      "difficulty": "基础",
+      "prompt": "__init__ 中写 self.score = score 的好处是什么？",
+      "answer": 3,
+      "explanation": "构造与后续修改使用同一个 setter 规则。",
+      "hint": "不要维护两份分数校验。",
+      "sourceIndex": 2,
+      "attribution": "依据 2026-11-09 实际阅读的官方/课程资料原创，非官方原题",
+      "options": [
+        "跳过setter",
+        "自动创建classmethod",
+        "把score变成类属性",
+        "复用setter校验"
+      ]
+    },
+    {
+      "id": "q4",
+      "type": "short",
+      "title": "非法修改后的状态",
+      "difficulty": "基础",
+      "prompt": "对象当前 score 为88，尝试设置101并抛出 ValueError；若先校验后赋值，之后读取 score 的精确值是什么？",
+      "answer": "88",
+      "explanation": "非法值没有写入 _score，原值保留。",
+      "hint": "失败不应破坏旧状态。",
+      "sourceIndex": 1,
+      "attribution": "依据 2026-11-09 实际阅读的官方/课程资料原创，非官方原题"
+    },
+    {
+      "id": "q5",
+      "type": "code",
+      "title": "受控成绩属性",
+      "difficulty": "综合",
+      "prompt": "实现 score property，允许0到100的整数，拒绝bool、浮点数和越界值。",
+      "answer": "class StudentRecord:\n    def __init__(self, student_id, name, score):\n        student_id, name = student_id.strip(), name.strip()\n        if not student_id or not name:\n            raise ValueError(\"id and name are required\")\n        self.student_id = student_id\n        self.name = name\n        self.score = score\n\n    @property\n    def score(self):\n        return self._score\n\n    @score.setter\n    def score(self, value):\n        if isinstance(value, bool) or not isinstance(value, int) or not 0 <= value <= 100:\n            raise ValueError(\"score must be an integer from 0 to 100\")\n        self._score = value\n\n    def __str__(self):\n        return f\"{self.student_id} | {self.name} | {self.score}\"\n\n\ndef run_checks():\n    student = StudentRecord(\" S01 \", \" Amy \", 95)\n    assert student.score == 95\n    student.score = 88\n    assert str(student) == \"S01 | Amy | 88\"\n    for bad_score in (-1, 101, True, 88.5):\n        try:\n            student.score = bad_score\n        except ValueError:\n            pass\n        else:\n            raise AssertionError(f\"invalid score accepted: {bad_score}\")\n    assert student.score == 88\n\n\nif __name__ == \"__main__\":\n    run_checks()\n    print(\"property checks: OK\")\n",
+      "explanation": "getter读取_score，setter统一校验后赋值。",
+      "hint": "setter最后才写 self._score。",
+      "sourceIndex": 0,
+      "attribution": "依据 2026-11-09 实际阅读的官方/课程资料原创，非官方原题",
+      "language": "python",
+      "starter": "class StudentRecord:\n    @property\n    def score(self):\n        pass\n\n    @score.setter\n    def score(self, value):\n        pass\n",
+      "tests": [
+        {
+          "input": "95 then 88",
+          "output": "property checks: OK"
+        },
+        {
+          "input": "-1,101,True,88.5",
+          "output": "property checks: OK"
+        }
+      ]
+    }
+  ]
+}
