@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-11-09",
+  "updatedAt": "2026-11-11",
   "projects": [
     {
       "id": "weekend-2026-10-10",
@@ -675,6 +675,59 @@
       "javaPath": "projects/2026-11/daily-2026-11-09.json",
       "guidePath": "projects/2026-11/daily-2026-11-09.md",
       "javaGuidePath": "projects/2026-11/daily-2026-11-09.md",
+      "ready": true
+    },
+    {
+      "id": "daily-2026-11-10",
+      "startDate": "2026-11-10",
+      "endDate": "2026-11-10",
+      "kind": "daily",
+      "title": "自动计算成绩等级",
+      "description": "Python 用只读 property 派生等级；Java 用数组与 size 完成固定容量栈。",
+      "concepts": [
+        "只读property",
+        "派生属性",
+        "等级边界"
+      ],
+      "javaConcepts": [
+        "数组栈",
+        "size",
+        "溢出与下溢",
+        "O(1)"
+      ],
+      "minutes": 50,
+      "javaMinutes": 25,
+      "pythonPath": "projects/2026-11/daily-2026-11-10.json",
+      "javaPath": "projects/2026-11/daily-2026-11-10.json",
+      "guidePath": "projects/2026-11/daily-2026-11-10.md",
+      "javaGuidePath": "projects/2026-11/daily-2026-11-10.md",
+      "ready": true
+    },
+    {
+      "id": "daily-2026-11-11",
+      "startDate": "2026-11-11",
+      "endDate": "2026-11-11",
+      "kind": "daily",
+      "title": "成绩对象排名查询",
+      "description": "Python 用组合排序键查询对象集合；Java 用单链表头实现链表栈。",
+      "concepts": [
+        "对象集合",
+        "sorted",
+        "key",
+        "组合排序"
+      ],
+      "javaConcepts": [
+        "链表栈",
+        "top",
+        "push/pop/peek",
+        "O(1)"
+      ],
+      "minutes": 50,
+      "javaMinutes": 25,
+      "pythonPath": "projects/2026-11/daily-2026-11-11.json",
+      "javaPath": "projects/2026-11/daily-2026-11-11.json",
+      "guidePath": "projects/2026-11/daily-2026-11-11.md",
+      "javaGuidePath": "projects/2026-11/daily-2026-11-11.md",
       "ready": true
     }
   ]
