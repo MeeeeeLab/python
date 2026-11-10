@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-11",
+  "topic": "对象集合与排序查询",
+  "stage": "主线延伸：类与对象",
+  "estimatedMinutes": 25,
+  "notePath": "notes/2026-11/2026-11-11_对象集合与排序查询.md",
+  "collectedAt": "2026-11-11",
+  "sources": [
+    {
+      "title": "Python 官方：Sorting Techniques",
+      "url": "https://docs.python.org/3/howto/sorting.html",
+      "kind": "Python 官方指南"
+    },
+    {
+      "title": "Python 官方：sorted",
+      "url": "https://docs.python.org/3/library/functions.html#sorted",
+      "kind": "Python 官方标准库"
+    },
+    {
+      "title": "CS50P：Classes",
+      "url": "https://cs50.harvard.edu/python/notes/8/#classes",
+      "kind": "Harvard 课程"
+    }
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "type": "mcq",
+      "title": "sorted 的结果",
+      "difficulty": "基础",
+      "prompt": "sorted(iterable, key=...) 的返回值是什么？",
+      "answer": 1,
+      "explanation": "sorted创建新的已排序列表。",
+      "hint": "它不要求原对象是列表。",
+      "sourceIndex": 1,
+      "attribution": "依据 2026-11-11 实际阅读的官方/课程资料原创，非官方原题",
+      "options": [
+        "原容器本身",
+        "新的列表",
+        "布尔值",
+        "生成器"
+      ]
+    },
+    {
+      "id": "q2",
+      "type": "mcq",
+      "title": "降序分数键",
+      "difficulty": "基础",
+      "prompt": "哪个key能让高分优先并在同分时按学号升序？",
+      "answer": 2,
+      "explanation": "负分数把高分排前，第二项学号解决同分。",
+      "hint": "元组按顺序比较。",
+      "sourceIndex": 0,
+      "attribution": "依据 2026-11-11 实际阅读的官方/课程资料原创，非官方原题",
+      "options": [
+        "lambda r:r.student_id",
+        "lambda r:r.score",
+        "lambda r:(-r.score,r.student_id)",
+        "lambda r:(r.score,-r.student_id)"
+      ]
+    },
+    {
+      "id": "q3",
+      "type": "mcq",
+      "title": "查询不修改原集合",
+      "difficulty": "基础",
+      "prompt": "为何 ranked 使用 sorted 而不直接改内部记录？",
+      "answer": 0,
+      "explanation": "查询返回新列表，避免产生隐藏副作用。",
+      "hint": "只读操作不应重排内部数据。",
+      "sourceIndex": 0,
+      "attribution": "依据 2026-11-11 实际阅读的官方/课程资料原创，非官方原题",
+      "options": [
+        "保留原集合顺序",
+        "让对象自动校验",
+        "避免创建列表",
+        "把字典变成集合"
+      ]
+    },
+    {
+      "id": "q4",
+      "type": "short",
+      "title": "排名结果",
+      "difficulty": "基础",
+      "prompt": "S03=88、S02=95、S01=95，按分数降序再按学号升序，学号顺序精确是什么？",
+      "answer": "S01,S02,S03",
+      "explanation": "两个95分先按学号S01、S02排列，88分最后。",
+      "hint": "先主键后次键。",
+      "sourceIndex": 0,
+      "attribution": "依据 2026-11-11 实际阅读的官方/课程资料原创，非官方原题"
+    },
+    {
+      "id": "q5",
+      "type": "code",
+      "title": "对象排名查询",
+      "difficulty": "综合",
+      "prompt": "实现成绩册添加和排名，覆盖空集合、重复学号、同分与原顺序不变。",
+      "answer": "class StudentRecord:\n    def __init__(self, student_id, name, score):\n        student_id, name = student_id.strip(), name.strip()\n        if not student_id or not name:\n            raise ValueError(\"id and name are required\")\n        if isinstance(score, bool) or not isinstance(score, int) or not 0 <= score <= 100:\n            raise ValueError(\"invalid score\")\n        self.student_id, self.name, self.score = student_id, name, score\n\n    def __str__(self):\n        return f\"{self.student_id} | {self.name} | {self.score}\"\n\n\nclass GradeBook:\n    def __init__(self):\n        self._records = {}\n\n    def add(self, record):\n        if record.student_id in self._records:\n            return False\n        self._records[record.student_id] = record\n        return True\n\n    def ranked(self):\n        return sorted(\n            self._records.values(),\n            key=lambda record: (-record.score, record.student_id),\n        )\n\n\ndef run_checks():\n    book = GradeBook()\n    assert book.ranked() == []\n    assert book.add(StudentRecord(\"S03\", \"Cat\", 88))\n    assert book.add(StudentRecord(\"S02\", \"Bo\", 95))\n    assert book.add(StudentRecord(\"S01\", \"Amy\", 95))\n    assert not book.add(StudentRecord(\"S01\", \"Other\", 60))\n    assert [record.student_id for record in book.ranked()] == [\"S01\", \"S02\", \"S03\"]\n    assert list(book._records) == [\"S03\", \"S02\", \"S01\"]\n\n\nif __name__ == \"__main__\":\n    run_checks()\n    print(\"ranking checks: OK\")\n",
+      "explanation": "字典保存唯一记录，sorted配合元组key产生新排名列表。",
+      "hint": "key返回(-score, student_id)。",
+      "sourceIndex": 0,
+      "attribution": "依据 2026-11-11 实际阅读的官方/课程资料原创，非官方原题",
+      "language": "python",
+      "starter": "class GradeBook:\n    def ranked(self):\n        pass\n",
+      "tests": [
+        {
+          "input": "S03/88,S02/95,S01/95",
+          "output": "ranking checks: OK"
+        },
+        {
+          "input": "empty and duplicate",
+          "output": "ranking checks: OK"
+        }
+      ]
+    }
+  ]
+}
