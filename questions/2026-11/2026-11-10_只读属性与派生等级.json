@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-10",
+  "topic": "只读属性与派生等级",
+  "stage": "主线延伸：类与对象",
+  "estimatedMinutes": 25,
+  "notePath": "notes/2026-11/2026-11-10_只读属性与派生等级.md",
+  "collectedAt": "2026-11-11",
+  "sources": [
+    {
+      "title": "Python 官方：property",
+      "url": "https://docs.python.org/3/library/functions.html#property",
+      "kind": "Python 官方标准库"
+    },
+    {
+      "title": "Python 官方教程：Classes",
+      "url": "https://docs.python.org/3/tutorial/classes.html",
+      "kind": "Python 官方教程"
+    },
+    {
+      "title": "CS50P：Properties",
+      "url": "https://cs50.harvard.edu/python/notes/8/#properties",
+      "kind": "Harvard 课程"
+    }
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "type": "mcq",
+      "title": "派生属性",
+      "difficulty": "基础",
+      "prompt": "为什么 grade 更适合根据 score 计算而不是单独保存？",
+      "answer": 1,
+      "explanation": "只保存源数据可避免分数改变后等级过期。",
+      "hint": "减少重复状态。",
+      "sourceIndex": 0,
+      "attribution": "依据 2026-11-11 实际阅读的官方/课程资料原创，非官方原题",
+      "options": [
+        "节省一个类",
+        "避免两份状态不一致",
+        "让score变成字符串",
+        "自动排序"
+      ]
+    },
+    {
+      "id": "q2",
+      "type": "mcq",
+      "title": "只读 property",
+      "difficulty": "基础",
+      "prompt": "只定义 @property getter 而不定义 setter，外部直接给该属性赋值会怎样？",
+      "answer": 2,
+      "explanation": "没有setter时赋值会触发AttributeError。",
+      "hint": "可以读但不能直接写。",
+      "sourceIndex": 0,
+      "attribution": "依据 2026-11-11 实际阅读的官方/课程资料原创，非官方原题",
+      "options": [
+        "静默忽略",
+        "修改底层字段",
+        "抛出AttributeError",
+        "删除对象"
+      ]
+    },
+    {
+      "id": "q3",
+      "type": "mcq",
+      "title": "判断顺序",
+      "difficulty": "基础",
+      "prompt": "等级区间为何应先检查 score >= 90？",
+      "answer": 3,
+      "explanation": "从低阈值开始会提前匹配高分。",
+      "hint": "if命中后立即return。",
+      "sourceIndex": 2,
+      "attribution": "依据 2026-11-11 实际阅读的官方/课程资料原创，非官方原题",
+      "options": [
+        "Python只支持降序",
+        "为了修改score",
+        "为了创建setter",
+        "避免高分被较低区间提前返回"
+      ]
+    },
+    {
+      "id": "q4",
+      "type": "short",
+      "title": "边界等级",
+      "difficulty": "基础",
+      "prompt": "按90/80/70/60分界，score=79 的精确等级是什么？",
+      "answer": "C",
+      "explanation": "79低于80且不低于70。",
+      "hint": "检查区间。",
+      "sourceIndex": 1,
+      "attribution": "依据 2026-11-11 实际阅读的官方/课程资料原创，非官方原题"
+    },
+    {
+      "id": "q5",
+      "type": "code",
+      "title": "只读等级自检",
+      "difficulty": "综合",
+      "prompt": "实现可校验score和只读grade，覆盖等级边界与直接赋值失败。",
+      "answer": "class StudentRecord:\n    def __init__(self, student_id, score):\n        student_id = student_id.strip()\n        if not student_id:\n            raise ValueError(\"id is required\")\n        self.student_id = student_id\n        self.score = score\n\n    @property\n    def score(self):\n        return self._score\n\n    @score.setter\n    def score(self, value):\n        if isinstance(value, bool) or not isinstance(value, int) or not 0 <= value <= 100:\n            raise ValueError(\"score must be an integer from 0 to 100\")\n        self._score = value\n\n    @property\n    def grade(self):\n        if self.score >= 90:\n            return \"A\"\n        if self.score >= 80:\n            return \"B\"\n        if self.score >= 70:\n            return \"C\"\n        if self.score >= 60:\n            return \"D\"\n        return \"F\"\n\n\ndef run_checks():\n    student = StudentRecord(\" S01 \", 90)\n    assert student.grade == \"A\"\n    student.score = 59\n    assert student.grade == \"F\"\n    boundaries = {100: \"A\", 89: \"B\", 79: \"C\", 69: \"D\", 0: \"F\"}\n    for score, grade in boundaries.items():\n        student.score = score\n        assert student.grade == grade\n    try:\n        student.grade = \"A\"\n    except AttributeError:\n        pass\n    else:\n        raise AssertionError(\"read-only grade was changed\")\n\n\nif __name__ == \"__main__\":\n    run_checks()\n    print(\"grade checks: OK\")\n",
+      "explanation": "grade只读取当前score并动态计算，不保存第二份状态。",
+      "hint": "只为score提供setter。",
+      "sourceIndex": 0,
+      "attribution": "依据 2026-11-11 实际阅读的官方/课程资料原创，非官方原题",
+      "language": "python",
+      "starter": "class StudentRecord:\n    @property\n    def grade(self):\n        pass\n",
+      "tests": [
+        {
+          "input": "100,89,79,69,0",
+          "output": "grade checks: OK"
+        },
+        {
+          "input": "assign grade",
+          "output": "grade checks: OK"
+        }
+      ]
+    }
+  ]
+}
