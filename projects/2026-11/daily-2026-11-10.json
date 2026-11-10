@@ -1,0 +1,95 @@
+{
+  "schemaVersion": 1,
+  "projectId": "daily-2026-11-10",
+  "track": "python",
+  "title": "自动计算成绩等级",
+  "goal": "用只读 property 从当前分数派生等级，避免重复状态不一致。",
+  "prerequisites": [
+    "property",
+    "条件判断",
+    "ValueError"
+  ],
+  "filename": "readonly_grade.py",
+  "runCommand": "python3 readonly_grade.py",
+  "starter": "class StudentRecord:\n    @property\n    def grade(self):\n        pass\n",
+  "solution": "class StudentRecord:\n    def __init__(self, student_id, score):\n        student_id = student_id.strip()\n        if not student_id:\n            raise ValueError(\"id is required\")\n        self.student_id = student_id\n        self.score = score\n\n    @property\n    def score(self):\n        return self._score\n\n    @score.setter\n    def score(self, value):\n        if isinstance(value, bool) or not isinstance(value, int) or not 0 <= value <= 100:\n            raise ValueError(\"score must be an integer from 0 to 100\")\n        self._score = value\n\n    @property\n    def grade(self):\n        if self.score >= 90:\n            return \"A\"\n        if self.score >= 80:\n            return \"B\"\n        if self.score >= 70:\n            return \"C\"\n        if self.score >= 60:\n            return \"D\"\n        return \"F\"\n\n\ndef run_checks():\n    student = StudentRecord(\" S01 \", 90)\n    assert student.grade == \"A\"\n    student.score = 59\n    assert student.grade == \"F\"\n    boundaries = {100: \"A\", 89: \"B\", 79: \"C\", 69: \"D\", 0: \"F\"}\n    for score, grade in boundaries.items():\n        student.score = score\n        assert student.grade == grade\n    try:\n        student.grade = \"A\"\n    except AttributeError:\n        pass\n    else:\n        raise AssertionError(\"read-only grade was changed\")\n\n\nif __name__ == \"__main__\":\n    run_checks()\n    print(\"grade checks: OK\")\n",
+  "solutionExplanation": [
+    "只实现当天需要的最小模型。",
+    "所有索引或引用访问前先处理边界。",
+    "保留一个可重复运行的正常与边界自检。"
+  ],
+  "steps": [
+    {
+      "id": "score",
+      "day": "2026-11-10",
+      "title": "保留受控分数",
+      "instruction": "沿用score property。",
+      "hint": "构造也走setter。",
+      "knowledge": [
+        "property",
+        "校验"
+      ]
+    },
+    {
+      "id": "grade",
+      "day": "2026-11-10",
+      "title": "增加只读等级",
+      "instruction": "从高到低返回等级。",
+      "hint": "不添加setter。",
+      "knowledge": [
+        "派生属性",
+        "区间"
+      ]
+    },
+    {
+      "id": "checks",
+      "day": "2026-11-10",
+      "title": "检查边界",
+      "instruction": "覆盖等级分界和直接赋值失败。",
+      "hint": "grade随score变化。",
+      "knowledge": [
+        "边界测试"
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "id": "t1",
+      "label": "等级边界",
+      "input": "100,89,79,69,0",
+      "output": "grade checks: OK",
+      "purpose": "验证派生等级"
+    },
+    {
+      "id": "t2",
+      "label": "只读赋值",
+      "input": "grade=A",
+      "output": "grade checks: OK",
+      "purpose": "验证无setter"
+    }
+  ],
+  "recall": [
+    {
+      "id": "derived",
+      "question": "为何不保存grade字段？",
+      "answer": "grade可由score唯一计算，重复保存容易失去同步。"
+    }
+  ],
+  "sources": [
+    {
+      "title": "Python 官方：property",
+      "url": "https://docs.python.org/3/library/functions.html#property",
+      "attribution": "2026-11-11 实际核对，项目为原创教学练习"
+    },
+    {
+      "title": "Python 官方教程：Classes",
+      "url": "https://docs.python.org/3/tutorial/classes.html",
+      "attribution": "2026-11-11 实际核对，项目为原创教学练习"
+    },
+    {
+      "title": "CS50P：Properties",
+      "url": "https://cs50.harvard.edu/python/notes/8/#properties",
+      "attribution": "2026-11-11 实际核对，项目为原创教学练习"
+    }
+  ]
+}
