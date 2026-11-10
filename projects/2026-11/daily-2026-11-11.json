@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 1,
+  "projectId": "daily-2026-11-11",
+  "track": "python",
+  "title": "成绩对象排名查询",
+  "goal": "用排序键对对象集合进行确定、无副作用的排名查询。",
+  "prerequisites": [
+    "类与对象",
+    "字典",
+    "sorted/key"
+  ],
+  "filename": "object_ranking.py",
+  "runCommand": "python3 object_ranking.py",
+  "starter": "class GradeBook:\n    def ranked(self):\n        pass\n",
+  "solution": "class StudentRecord:\n    def __init__(self, student_id, name, score):\n        student_id, name = student_id.strip(), name.strip()\n        if not student_id or not name:\n            raise ValueError(\"id and name are required\")\n        if isinstance(score, bool) or not isinstance(score, int) or not 0 <= score <= 100:\n            raise ValueError(\"invalid score\")\n        self.student_id, self.name, self.score = student_id, name, score\n\n    def __str__(self):\n        return f\"{self.student_id} | {self.name} | {self.score}\"\n\n\nclass GradeBook:\n    def __init__(self):\n        self._records = {}\n\n    def add(self, record):\n        if record.student_id in self._records:\n            return False\n        self._records[record.student_id] = record\n        return True\n\n    def ranked(self):\n        return sorted(\n            self._records.values(),\n            key=lambda record: (-record.score, record.student_id),\n        )\n\n\ndef run_checks():\n    book = GradeBook()\n    assert book.ranked() == []\n    assert book.add(StudentRecord(\"S03\", \"Cat\", 88))\n    assert book.add(StudentRecord(\"S02\", \"Bo\", 95))\n    assert book.add(StudentRecord(\"S01\", \"Amy\", 95))\n    assert not book.add(StudentRecord(\"S01\", \"Other\", 60))\n    assert [record.student_id for record in book.ranked()] == [\"S01\", \"S02\", \"S03\"]\n    assert list(book._records) == [\"S03\", \"S02\", \"S01\"]\n\n\nif __name__ == \"__main__\":\n    run_checks()\n    print(\"ranking checks: OK\")\n",
+  "solutionExplanation": [
+    "只实现当天需要的最小模型。",
+    "所有索引或引用访问前先处理边界。",
+    "保留一个可重复运行的正常与边界自检。"
+  ],
+  "steps": [
+    {
+      "id": "collection",
+      "day": "2026-11-11",
+      "title": "保存唯一对象",
+      "instruction": "按学号存入字典并拒绝重复。",
+      "hint": "重复返回False。",
+      "knowledge": [
+        "字典",
+        "对象"
+      ]
+    },
+    {
+      "id": "ranking",
+      "day": "2026-11-11",
+      "title": "编写排序键",
+      "instruction": "分数降序、学号升序。",
+      "hint": "返回(-score,id)。",
+      "knowledge": [
+        "sorted",
+        "key"
+      ]
+    },
+    {
+      "id": "checks",
+      "day": "2026-11-11",
+      "title": "验证查询无副作用",
+      "instruction": "检查空、同分、重复和原顺序。",
+      "hint": "sorted返回新列表。",
+      "knowledge": [
+        "边界测试",
+        "只读查询"
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "id": "t1",
+      "label": "排名",
+      "input": "S03/88,S02/95,S01/95",
+      "output": "ranking checks: OK",
+      "purpose": "验证组合排序键"
+    },
+    {
+      "id": "t2",
+      "label": "空与重复",
+      "input": "empty/duplicate",
+      "output": "ranking checks: OK",
+      "purpose": "验证集合边界"
+    }
+  ],
+  "recall": [
+    {
+      "id": "key",
+      "question": "元组key为何能表达两个规则？",
+      "answer": "排序先比较第一项，第一项相等时再比较第二项。"
+    }
+  ],
+  "sources": [
+    {
+      "title": "Python 官方：Sorting Techniques",
+      "url": "https://docs.python.org/3/howto/sorting.html",
+      "attribution": "2026-11-11 实际核对，项目为原创教学练习"
+    },
+    {
+      "title": "Python 官方：sorted",
+      "url": "https://docs.python.org/3/library/functions.html#sorted",
+      "attribution": "2026-11-11 实际核对，项目为原创教学练习"
+    },
+    {
+      "title": "CS50P：Classes",
+      "url": "https://cs50.harvard.edu/python/notes/8/#classes",
+      "attribution": "2026-11-11 实际核对，项目为原创教学练习"
+    }
+  ]
+}
