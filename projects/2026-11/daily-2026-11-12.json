@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 1,
+  "projectId": "daily-2026-11-12",
+  "track": "python",
+  "title": "班级成绩分组统计",
+  "goal": "按班级查询对象集合并生成确定的统计结果。",
+  "prerequisites": [
+    "类与对象",
+    "列表与字典",
+    "边界校验"
+  ],
+  "filename": "group_statistics.py",
+  "runCommand": "python3 group_statistics.py",
+  "starter": "class GradeBook:\n    def summary_by_class(self):\n        pass\n",
+  "solution": "class StudentRecord:\n    def __init__(self, student_id, class_name, score):\n        student_id = student_id.strip()\n        class_name = class_name.strip()\n        if not student_id or not class_name:\n            raise ValueError(\"id and class are required\")\n        if isinstance(score, bool) or not isinstance(score, int) or not 0 <= score <= 100:\n            raise ValueError(\"invalid score\")\n        self.student_id = student_id\n        self.class_name = class_name\n        self.score = score\n\n\nclass GradeBook:\n    def __init__(self):\n        self._records = []\n\n    def add(self, record):\n        if any(item.student_id == record.student_id for item in self._records):\n            return False\n        self._records.append(record)\n        return True\n\n    def summary_by_class(self):\n        groups = {}\n        for record in self._records:\n            groups.setdefault(record.class_name, []).append(record.score)\n        return {\n            name: {\"count\": len(scores), \"average\": sum(scores) / len(scores)}\n            for name, scores in sorted(groups.items())\n        }\n\n\ndef run_checks():\n    book = GradeBook()\n    assert book.summary_by_class() == {}\n    assert book.add(StudentRecord(\"S01\", \"A\", 90))\n    assert book.add(StudentRecord(\"S02\", \"B\", 70))\n    assert book.add(StudentRecord(\"S03\", \"A\", 80))\n    assert not book.add(StudentRecord(\"S01\", \"A\", 60))\n    assert book.summary_by_class() == {\n        \"A\": {\"count\": 2, \"average\": 85.0},\n        \"B\": {\"count\": 1, \"average\": 70.0},\n    }\n\n\nif __name__ == \"__main__\":\n    run_checks()\n    print(\"group-statistics checks: OK\")\n",
+  "solutionExplanation": [
+    "只实现当天目标所需的最小模型。",
+    "正常流程与至少一个边界流程使用断言验证。",
+    "公开内容只提供学习材料，不记录个人完成状态。"
+  ],
+  "steps": [
+    {
+      "id": "model",
+      "day": "2026-11-12",
+      "title": "校验记录",
+      "instruction": "保存学号、班级和成绩。",
+      "hint": "拒绝空值和非法成绩。",
+      "knowledge": [
+        "对象",
+        "校验"
+      ]
+    },
+    {
+      "id": "group",
+      "day": "2026-11-12",
+      "title": "按班级分组",
+      "instruction": "遍历记录并收集每组分数。",
+      "hint": "setdefault。",
+      "knowledge": [
+        "字典",
+        "列表"
+      ]
+    },
+    {
+      "id": "summary",
+      "day": "2026-11-12",
+      "title": "计算统计",
+      "instruction": "输出count与average。",
+      "hint": "空成绩册返回{}。",
+      "knowledge": [
+        "sum",
+        "边界"
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "id": "t1",
+      "label": "正常分组",
+      "input": "A:90,80;B:70",
+      "output": "group-statistics checks: OK",
+      "purpose": "验证分组平均值"
+    },
+    {
+      "id": "t2",
+      "label": "空与重复",
+      "input": "empty, duplicate S01",
+      "output": "group-statistics checks: OK",
+      "purpose": "验证边界"
+    }
+  ],
+  "recall": [
+    {
+      "id": "separate",
+      "question": "为什么分组和计算拆成两步？",
+      "answer": "每一步职责单一，更容易核对原始分数和统计结果。"
+    }
+  ],
+  "sources": [
+    {
+      "title": "Python 官方：Classes",
+      "url": "https://docs.python.org/3/tutorial/classes.html",
+      "attribution": "2026-11-13 实际核对，项目为原创教学练习"
+    },
+    {
+      "title": "Python 官方：Data Structures",
+      "url": "https://docs.python.org/3/tutorial/datastructures.html",
+      "attribution": "2026-11-13 实际核对，项目为原创教学练习"
+    },
+    {
+      "title": "Python 官方：Built-in Functions",
+      "url": "https://docs.python.org/3/library/functions.html",
+      "attribution": "2026-11-13 实际核对，项目为原创教学练习"
+    }
+  ]
+}
