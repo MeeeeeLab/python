@@ -28,9 +28,9 @@
 
 工作日每天一个 Python 小项目；周六、周日合做一个综合项目。Java 数据结构作为同一场景的可选加练。笔记依旧每天更新，原练习网站继续可用；项目的代码、步骤与复盘按账号保存，个人记录不上传到公开仓库。
 
-今日项目：[成绩对象排名查询](projects/2026-11/daily-2026-11-11.md)（主线延伸安排；对象集合与组合排序键）。
+今日项目：[对象 CSV 备份恢复](projects/2026-11/daily-2026-11-13.md)（主线延伸安排；复用类、classmethod 与 CSV）。
 
-上一项目：[自动计算成绩等级](projects/2026-11/daily-2026-11-10.md)（主线延伸安排；历史项目 ID 保留）。
+上一项目：[班级成绩分组统计](projects/2026-11/daily-2026-11-12.md)（主线延伸安排；历史项目 ID 保留）。
 
 上个周末项目：[面向对象成绩册重构](projects/2026-11/weekend-2026-11-07.md)（11 月 7–8 日使用同一项目 ID；历史资料与记录保留）。
 
@@ -83,6 +83,8 @@
 | 2026-11-09 | [属性访问与 property 入门](notes/2026-11/2026-11-09_属性访问与property入门.md) | [打开每日练习](https://python-daily-lab.sillywood.chatgpt.site) · [题目数据](questions/2026-11/2026-11-09_属性访问与property入门.json) |
 | 2026-11-10 | [只读属性与派生等级](notes/2026-11/2026-11-10_只读属性与派生等级.md) | [打开每日练习](https://python-daily-lab.sillywood.chatgpt.site) · [题目数据](questions/2026-11/2026-11-10_只读属性与派生等级.json) |
 | 2026-11-11 | [对象集合与排序查询](notes/2026-11/2026-11-11_对象集合与排序查询.md) | [打开每日练习](https://python-daily-lab.sillywood.chatgpt.site) · [题目数据](questions/2026-11/2026-11-11_对象集合与排序查询.json) |
+| 2026-11-12 | [对象查询与分组统计](notes/2026-11/2026-11-12_对象查询与分组统计.md) | [打开每日练习](https://python-daily-lab.sillywood.chatgpt.site) · [题目数据](questions/2026-11/2026-11-12_对象查询与分组统计.json) |
+| 2026-11-13 | [对象与 CSV 往返](notes/2026-11/2026-11-13_对象与CSV往返.md) | [打开每日练习](https://python-daily-lab.sillywood.chatgpt.site) · [题目数据](questions/2026-11/2026-11-13_对象与CSV往返.json) |
 <!-- DAILY_NOTES_END -->
 
 ## ✅ 学习方法
