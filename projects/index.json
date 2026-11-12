@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-11-11",
+  "updatedAt": "2026-11-13",
   "projects": [
     {
       "id": "weekend-2026-10-10",
@@ -728,6 +728,60 @@
       "javaPath": "projects/2026-11/daily-2026-11-11.json",
       "guidePath": "projects/2026-11/daily-2026-11-11.md",
       "javaGuidePath": "projects/2026-11/daily-2026-11-11.md",
+      "ready": true
+    },
+    {
+      "id": "daily-2026-11-12",
+      "startDate": "2026-11-12",
+      "endDate": "2026-11-12",
+      "kind": "daily",
+      "title": "班级成绩分组统计",
+      "description": "Python 按班级查询并统计对象集合；Java 用栈完成括号匹配短练习。",
+      "concepts": [
+        "对象集合",
+        "字典分组",
+        "人数与平均值",
+        "边界测试"
+      ],
+      "javaConcepts": [
+        "栈应用",
+        "括号匹配",
+        "ArrayDeque",
+        "O(n)"
+      ],
+      "minutes": 50,
+      "javaMinutes": 25,
+      "pythonPath": "projects/2026-11/daily-2026-11-12.json",
+      "javaPath": "projects/2026-11/daily-2026-11-12.json",
+      "guidePath": "projects/2026-11/daily-2026-11-12.md",
+      "javaGuidePath": "projects/2026-11/daily-2026-11-12.md",
+      "ready": true
+    },
+    {
+      "id": "daily-2026-11-13",
+      "startDate": "2026-11-13",
+      "endDate": "2026-11-13",
+      "kind": "daily",
+      "title": "对象CSV备份与栈章节验收",
+      "description": "Python 完成对象与 CSV 的验证往返；Java 独立实现链表栈并完成章节验收。",
+      "concepts": [
+        "csv.DictReader",
+        "csv.DictWriter",
+        "classmethod",
+        "对象恢复"
+      ],
+      "javaConcepts": [
+        "链表栈",
+        "LIFO",
+        "括号匹配",
+        "章节验收"
+      ],
+      "minutes": 50,
+      "javaMinutes": 30,
+      "pythonPath": "projects/2026-11/daily-2026-11-13.json",
+      "javaPath": "projects/2026-11/daily-2026-11-13.json",
+      "guidePath": "projects/2026-11/daily-2026-11-13.md",
+      "javaGuidePath": "projects/2026-11/daily-2026-11-13.md",
       "ready": true
     }
   ]
