@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-13",
+  "topic": "对象与CSV往返",
+  "stage": "主线延伸：类与对象",
+  "estimatedMinutes": 30,
+  "notePath": "notes/2026-11/2026-11-13_对象与CSV往返.md",
+  "collectedAt": "2026-11-13",
+  "sources": [
+    {
+      "title": "Python 官方：csv",
+      "url": "https://docs.python.org/3/library/csv.html",
+      "kind": "Python 官方标准库"
+    },
+    {
+      "title": "Python 官方：Classes",
+      "url": "https://docs.python.org/3/tutorial/classes.html",
+      "kind": "Python 官方教程"
+    },
+    {
+      "title": "CS50P：Classes",
+      "url": "https://cs50.harvard.edu/python/notes/8/",
+      "kind": "Harvard 课程"
+    }
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "type": "mcq",
+      "title": "CSV字典读取",
+      "difficulty": "基础",
+      "prompt": "csv.DictReader通常把每一行转换为什么？",
+      "answer": 1,
+      "explanation": "DictReader用表头作为键，把每一行映射为字典。",
+      "hint": "字段名来自表头。",
+      "sourceIndex": 0,
+      "attribution": "依据 2026-11-13 实际阅读的官方/课程资料原创，非官方原题",
+      "options": [
+        "StudentRecord对象",
+        "字典",
+        "整数列表",
+        "集合"
+      ]
+    },
+    {
+      "id": "q2",
+      "type": "mcq",
+      "title": "恢复对象的入口",
+      "difficulty": "基础",
+      "prompt": "from_row使用@classmethod的主要好处是什么？",
+      "answer": 2,
+      "explanation": "它通过cls(...)集中完成从一行数据到对象的构造。",
+      "hint": "不需要先创建实例。",
+      "sourceIndex": 2,
+      "attribution": "依据 2026-11-13 实际阅读的官方/课程资料原创，非官方原题",
+      "options": [
+        "绕过校验",
+        "自动修改CSV",
+        "通过类创建实例",
+        "把对象变成字符串"
+      ]
+    },
+    {
+      "id": "q3",
+      "type": "mcq",
+      "title": "CSV中的成绩类型",
+      "difficulty": "基础",
+      "prompt": "DictReader读到score字段后，构造对象时通常还要做什么？",
+      "answer": 0,
+      "explanation": "CSV字段读取为字符串，业务模型需要显式转为整数并再次校验。",
+      "hint": "文件里的95不是自动成为int。",
+      "sourceIndex": 0,
+      "attribution": "依据 2026-11-13 实际阅读的官方/课程资料原创，非官方原题",
+      "options": [
+        "int转换并校验",
+        "删除表头",
+        "调用sorted",
+        "改成类属性"
+      ]
+    },
+    {
+      "id": "q4",
+      "type": "short",
+      "title": "空记录往返",
+      "difficulty": "基础",
+      "prompt": "只有表头student_id,name,score且没有数据行时，load_csv返回列表的精确表示是什么？",
+      "answer": "[]",
+      "explanation": "DictReader没有产生记录，因此列表为空。",
+      "hint": "表头不是数据行。",
+      "sourceIndex": 0,
+      "attribution": "依据 2026-11-13 实际阅读的官方/课程资料原创，非官方原题"
+    },
+    {
+      "id": "q5",
+      "type": "code",
+      "title": "对象CSV备份恢复",
+      "difficulty": "综合",
+      "prompt": "实现对象到CSV字典行的转换及恢复，覆盖空集合、中文姓名、0分和非法101分。",
+      "answer": "import csv\nimport io\n\n\nclass StudentRecord:\n    def __init__(self, student_id, name, score):\n        student_id, name = student_id.strip(), name.strip()\n        if not student_id or not name:\n            raise ValueError(\"id and name are required\")\n        score = int(score)\n        if not 0 <= score <= 100:\n            raise ValueError(\"invalid score\")\n        self.student_id, self.name, self.score = student_id, name, score\n\n    def to_row(self):\n        return {\"student_id\": self.student_id, \"name\": self.name, \"score\": self.score}\n\n    @classmethod\n    def from_row(cls, row):\n        return cls(row[\"student_id\"], row[\"name\"], row[\"score\"])\n\n\ndef dump_csv(records):\n    stream = io.StringIO(newline=\"\")\n    writer = csv.DictWriter(stream, fieldnames=[\"student_id\", \"name\", \"score\"])\n    writer.writeheader()\n    writer.writerows(record.to_row() for record in records)\n    return stream.getvalue()\n\n\ndef load_csv(text):\n    return [StudentRecord.from_row(row) for row in csv.DictReader(io.StringIO(text))]\n\n\ndef run_checks():\n    assert load_csv(dump_csv([])) == []\n    original = [StudentRecord(\"S01\", \"林安\", 95), StudentRecord(\"S02\", \"Bo\", 0)]\n    restored = load_csv(dump_csv(original))\n    assert [(x.student_id, x.name, x.score) for x in restored] == [\n        (\"S01\", \"林安\", 95), (\"S02\", \"Bo\", 0)\n    ]\n    try:\n        load_csv(\"student_id,name,score\\nS03,Cat,101\\n\")\n        raise AssertionError(\"invalid score accepted\")\n    except ValueError:\n        pass\n\n\nif __name__ == \"__main__\":\n    run_checks()\n    print(\"csv-roundtrip checks: OK\")\n",
+      "explanation": "to_row负责导出，from_row复用构造器校验；保存与恢复职责清晰。",
+      "hint": "文件对象使用newline=''；本题用StringIO自测。",
+      "sourceIndex": 0,
+      "attribution": "依据 2026-11-13 实际阅读的官方/课程资料原创，非官方原题",
+      "language": "python",
+      "starter": "class StudentRecord:\n    def to_row(self):\n        pass\n\n    @classmethod\n    def from_row(cls, row):\n        pass\n",
+      "tests": [
+        {
+          "input": "empty and Unicode rows",
+          "output": "csv-roundtrip checks: OK"
+        },
+        {
+          "input": "score=101",
+          "output": "csv-roundtrip checks: OK"
+        }
+      ]
+    }
+  ]
+}
