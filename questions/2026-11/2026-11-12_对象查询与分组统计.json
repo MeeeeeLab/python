@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-12",
+  "topic": "对象查询与分组统计",
+  "stage": "主线延伸：类与对象",
+  "estimatedMinutes": 30,
+  "notePath": "notes/2026-11/2026-11-12_对象查询与分组统计.md",
+  "collectedAt": "2026-11-13",
+  "sources": [
+    {
+      "title": "Python 官方：Classes",
+      "url": "https://docs.python.org/3/tutorial/classes.html",
+      "kind": "Python 官方教程"
+    },
+    {
+      "title": "Python 官方：Data Structures",
+      "url": "https://docs.python.org/3/tutorial/datastructures.html",
+      "kind": "Python 官方教程"
+    },
+    {
+      "title": "Python 官方：Built-in Functions",
+      "url": "https://docs.python.org/3/library/functions.html",
+      "kind": "Python 官方标准库"
+    }
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "type": "mcq",
+      "title": "分组容器",
+      "difficulty": "基础",
+      "prompt": "按班级收集多个分数时，groups中每个班级最适合先保存什么？",
+      "answer": 2,
+      "explanation": "每组需要保存多个分数，列表适合追加并随后统计。",
+      "hint": "一个班级对应多个数值。",
+      "sourceIndex": 1,
+      "attribution": "依据 2026-11-13 实际阅读的官方/课程资料原创，非官方原题",
+      "options": [
+        "单个整数",
+        "布尔值",
+        "列表",
+        "类对象本身"
+      ]
+    },
+    {
+      "id": "q2",
+      "type": "mcq",
+      "title": "安全初始化分组",
+      "difficulty": "基础",
+      "prompt": "哪一行能在键不存在时创建空列表并返回该列表？",
+      "answer": 1,
+      "explanation": "setdefault在缺少键时写入默认值，并返回对应值。",
+      "hint": "随后可直接append。",
+      "sourceIndex": 1,
+      "attribution": "依据 2026-11-13 实际阅读的官方/课程资料原创，非官方原题",
+      "options": [
+        "groups.get(name).append(score)",
+        "groups.setdefault(name, []).append(score)",
+        "groups[name] = score",
+        "groups.add(name, score)"
+      ]
+    },
+    {
+      "id": "q3",
+      "type": "mcq",
+      "title": "空集合统计",
+      "difficulty": "基础",
+      "prompt": "为什么空成绩册应直接返回空字典而不是计算平均分？",
+      "answer": 0,
+      "explanation": "没有分组就没有分母，返回空结果可避免除零并保持语义明确。",
+      "hint": "先考虑分母。",
+      "sourceIndex": 2,
+      "attribution": "依据 2026-11-13 实际阅读的官方/课程资料原创，非官方原题",
+      "options": [
+        "避免除以零",
+        "提高满分",
+        "创建类属性",
+        "修改原记录"
+      ]
+    },
+    {
+      "id": "q4",
+      "type": "short",
+      "title": "分组平均值",
+      "difficulty": "基础",
+      "prompt": "A班分数90、80，B班分数70。按A、B顺序写出两个平均值，用英文逗号连接。",
+      "answer": "85.0,70.0",
+      "explanation": "A班(90+80)/2=85.0，B班只有70。",
+      "hint": "先分别求和再除数量。",
+      "sourceIndex": 2,
+      "attribution": "依据 2026-11-13 实际阅读的官方/课程资料原创，非官方原题"
+    },
+    {
+      "id": "q5",
+      "type": "code",
+      "title": "班级分组统计",
+      "difficulty": "综合",
+      "prompt": "实现成绩册按班级统计人数和平均分，覆盖空成绩册、重复学号与单元素分组。",
+      "answer": "class StudentRecord:\n    def __init__(self, student_id, class_name, score):\n        student_id = student_id.strip()\n        class_name = class_name.strip()\n        if not student_id or not class_name:\n            raise ValueError(\"id and class are required\")\n        if isinstance(score, bool) or not isinstance(score, int) or not 0 <= score <= 100:\n            raise ValueError(\"invalid score\")\n        self.student_id = student_id\n        self.class_name = class_name\n        self.score = score\n\n\nclass GradeBook:\n    def __init__(self):\n        self._records = []\n\n    def add(self, record):\n        if any(item.student_id == record.student_id for item in self._records):\n            return False\n        self._records.append(record)\n        return True\n\n    def summary_by_class(self):\n        groups = {}\n        for record in self._records:\n            groups.setdefault(record.class_name, []).append(record.score)\n        return {\n            name: {\"count\": len(scores), \"average\": sum(scores) / len(scores)}\n            for name, scores in sorted(groups.items())\n        }\n\n\ndef run_checks():\n    book = GradeBook()\n    assert book.summary_by_class() == {}\n    assert book.add(StudentRecord(\"S01\", \"A\", 90))\n    assert book.add(StudentRecord(\"S02\", \"B\", 70))\n    assert book.add(StudentRecord(\"S03\", \"A\", 80))\n    assert not book.add(StudentRecord(\"S01\", \"A\", 60))\n    assert book.summary_by_class() == {\n        \"A\": {\"count\": 2, \"average\": 85.0},\n        \"B\": {\"count\": 1, \"average\": 70.0},\n    }\n\n\nif __name__ == \"__main__\":\n    run_checks()\n    print(\"group-statistics checks: OK\")\n",
+      "explanation": "先按班级收集分数，再由每组列表计算count与average。",
+      "hint": "用setdefault构建分组。",
+      "sourceIndex": 1,
+      "attribution": "依据 2026-11-13 实际阅读的官方/课程资料原创，非官方原题",
+      "language": "python",
+      "starter": "class GradeBook:\n    def summary_by_class(self):\n        pass\n",
+      "tests": [
+        {
+          "input": "empty",
+          "output": "group-statistics checks: OK"
+        },
+        {
+          "input": "A:90,80; B:70; duplicate S01",
+          "output": "group-statistics checks: OK"
+        }
+      ]
+    }
+  ]
+}
