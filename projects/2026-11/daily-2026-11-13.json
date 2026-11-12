@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 1,
+  "projectId": "daily-2026-11-13",
+  "track": "python",
+  "title": "对象CSV备份恢复",
+  "goal": "在对象与CSV字典行之间往返并复用构造校验。",
+  "prerequisites": [
+    "类与对象",
+    "列表与字典",
+    "边界校验"
+  ],
+  "filename": "object_csv_roundtrip.py",
+  "runCommand": "python3 object_csv_roundtrip.py",
+  "starter": "class StudentRecord:\n    def to_row(self):\n        pass\n\n    @classmethod\n    def from_row(cls, row):\n        pass\n",
+  "solution": "import csv\nimport io\n\n\nclass StudentRecord:\n    def __init__(self, student_id, name, score):\n        student_id, name = student_id.strip(), name.strip()\n        if not student_id or not name:\n            raise ValueError(\"id and name are required\")\n        score = int(score)\n        if not 0 <= score <= 100:\n            raise ValueError(\"invalid score\")\n        self.student_id, self.name, self.score = student_id, name, score\n\n    def to_row(self):\n        return {\"student_id\": self.student_id, \"name\": self.name, \"score\": self.score}\n\n    @classmethod\n    def from_row(cls, row):\n        return cls(row[\"student_id\"], row[\"name\"], row[\"score\"])\n\n\ndef dump_csv(records):\n    stream = io.StringIO(newline=\"\")\n    writer = csv.DictWriter(stream, fieldnames=[\"student_id\", \"name\", \"score\"])\n    writer.writeheader()\n    writer.writerows(record.to_row() for record in records)\n    return stream.getvalue()\n\n\ndef load_csv(text):\n    return [StudentRecord.from_row(row) for row in csv.DictReader(io.StringIO(text))]\n\n\ndef run_checks():\n    assert load_csv(dump_csv([])) == []\n    original = [StudentRecord(\"S01\", \"林安\", 95), StudentRecord(\"S02\", \"Bo\", 0)]\n    restored = load_csv(dump_csv(original))\n    assert [(x.student_id, x.name, x.score) for x in restored] == [\n        (\"S01\", \"林安\", 95), (\"S02\", \"Bo\", 0)\n    ]\n    try:\n        load_csv(\"student_id,name,score\\nS03,Cat,101\\n\")\n        raise AssertionError(\"invalid score accepted\")\n    except ValueError:\n        pass\n\n\nif __name__ == \"__main__\":\n    run_checks()\n    print(\"csv-roundtrip checks: OK\")\n",
+  "solutionExplanation": [
+    "只实现当天目标所需的最小模型。",
+    "正常流程与至少一个边界流程使用断言验证。",
+    "公开内容只提供学习材料，不记录个人完成状态。"
+  ],
+  "steps": [
+    {
+      "id": "export",
+      "day": "2026-11-13",
+      "title": "导出字典行",
+      "instruction": "实现to_row。",
+      "hint": "键与表头一致。",
+      "knowledge": [
+        "对象",
+        "字典"
+      ]
+    },
+    {
+      "id": "restore",
+      "day": "2026-11-13",
+      "title": "恢复对象",
+      "instruction": "用classmethod调用构造器。",
+      "hint": "CSV成绩先转int。",
+      "knowledge": [
+        "classmethod",
+        "校验"
+      ]
+    },
+    {
+      "id": "roundtrip",
+      "day": "2026-11-13",
+      "title": "验证往返",
+      "instruction": "覆盖空、Unicode和非法值。",
+      "hint": "使用StringIO。",
+      "knowledge": [
+        "csv",
+        "边界"
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "id": "t1",
+      "label": "正常往返",
+      "input": "林安/95, Bo/0",
+      "output": "csv-roundtrip checks: OK",
+      "purpose": "验证Unicode与边界分数"
+    },
+    {
+      "id": "t2",
+      "label": "非法恢复",
+      "input": "score=101",
+      "output": "csv-roundtrip checks: OK",
+      "purpose": "验证恢复时仍校验"
+    }
+  ],
+  "recall": [
+    {
+      "id": "boundary",
+      "question": "为什么from_row不能绕过构造器？",
+      "answer": "文件数据也不可信，必须复用相同业务校验。"
+    }
+  ],
+  "sources": [
+    {
+      "title": "Python 官方：csv",
+      "url": "https://docs.python.org/3/library/csv.html",
+      "attribution": "2026-11-13 实际核对，项目为原创教学练习"
+    },
+    {
+      "title": "Python 官方：Classes",
+      "url": "https://docs.python.org/3/tutorial/classes.html",
+      "attribution": "2026-11-13 实际核对，项目为原创教学练习"
+    },
+    {
+      "title": "CS50P：Classes",
+      "url": "https://cs50.harvard.edu/python/notes/8/",
+      "attribution": "2026-11-13 实际核对，项目为原创教学练习"
+    }
+  ]
+}
