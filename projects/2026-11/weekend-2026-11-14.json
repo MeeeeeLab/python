@@ -1,0 +1,151 @@
+{
+  "schemaVersion": 1,
+  "projectId": "weekend-2026-11-14",
+  "track": "python",
+  "title": "成绩册备份与恢复工具",
+  "goal": "把经过校验的对象成绩册稳定地导出到CSV并恢复。",
+  "prerequisites": [
+    "类与对象",
+    "字典",
+    "CSV",
+    "classmethod"
+  ],
+  "filename": "gradebook_backup.py",
+  "runCommand": "python3 gradebook_backup.py",
+  "starter": "class GradeBook:\n    def to_csv(self):\n        pass\n\n    @classmethod\n    def from_csv(cls, text):\n        pass\n",
+  "solution": "import csv\nimport io\n\n\nclass StudentRecord:\n    def __init__(self, student_id, name, score):\n        student_id, name = student_id.strip(), name.strip()\n        if not student_id or not name:\n            raise ValueError(\"id and name are required\")\n        score = int(score)\n        if not 0 <= score <= 100:\n            raise ValueError(\"invalid score\")\n        self.student_id, self.name, self.score = student_id, name, score\n\n    def to_row(self):\n        return {\"student_id\": self.student_id, \"name\": self.name, \"score\": self.score}\n\n\nclass GradeBook:\n    def __init__(self):\n        self._records = {}\n\n    def add(self, record):\n        if record.student_id in self._records:\n            return False\n        self._records[record.student_id] = record\n        return True\n\n    def to_csv(self):\n        stream = io.StringIO(newline=\"\")\n        writer = csv.DictWriter(stream, fieldnames=[\"student_id\", \"name\", \"score\"])\n        writer.writeheader()\n        writer.writerows(record.to_row() for record in self._records.values())\n        return stream.getvalue()\n\n    @classmethod\n    def from_csv(cls, text):\n        restored = cls()\n        for row in csv.DictReader(io.StringIO(text)):\n            record = StudentRecord(row[\"student_id\"], row[\"name\"], row[\"score\"])\n            if not restored.add(record):\n                raise ValueError(\"duplicate student id\")\n        return restored\n\n    def snapshot(self):\n        return [(r.student_id, r.name, r.score) for r in self._records.values()]\n\n\ndef run_checks():\n    empty = GradeBook.from_csv(GradeBook().to_csv())\n    assert empty.snapshot() == []\n    book = GradeBook()\n    assert book.add(StudentRecord(\"S01\", \"林安\", 95))\n    assert book.add(StudentRecord(\"S02\", \"Bo\", 0))\n    assert not book.add(StudentRecord(\"S01\", \"Other\", 60))\n    restored = GradeBook.from_csv(book.to_csv())\n    assert restored.snapshot() == [(\"S01\", \"林安\", 95), (\"S02\", \"Bo\", 0)]\n    try:\n        GradeBook.from_csv(\"student_id,name,score\\nS03,Cat,101\\n\")\n        raise AssertionError(\"invalid backup accepted\")\n    except ValueError:\n        pass\n\n\nif __name__ == \"__main__\":\n    run_checks()\n    print(\"gradebook-backup Saturday checks: OK\")\n",
+  "solutionExplanation": [
+    "周六建立核心数据流并通过正常与边界自检。",
+    "周日继续同一项目，完成失败保护、复杂度说明与独立验收。",
+    "公开仓库只保存教学材料，不保存个人草稿或完成状态。"
+  ],
+  "steps": [
+    {
+      "id": "record-contract",
+      "day": "2026-11-14",
+      "title": "固定记录契约",
+      "instruction": "明确学号、姓名、成绩字段和校验。",
+      "hint": "文件数据也要校验。",
+      "knowledge": [
+        "对象",
+        "不变量"
+      ]
+    },
+    {
+      "id": "csv-export",
+      "day": "2026-11-14",
+      "title": "导出CSV",
+      "instruction": "写表头并逐行导出对象。",
+      "hint": "DictWriter。",
+      "knowledge": [
+        "CSV",
+        "字典行"
+      ]
+    },
+    {
+      "id": "saturday-checks",
+      "day": "2026-11-14",
+      "title": "周六边界自检",
+      "instruction": "覆盖空、Unicode、0分和重复。",
+      "hint": "断言精确快照。",
+      "knowledge": [
+        "边界测试"
+      ]
+    },
+    {
+      "id": "csv-restore",
+      "day": "2026-11-15",
+      "title": "恢复新成绩册",
+      "instruction": "用classmethod构造新对象集合。",
+      "hint": "不要直接修改旧成绩册。",
+      "knowledge": [
+        "classmethod",
+        "恢复"
+      ]
+    },
+    {
+      "id": "failure-safety",
+      "day": "2026-11-15",
+      "title": "恢复失败保护",
+      "instruction": "非法行不得产生半成品。",
+      "hint": "先构造临时对象。",
+      "knowledge": [
+        "异常",
+        "原子性"
+      ]
+    },
+    {
+      "id": "report-check",
+      "day": "2026-11-15",
+      "title": "往返报告核对",
+      "instruction": "比较恢复前后的确定快照。",
+      "hint": "字段顺序固定。",
+      "knowledge": [
+        "往返",
+        "验收"
+      ]
+    },
+    {
+      "id": "sunday-acceptance",
+      "day": "2026-11-15",
+      "title": "周日综合验收",
+      "instruction": "独立完成正常与损坏备份测试。",
+      "hint": "不预先勾选。",
+      "knowledge": [
+        "综合验收"
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "id": "t1",
+      "label": "正常往返",
+      "input": "S01/林安/95; S02/Bo/0",
+      "output": "gradebook-backup Saturday checks: OK",
+      "purpose": "验证对象CSV往返"
+    },
+    {
+      "id": "t2",
+      "label": "空与重复",
+      "input": "empty; duplicate S01",
+      "output": "gradebook-backup Saturday checks: OK",
+      "purpose": "验证边界"
+    },
+    {
+      "id": "t3",
+      "label": "损坏备份",
+      "input": "score=101",
+      "output": "gradebook-backup Saturday checks: OK",
+      "purpose": "验证恢复校验"
+    }
+  ],
+  "recall": [
+    {
+      "id": "validation",
+      "question": "为什么from_csv要调用StudentRecord构造器？",
+      "answer": "文件数据也不可信，必须复用同一业务校验。"
+    },
+    {
+      "id": "atomic",
+      "question": "为什么恢复到新GradeBook而不是边读边改旧对象？",
+      "answer": "失败时旧对象不被半途污染。"
+    }
+  ],
+  "sources": [
+    {
+      "title": "Python 官方：csv",
+      "url": "https://docs.python.org/3/library/csv.html",
+      "attribution": "2026-11-14 实际核对，项目为原创教学练习"
+    },
+    {
+      "title": "Python 官方：classmethod",
+      "url": "https://docs.python.org/3/library/functions.html#classmethod",
+      "attribution": "2026-11-14 实际核对，项目为原创教学练习"
+    },
+    {
+      "title": "Python 官方：Classes",
+      "url": "https://docs.python.org/3/tutorial/classes.html",
+      "attribution": "2026-11-14 实际核对，项目为原创教学练习"
+    }
+  ]
+}
