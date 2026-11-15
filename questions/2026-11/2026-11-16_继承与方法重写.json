@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-16",
+  "topic": "继承与方法重写",
+  "stage": "主线延伸：类与对象",
+  "estimatedMinutes": 30,
+  "notePath": "notes/2026-11/2026-11-16_继承与方法重写.md",
+  "collectedAt": "2026-11-16",
+  "sources": [
+    {
+      "title": "Python 官方：Inheritance",
+      "url": "https://docs.python.org/3/tutorial/classes.html#inheritance",
+      "kind": "Python 官方教程"
+    },
+    {
+      "title": "Python 官方：super",
+      "url": "https://docs.python.org/3/library/functions.html#super",
+      "kind": "Python 官方标准库"
+    },
+    {
+      "title": "CS50P：Inheritance",
+      "url": "https://cs50.harvard.edu/python/notes/8/#inheritance",
+      "kind": "Harvard 课程"
+    }
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "type": "mcq",
+      "title": "继承语法",
+      "difficulty": "基础",
+      "prompt": "哪个定义表示HonorsRecord继承StudentRecord？",
+      "answer": 1,
+      "explanation": "基类写在子类名后的圆括号中。",
+      "hint": "class Child(Parent)。",
+      "sourceIndex": 0,
+      "attribution": "依据 2026-11-16 实际阅读的官方/课程资料原创，非官方原题",
+      "options": [
+        "class HonorsRecord: StudentRecord",
+        "class HonorsRecord(StudentRecord):",
+        "class StudentRecord(HonorsRecord):",
+        "class HonorsRecord -> StudentRecord:"
+      ]
+    },
+    {
+      "id": "q2",
+      "type": "mcq",
+      "title": "super初始化",
+      "difficulty": "基础",
+      "prompt": "子类__init__中调用super().__init__(...)的主要作用是什么？",
+      "answer": 2,
+      "explanation": "它复用父类的公共字段初始化和校验。",
+      "hint": "不要复制粘贴学号、姓名、分数校验。",
+      "sourceIndex": 1,
+      "attribution": "依据 2026-11-16 实际阅读的官方/课程资料原创，非官方原题",
+      "options": [
+        "删除父类",
+        "创建CSV",
+        "调用父类初始化逻辑",
+        "自动改变MRO"
+      ]
+    },
+    {
+      "id": "q3",
+      "type": "mcq",
+      "title": "方法重写",
+      "difficulty": "基础",
+      "prompt": "子类定义与父类同名summary方法后，调用honors.summary()会怎样？",
+      "answer": 0,
+      "explanation": "属性查找先命中子类方法；子类仍可通过super调用父类版本。",
+      "hint": "重写不是删除父类。",
+      "sourceIndex": 0,
+      "attribution": "依据 2026-11-16 实际阅读的官方/课程资料原创，非官方原题",
+      "options": [
+        "调用子类summary",
+        "总是调用父类summary",
+        "抛出TypeError",
+        "返回None"
+      ]
+    },
+    {
+      "id": "q4",
+      "type": "short",
+      "title": "继承关系",
+      "difficulty": "基础",
+      "prompt": "honors=HonorsRecord(...)时，isinstance(honors, StudentRecord)的精确结果是什么？",
+      "answer": "True",
+      "explanation": "子类实例也属于父类类型。",
+      "hint": "注意首字母大写。",
+      "sourceIndex": 0,
+      "attribution": "依据 2026-11-16 实际阅读的官方/课程资料原创，非官方原题"
+    },
+    {
+      "id": "q5",
+      "type": "code",
+      "title": "荣誉成绩记录",
+      "difficulty": "综合",
+      "prompt": "实现StudentRecord与HonorsRecord，复用父类校验并重写summary，覆盖非法分数和空项目名。",
+      "answer": "class StudentRecord:\n    def __init__(self, student_id, name, score):\n        student_id, name = student_id.strip(), name.strip()\n        if not student_id or not name:\n            raise ValueError(\"id and name are required\")\n        if isinstance(score, bool) or not isinstance(score, int) or not 0 <= score <= 100:\n            raise ValueError(\"invalid score\")\n        self.student_id, self.name, self.score = student_id, name, score\n\n    def summary(self):\n        return f\"{self.student_id} | {self.name} | {self.score}\"\n\n\nclass HonorsRecord(StudentRecord):\n    def __init__(self, student_id, name, score, project):\n        super().__init__(student_id, name, score)\n        project = project.strip()\n        if not project:\n            raise ValueError(\"project is required\")\n        self.project = project\n\n    def summary(self):\n        return f\"{super().summary()} | honors: {self.project}\"\n\n\ndef run_checks():\n    regular = StudentRecord(\"S01\", \"Amy\", 88)\n    honors = HonorsRecord(\"S02\", \"Bo\", 95, \"Robot\")\n    assert regular.summary() == \"S01 | Amy | 88\"\n    assert honors.summary() == \"S02 | Bo | 95 | honors: Robot\"\n    assert isinstance(honors, StudentRecord)\n    try:\n        HonorsRecord(\"S03\", \"Cat\", 101, \"AI\")\n        raise AssertionError(\"invalid inherited score accepted\")\n    except ValueError:\n        pass\n    try:\n        HonorsRecord(\"S03\", \"Cat\", 90, \"  \")\n        raise AssertionError(\"blank project accepted\")\n    except ValueError:\n        pass\n\n\nif __name__ == \"__main__\":\n    run_checks()\n    print(\"inheritance checks: OK\")\n",
+      "explanation": "子类只增加项目字段和展示差异，公共校验保留在父类。",
+      "hint": "super().__init__和super().summary()分别复用初始化与展示。",
+      "sourceIndex": 2,
+      "attribution": "依据 2026-11-16 实际阅读的官方/课程资料原创，非官方原题",
+      "language": "python",
+      "starter": "class StudentRecord:\n    pass\n\nclass HonorsRecord(StudentRecord):\n    pass\n",
+      "tests": [
+        {
+          "input": "regular and honors records",
+          "output": "inheritance checks: OK"
+        },
+        {
+          "input": "score 101 and blank project",
+          "output": "inheritance checks: OK"
+        }
+      ]
+    }
+  ]
+}
