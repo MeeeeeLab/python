@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-11-14",
+  "updatedAt": "2026-11-16",
   "projects": [
     {
       "id": "weekend-2026-10-10",
@@ -809,6 +809,33 @@
       "javaPath": "projects/2026-11/weekend-2026-11-14.json",
       "guidePath": "projects/2026-11/weekend-2026-11-14.md",
       "javaGuidePath": "projects/2026-11/weekend-2026-11-14.md",
+      "ready": true
+    },
+    {
+      "id": "daily-2026-11-16",
+      "startDate": "2026-11-16",
+      "endDate": "2026-11-16",
+      "kind": "daily",
+      "title": "荣誉成绩记录与排队叫号基础",
+      "description": "Python 用继承与方法重写扩展成绩记录；Java 用 ArrayDeque 完成 FIFO 排队短练习。",
+      "concepts": [
+        "继承",
+        "super",
+        "方法重写",
+        "父类校验"
+      ],
+      "javaConcepts": [
+        "队列",
+        "FIFO",
+        "offerLast",
+        "pollFirst/peekFirst"
+      ],
+      "minutes": 50,
+      "javaMinutes": 25,
+      "pythonPath": "projects/2026-11/daily-2026-11-16.json",
+      "javaPath": "projects/2026-11/daily-2026-11-16.json",
+      "guidePath": "projects/2026-11/daily-2026-11-16.md",
+      "javaGuidePath": "projects/2026-11/daily-2026-11-16.md",
       "ready": true
     }
   ]
