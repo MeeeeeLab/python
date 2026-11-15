@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 1,
+  "projectId": "daily-2026-11-16",
+  "track": "python",
+  "title": "荣誉成绩记录",
+  "goal": "用继承复用学生记录校验，并重写展示方法。",
+  "prerequisites": [
+    "类与对象",
+    "构造器",
+    "方法重写"
+  ],
+  "filename": "inheritance_records.py",
+  "runCommand": "python3 inheritance_records.py",
+  "starter": "class StudentRecord:\n    pass\n\nclass HonorsRecord(StudentRecord):\n    pass\n",
+  "solution": "class StudentRecord:\n    def __init__(self, student_id, name, score):\n        student_id, name = student_id.strip(), name.strip()\n        if not student_id or not name:\n            raise ValueError(\"id and name are required\")\n        if isinstance(score, bool) or not isinstance(score, int) or not 0 <= score <= 100:\n            raise ValueError(\"invalid score\")\n        self.student_id, self.name, self.score = student_id, name, score\n\n    def summary(self):\n        return f\"{self.student_id} | {self.name} | {self.score}\"\n\n\nclass HonorsRecord(StudentRecord):\n    def __init__(self, student_id, name, score, project):\n        super().__init__(student_id, name, score)\n        project = project.strip()\n        if not project:\n            raise ValueError(\"project is required\")\n        self.project = project\n\n    def summary(self):\n        return f\"{super().summary()} | honors: {self.project}\"\n\n\ndef run_checks():\n    regular = StudentRecord(\"S01\", \"Amy\", 88)\n    honors = HonorsRecord(\"S02\", \"Bo\", 95, \"Robot\")\n    assert regular.summary() == \"S01 | Amy | 88\"\n    assert honors.summary() == \"S02 | Bo | 95 | honors: Robot\"\n    assert isinstance(honors, StudentRecord)\n    try:\n        HonorsRecord(\"S03\", \"Cat\", 101, \"AI\")\n        raise AssertionError(\"invalid inherited score accepted\")\n    except ValueError:\n        pass\n    try:\n        HonorsRecord(\"S03\", \"Cat\", 90, \"  \")\n        raise AssertionError(\"blank project accepted\")\n    except ValueError:\n        pass\n\n\nif __name__ == \"__main__\":\n    run_checks()\n    print(\"inheritance checks: OK\")\n",
+  "solutionExplanation": [
+    "只实现当天主题需要的最小模型。",
+    "正常流程与空或非法边界均使用断言验证。",
+    "公开内容不记录个人完成状态。"
+  ],
+  "steps": [
+    {
+      "id": "base",
+      "day": "2026-11-16",
+      "title": "建立父类",
+      "instruction": "集中公共字段和校验。",
+      "hint": "StudentRecord。",
+      "knowledge": [
+        "父类",
+        "不变量"
+      ]
+    },
+    {
+      "id": "child",
+      "day": "2026-11-16",
+      "title": "建立子类",
+      "instruction": "用super初始化并增加project。",
+      "hint": "HonorsRecord。",
+      "knowledge": [
+        "继承",
+        "super"
+      ]
+    },
+    {
+      "id": "override",
+      "day": "2026-11-16",
+      "title": "重写与自检",
+      "instruction": "扩展summary并测边界。",
+      "hint": "复用父类输出。",
+      "knowledge": [
+        "重写",
+        "测试"
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "id": "t1",
+      "label": "普通与荣誉记录",
+      "input": "S01/Amy/88; S02/Bo/95/Robot",
+      "output": "inheritance checks: OK",
+      "purpose": "验证继承和重写"
+    },
+    {
+      "id": "t2",
+      "label": "非法字段",
+      "input": "score=101; blank project",
+      "output": "inheritance checks: OK",
+      "purpose": "验证父子类校验"
+    }
+  ],
+  "recall": [
+    {
+      "id": "isa",
+      "question": "何时适合用继承？",
+      "answer": "子类与父类存在稳定的“是一个”关系，并能遵守父类契约。"
+    }
+  ],
+  "sources": [
+    {
+      "title": "Python 官方：Inheritance",
+      "url": "https://docs.python.org/3/tutorial/classes.html#inheritance",
+      "attribution": "2026-11-16 实际核对，项目为原创教学练习"
+    },
+    {
+      "title": "Python 官方：super",
+      "url": "https://docs.python.org/3/library/functions.html#super",
+      "attribution": "2026-11-16 实际核对，项目为原创教学练习"
+    },
+    {
+      "title": "CS50P：Inheritance",
+      "url": "https://cs50.harvard.edu/python/notes/8/#inheritance",
+      "attribution": "2026-11-16 实际核对，项目为原创教学练习"
+    }
+  ]
+}
