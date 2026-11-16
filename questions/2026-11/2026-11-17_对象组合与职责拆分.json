@@ -1,0 +1,112 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-17",
+  "topic": "对象组合与职责拆分",
+  "stage": "主线延伸：类与对象",
+  "estimatedMinutes": 30,
+  "notePath": "notes/2026-11/2026-11-17_对象组合与职责拆分.md",
+  "collectedAt": "2026-11-17",
+  "sources": [
+    {
+      "title": "Python 官方：Classes",
+      "url": "https://docs.python.org/3/tutorial/classes.html",
+      "kind": "Python 官方教程"
+    },
+    {
+      "title": "Python 官方：isinstance",
+      "url": "https://docs.python.org/3/library/functions.html#isinstance",
+      "kind": "Python 官方标准库"
+    },
+    {
+      "title": "CS50P：Object-Oriented Programming",
+      "url": "https://cs50.harvard.edu/python/notes/8/",
+      "kind": "Harvard 课程"
+    }
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "type": "mcq",
+      "title": "组合关系",
+      "difficulty": "基础",
+      "prompt": "StudentRecord把ContactInfo实例保存在contact属性中，最准确的描述是什么？",
+      "answer": 1,
+      "explanation": "StudentRecord拥有一个ContactInfo，属于has-a组合关系。",
+      "hint": "一个对象作为另一个对象的属性。",
+      "sourceIndex": 0,
+      "attribution": "依据 2026-11-17 实际阅读的官方/课程资料原创，非官方原题",
+      "options": [
+        "StudentRecord继承ContactInfo",
+        "StudentRecord组合ContactInfo",
+        "ContactInfo重写StudentRecord",
+        "二者必须是同一个类"
+      ]
+    },
+    {
+      "id": "q2",
+      "type": "mcq",
+      "title": "职责边界",
+      "difficulty": "基础",
+      "prompt": "邮箱格式的最小校验更适合放在哪里？",
+      "answer": 2,
+      "explanation": "ContactInfo负责联系方式不变量，避免StudentRecord承担无关细节。",
+      "hint": "让拥有该数据的类维护它。",
+      "sourceIndex": 2,
+      "attribution": "依据 2026-11-17 实际阅读的官方/课程资料原创，非官方原题",
+      "options": [
+        "GradeBook.passed_emails",
+        "StudentRecord.passed",
+        "ContactInfo.__init__",
+        "所有调用者各写一遍"
+      ]
+    },
+    {
+      "id": "q3",
+      "type": "short",
+      "title": "类型校验",
+      "difficulty": "基础",
+      "prompt": "isinstance(contact, ContactInfo)在contact确实是ContactInfo实例时返回什么？",
+      "answer": "True",
+      "explanation": "isinstance用于检查对象是否属于给定类型或其子类。",
+      "hint": "注意首字母大写。",
+      "sourceIndex": 1,
+      "attribution": "依据 2026-11-17 实际阅读的官方/课程资料原创，非官方原题"
+    },
+    {
+      "id": "q4",
+      "type": "short",
+      "title": "空集合边界",
+      "difficulty": "基础",
+      "prompt": "一个没有任何记录的GradeBook调用passed_emails()，结果应写成哪个精确的Python字面量？",
+      "answer": "[]",
+      "explanation": "列表推导式遍历空集合得到空列表。",
+      "hint": "不是None。",
+      "sourceIndex": 0,
+      "attribution": "依据 2026-11-17 实际阅读的官方/课程资料原创，非官方原题"
+    },
+    {
+      "id": "q5",
+      "type": "code",
+      "title": "学生联系方式组合模型",
+      "difficulty": "综合",
+      "prompt": "实现ContactInfo、StudentRecord和GradeBook的组合模型，覆盖合格筛选、重复学号、非法邮箱、非法分数、错误contact类型和空成绩册。",
+      "answer": "class ContactInfo:\n    def __init__(self, email: str) -> None:\n        email = email.strip()\n        if \"@\" not in email or email.startswith(\"@\") or email.endswith(\"@\"):\n            raise ValueError(\"email must contain text on both sides of @\")\n        self.email = email\n\n\nclass StudentRecord:\n    def __init__(self, student_id: str, name: str, score: int, contact: ContactInfo) -> None:\n        if not student_id.strip() or not name.strip():\n            raise ValueError(\"student_id and name cannot be blank\")\n        if not 0 <= score <= 100:\n            raise ValueError(\"score must be between 0 and 100\")\n        if not isinstance(contact, ContactInfo):\n            raise TypeError(\"contact must be ContactInfo\")\n        self.student_id = student_id.strip()\n        self.name = name.strip()\n        self.score = score\n        self.contact = contact\n\n    def passed(self) -> bool:\n        return self.score >= 60\n\n\nclass GradeBook:\n    def __init__(self) -> None:\n        self._records: dict[str, StudentRecord] = {}\n\n    def add(self, record: StudentRecord) -> None:\n        if record.student_id in self._records:\n            raise ValueError(\"duplicate student_id\")\n        self._records[record.student_id] = record\n\n    def passed_emails(self) -> list[str]:\n        return [r.contact.email for r in self._records.values() if r.passed()]\n\n\ndef check_raises(error_type, action) -> None:\n    try:\n        action()\n    except error_type:\n        return\n    raise AssertionError(f\"expected {error_type.__name__}\")\n\n\nbook = GradeBook()\nalice = StudentRecord(\"S01\", \"Alice\", 88, ContactInfo(\"alice@example.com\"))\nbob = StudentRecord(\"S02\", \"Bob\", 59, ContactInfo(\"bob@example.com\"))\nbook.add(alice)\nbook.add(bob)\nassert book.passed_emails() == [\"alice@example.com\"]\ncheck_raises(ValueError, lambda: book.add(alice))\ncheck_raises(ValueError, lambda: ContactInfo(\"invalid\"))\ncheck_raises(ValueError, lambda: StudentRecord(\"S03\", \"Cai\", 101, ContactInfo(\"cai@example.com\")))\ncheck_raises(TypeError, lambda: StudentRecord(\"S04\", \"Dan\", 60, \"dan@example.com\"))\nassert GradeBook().passed_emails() == []\nprint(\"composition checks: OK\")\n",
+      "explanation": "联系方式、学生记录和集合管理各自维护自己的不变量与操作。",
+      "hint": "使用has-a关系，不要让StudentRecord继承ContactInfo。",
+      "sourceIndex": 2,
+      "attribution": "依据 2026-11-17 实际阅读的官方/课程资料原创，非官方原题",
+      "language": "python",
+      "starter": "class ContactInfo:\n    pass\n\nclass StudentRecord:\n    pass\n\nclass GradeBook:\n    pass\n",
+      "tests": [
+        {
+          "input": "S01/88/alice@example.com; S02/59/bob@example.com",
+          "output": "composition checks: OK"
+        },
+        {
+          "input": "empty, duplicate id, bad email, score 101, wrong contact type",
+          "output": "composition checks: OK"
+        }
+      ]
+    }
+  ]
+}
