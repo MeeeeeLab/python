@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 1,
+  "projectId": "daily-2026-11-17",
+  "track": "python",
+  "title": "学生联系方式组合模型",
+  "goal": "用对象组合拆分联系方式、学生记录和成绩册职责。",
+  "prerequisites": [
+    "类与对象",
+    "构造器",
+    "对象集合"
+  ],
+  "filename": "object_composition.py",
+  "runCommand": "python3 object_composition.py",
+  "starter": "class ContactInfo:\n    pass\n\nclass StudentRecord:\n    pass\n\nclass GradeBook:\n    pass\n",
+  "solution": "class ContactInfo:\n    def __init__(self, email: str) -> None:\n        email = email.strip()\n        if \"@\" not in email or email.startswith(\"@\") or email.endswith(\"@\"):\n            raise ValueError(\"email must contain text on both sides of @\")\n        self.email = email\n\n\nclass StudentRecord:\n    def __init__(self, student_id: str, name: str, score: int, contact: ContactInfo) -> None:\n        if not student_id.strip() or not name.strip():\n            raise ValueError(\"student_id and name cannot be blank\")\n        if not 0 <= score <= 100:\n            raise ValueError(\"score must be between 0 and 100\")\n        if not isinstance(contact, ContactInfo):\n            raise TypeError(\"contact must be ContactInfo\")\n        self.student_id = student_id.strip()\n        self.name = name.strip()\n        self.score = score\n        self.contact = contact\n\n    def passed(self) -> bool:\n        return self.score >= 60\n\n\nclass GradeBook:\n    def __init__(self) -> None:\n        self._records: dict[str, StudentRecord] = {}\n\n    def add(self, record: StudentRecord) -> None:\n        if record.student_id in self._records:\n            raise ValueError(\"duplicate student_id\")\n        self._records[record.student_id] = record\n\n    def passed_emails(self) -> list[str]:\n        return [r.contact.email for r in self._records.values() if r.passed()]\n\n\ndef check_raises(error_type, action) -> None:\n    try:\n        action()\n    except error_type:\n        return\n    raise AssertionError(f\"expected {error_type.__name__}\")\n\n\nbook = GradeBook()\nalice = StudentRecord(\"S01\", \"Alice\", 88, ContactInfo(\"alice@example.com\"))\nbob = StudentRecord(\"S02\", \"Bob\", 59, ContactInfo(\"bob@example.com\"))\nbook.add(alice)\nbook.add(bob)\nassert book.passed_emails() == [\"alice@example.com\"]\ncheck_raises(ValueError, lambda: book.add(alice))\ncheck_raises(ValueError, lambda: ContactInfo(\"invalid\"))\ncheck_raises(ValueError, lambda: StudentRecord(\"S03\", \"Cai\", 101, ContactInfo(\"cai@example.com\")))\ncheck_raises(TypeError, lambda: StudentRecord(\"S04\", \"Dan\", 60, \"dan@example.com\"))\nassert GradeBook().passed_emails() == []\nprint(\"composition checks: OK\")\n",
+  "solutionExplanation": [
+    "ContactInfo单独维护邮箱不变量，StudentRecord通过属性拥有它。",
+    "GradeBook只管理记录集合、唯一学号和查询。",
+    "正常、空集合与非法边界均由断言验证，公开内容不记录个人完成状态。"
+  ],
+  "steps": [
+    {
+      "id": "contact",
+      "day": "2026-11-17",
+      "title": "拆出联系方式",
+      "instruction": "让ContactInfo校验并保存邮箱。",
+      "hint": "has-a关系。",
+      "knowledge": [
+        "对象组合",
+        "不变量"
+      ]
+    },
+    {
+      "id": "record",
+      "day": "2026-11-17",
+      "title": "组合学生记录",
+      "instruction": "StudentRecord接收ContactInfo并维护成绩规则。",
+      "hint": "isinstance校验。",
+      "knowledge": [
+        "职责拆分",
+        "类型校验"
+      ]
+    },
+    {
+      "id": "book-check",
+      "day": "2026-11-17",
+      "title": "集合查询与自检",
+      "instruction": "拒绝重复学号并筛选合格邮箱。",
+      "hint": "覆盖空集合。",
+      "knowledge": [
+        "对象集合",
+        "边界测试"
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "id": "t1",
+      "label": "正常组合与筛选",
+      "input": "S01/88/alice@example.com; S02/59/bob@example.com",
+      "output": "composition checks: OK",
+      "purpose": "验证has-a与查询"
+    },
+    {
+      "id": "t2",
+      "label": "空与非法边界",
+      "input": "empty, duplicate id, bad email, score 101, wrong contact type",
+      "output": "composition checks: OK",
+      "purpose": "验证职责内校验"
+    }
+  ],
+  "recall": [
+    {
+      "id": "has-a",
+      "question": "组合与继承分别表达什么？",
+      "answer": "组合表达“拥有一个”；继承表达稳定的“是一个”。"
+    }
+  ],
+  "sources": [
+    {
+      "title": "Python 官方：Classes",
+      "url": "https://docs.python.org/3/tutorial/classes.html",
+      "attribution": "2026-11-17 实际核对，项目为原创教学练习"
+    },
+    {
+      "title": "Python 官方：isinstance",
+      "url": "https://docs.python.org/3/library/functions.html#isinstance",
+      "attribution": "2026-11-17 实际核对，项目为原创教学练习"
+    },
+    {
+      "title": "CS50P：Object-Oriented Programming",
+      "url": "https://cs50.harvard.edu/python/notes/8/",
+      "attribution": "2026-11-17 实际核对，项目为原创教学练习"
+    }
+  ]
+}
