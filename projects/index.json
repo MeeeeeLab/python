@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-11-16",
+  "updatedAt": "2026-11-17",
   "projects": [
     {
       "id": "weekend-2026-10-10",
@@ -836,6 +836,33 @@
       "javaPath": "projects/2026-11/daily-2026-11-16.json",
       "guidePath": "projects/2026-11/daily-2026-11-16.md",
       "javaGuidePath": "projects/2026-11/daily-2026-11-16.md",
+      "ready": true
+    },
+    {
+      "id": "daily-2026-11-17",
+      "startDate": "2026-11-17",
+      "endDate": "2026-11-17",
+      "kind": "daily",
+      "title": "学生联系方式组合与固定容量数组队列",
+      "description": "Python 用对象组合拆分联系方式职责；Java 用数组实现固定容量 FIFO 队列并分析移动成本。",
+      "concepts": [
+        "对象组合",
+        "has-a",
+        "职责拆分",
+        "边界校验"
+      ],
+      "javaConcepts": [
+        "数组队列",
+        "FIFO",
+        "元素移动",
+        "O(n)"
+      ],
+      "minutes": 50,
+      "javaMinutes": 25,
+      "pythonPath": "projects/2026-11/daily-2026-11-17.json",
+      "javaPath": "projects/2026-11/daily-2026-11-17.json",
+      "guidePath": "projects/2026-11/daily-2026-11-17.md",
+      "javaGuidePath": "projects/2026-11/daily-2026-11-17.md",
       "ready": true
     }
   ]
