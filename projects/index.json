@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-11-17",
+  "updatedAt": "2026-11-19",
   "projects": [
     {
       "id": "weekend-2026-10-10",
@@ -863,6 +863,33 @@
       "javaPath": "projects/2026-11/daily-2026-11-17.json",
       "guidePath": "projects/2026-11/daily-2026-11-17.md",
       "javaGuidePath": "projects/2026-11/daily-2026-11-17.md",
+      "ready": true
+    },
+    {
+      "id": "daily-2026-11-19",
+      "startDate": "2026-11-19",
+      "endDate": "2026-11-19",
+      "kind": "daily",
+      "title": "多格式成绩报告与循环排队队列",
+      "description": "Python 用统一 format 接口练习多态；Java 用循环数组实现固定容量 FIFO 队列。",
+      "concepts": [
+        "多态",
+        "鸭子类型",
+        "统一接口",
+        "边界校验"
+      ],
+      "javaConcepts": [
+        "循环数组队列",
+        "FIFO",
+        "取模回绕",
+        "O(1)"
+      ],
+      "minutes": 50,
+      "javaMinutes": 25,
+      "pythonPath": "projects/2026-11/daily-2026-11-19.json",
+      "javaPath": "projects/2026-11/daily-2026-11-19.json",
+      "guidePath": "projects/2026-11/daily-2026-11-19.md",
+      "javaGuidePath": "projects/2026-11/daily-2026-11-19.md",
       "ready": true
     }
   ]
