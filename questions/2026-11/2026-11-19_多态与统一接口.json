@@ -1,0 +1,112 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-19",
+  "topic": "多态与统一接口",
+  "stage": "主线延伸：类与对象",
+  "estimatedMinutes": 30,
+  "notePath": "notes/2026-11/2026-11-19_多态与统一接口.md",
+  "collectedAt": "2026-11-19",
+  "sources": [
+    {
+      "title": "Python 官方词汇表：duck-typing",
+      "url": "https://docs.python.org/3/glossary.html#term-duck-typing",
+      "kind": "Python 官方文档"
+    },
+    {
+      "title": "Python 官方教程：Classes",
+      "url": "https://docs.python.org/3/tutorial/classes.html",
+      "kind": "Python 官方教程"
+    },
+    {
+      "title": "Python 官方：typing.Protocol",
+      "url": "https://docs.python.org/3/library/typing.html#typing.Protocol",
+      "kind": "Python 官方标准库"
+    }
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "type": "mcq",
+      "title": "统一调用",
+      "difficulty": "基础",
+      "prompt": "build_report只调用formatter.format(record)，它最关心formatter的什么？",
+      "answer": 1,
+      "explanation": "鸭子类型强调对象是否提供所需接口，而不是它的具体类名。",
+      "hint": "看调用处实际使用了哪个方法。",
+      "sourceIndex": 0,
+      "attribution": "依据 2026-11-19 实际阅读的官方/课程资料原创，非官方原题",
+      "options": [
+        "必须继承TextFormatter",
+        "提供可调用的format方法",
+        "必须是字符串",
+        "必须通过type精确相等"
+      ]
+    },
+    {
+      "id": "q2",
+      "type": "mcq",
+      "title": "多态结果",
+      "difficulty": "基础",
+      "prompt": "同一条StudentRecord分别交给TextFormatter和CsvFormatter，为什么可以得到不同文本？",
+      "answer": 2,
+      "explanation": "两个对象实现同名format方法，各自负责不同输出规则。",
+      "hint": "同一调用，不同实现。",
+      "sourceIndex": 1,
+      "attribution": "依据 2026-11-19 实际阅读的官方/课程资料原创，非官方原题",
+      "options": [
+        "record自动复制",
+        "Python修改了score",
+        "运行时调用传入对象自己的format实现",
+        "两个类共享同一个字符串"
+      ]
+    },
+    {
+      "id": "q3",
+      "type": "short",
+      "title": "缺少接口",
+      "difficulty": "基础",
+      "prompt": "把普通object()传给build_report作为formatter时，访问不存在的format方法会抛出哪个异常类名？",
+      "answer": "AttributeError",
+      "explanation": "对象没有所请求属性时会抛出AttributeError。",
+      "hint": "不是TypeError。",
+      "sourceIndex": 0,
+      "attribution": "依据 2026-11-19 实际阅读的官方/课程资料原创，非官方原题"
+    },
+    {
+      "id": "q4",
+      "type": "short",
+      "title": "布尔边界",
+      "difficulty": "基础",
+      "prompt": "为什么成绩校验要先排除bool，再检查int？",
+      "answer": "因为bool是int的子类，True会通过isinstance(True, int)。",
+      "explanation": "显式排除bool可避免把True当作分数1。",
+      "hint": "回想Python继承关系。",
+      "sourceIndex": 1,
+      "attribution": "依据 2026-11-19 实际阅读的官方/课程资料原创，非官方原题"
+    },
+    {
+      "id": "q5",
+      "type": "code",
+      "title": "多格式成绩报告",
+      "difficulty": "综合",
+      "prompt": "实现StudentRecord、TextFormatter、CsvFormatter和build_report，覆盖两种格式、空学号、布尔分数和缺少format方法的对象。",
+      "answer": "class StudentRecord:\n    def __init__(self, student_id: str, name: str, score: int) -> None:\n        student_id, name = student_id.strip(), name.strip()\n        if not student_id or not name:\n            raise ValueError(\"student_id and name cannot be blank\")\n        if isinstance(score, bool) or not isinstance(score, int) or not 0 <= score <= 100:\n            raise ValueError(\"score must be an integer from 0 to 100\")\n        self.student_id = student_id\n        self.name = name\n        self.score = score\n\n\nclass TextFormatter:\n    def format(self, record: StudentRecord) -> str:\n        return f\"{record.student_id} | {record.name} | {record.score}\"\n\n\nclass CsvFormatter:\n    def format(self, record: StudentRecord) -> str:\n        return f\"{record.student_id},{record.name},{record.score}\"\n\n\ndef build_report(record: StudentRecord, formatter) -> str:\n    return formatter.format(record)\n\n\ndef check_raises(error_type, action) -> None:\n    try:\n        action()\n    except error_type:\n        return\n    raise AssertionError(f\"expected {error_type.__name__}\")\n\n\namy = StudentRecord(\"S01\", \"Amy\", 88)\nassert build_report(amy, TextFormatter()) == \"S01 | Amy | 88\"\nassert build_report(amy, CsvFormatter()) == \"S01,Amy,88\"\ncheck_raises(ValueError, lambda: StudentRecord(\"\", \"Amy\", 88))\ncheck_raises(ValueError, lambda: StudentRecord(\"S02\", \"Bo\", True))\ncheck_raises(AttributeError, lambda: build_report(amy, object()))\nprint(\"polymorphism checks: OK\")\n",
+      "explanation": "调用方依赖format这一最小接口；具体格式器可以替换而无需修改build_report。",
+      "hint": "不要在build_report里用if判断格式器类名。",
+      "sourceIndex": 2,
+      "attribution": "依据 2026-11-19 实际阅读的官方/课程资料原创，非官方原题",
+      "language": "python",
+      "starter": "class StudentRecord:\n    pass\n\nclass TextFormatter:\n    pass\n\nclass CsvFormatter:\n    pass\n\ndef build_report(record, formatter):\n    pass\n",
+      "tests": [
+        {
+          "input": "S01/Amy/88 with TextFormatter and CsvFormatter",
+          "output": "polymorphism checks: OK"
+        },
+        {
+          "input": "blank id, bool score, formatter without format",
+          "output": "polymorphism checks: OK"
+        }
+      ]
+    }
+  ]
+}
