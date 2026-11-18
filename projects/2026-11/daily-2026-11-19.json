@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 1,
+  "projectId": "daily-2026-11-19",
+  "track": "python",
+  "title": "多格式成绩报告",
+  "goal": "用统一format接口替换具体格式器，理解Python鸭子类型与多态。",
+  "prerequisites": [
+    "类与对象",
+    "对象组合",
+    "方法调用"
+  ],
+  "filename": "polymorphic_reports.py",
+  "runCommand": "python3 polymorphic_reports.py",
+  "starter": "class StudentRecord:\n    pass\n\nclass TextFormatter:\n    pass\n\nclass CsvFormatter:\n    pass\n",
+  "solution": "class StudentRecord:\n    def __init__(self, student_id: str, name: str, score: int) -> None:\n        student_id, name = student_id.strip(), name.strip()\n        if not student_id or not name:\n            raise ValueError(\"student_id and name cannot be blank\")\n        if isinstance(score, bool) or not isinstance(score, int) or not 0 <= score <= 100:\n            raise ValueError(\"score must be an integer from 0 to 100\")\n        self.student_id = student_id\n        self.name = name\n        self.score = score\n\n\nclass TextFormatter:\n    def format(self, record: StudentRecord) -> str:\n        return f\"{record.student_id} | {record.name} | {record.score}\"\n\n\nclass CsvFormatter:\n    def format(self, record: StudentRecord) -> str:\n        return f\"{record.student_id},{record.name},{record.score}\"\n\n\ndef build_report(record: StudentRecord, formatter) -> str:\n    return formatter.format(record)\n\n\ndef check_raises(error_type, action) -> None:\n    try:\n        action()\n    except error_type:\n        return\n    raise AssertionError(f\"expected {error_type.__name__}\")\n\n\namy = StudentRecord(\"S01\", \"Amy\", 88)\nassert build_report(amy, TextFormatter()) == \"S01 | Amy | 88\"\nassert build_report(amy, CsvFormatter()) == \"S01,Amy,88\"\ncheck_raises(ValueError, lambda: StudentRecord(\"\", \"Amy\", 88))\ncheck_raises(ValueError, lambda: StudentRecord(\"S02\", \"Bo\", True))\ncheck_raises(AttributeError, lambda: build_report(amy, object()))\nprint(\"polymorphism checks: OK\")\n",
+  "solutionExplanation": [
+    "build_report只依赖format方法，不检查具体类名。",
+    "TextFormatter和CsvFormatter可以互相替换，各自产生不同输出。",
+    "正常与非法边界均由断言验证，公开内容不记录个人完成状态。"
+  ],
+  "steps": [
+    {
+      "id": "record",
+      "day": "2026-11-19",
+      "title": "建立学生记录",
+      "instruction": "集中校验学号、姓名和整数分数。",
+      "hint": "先排除bool。",
+      "knowledge": [
+        "不变量",
+        "边界"
+      ]
+    },
+    {
+      "id": "formatters",
+      "day": "2026-11-19",
+      "title": "实现统一方法",
+      "instruction": "两个格式器都提供format(record)。",
+      "hint": "方法名和参数保持一致。",
+      "knowledge": [
+        "统一接口",
+        "多态"
+      ]
+    },
+    {
+      "id": "replace-check",
+      "day": "2026-11-19",
+      "title": "替换与自检",
+      "instruction": "同一函数传入不同格式器并测试错误对象。",
+      "hint": "不写类名分支。",
+      "knowledge": [
+        "鸭子类型",
+        "测试"
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "id": "t1",
+      "label": "两种格式器",
+      "input": "S01/Amy/88",
+      "output": "polymorphism checks: OK",
+      "purpose": "验证多态替换"
+    },
+    {
+      "id": "t2",
+      "label": "非法边界",
+      "input": "blank id, bool score, missing format",
+      "output": "polymorphism checks: OK",
+      "purpose": "验证契约失败"
+    }
+  ],
+  "recall": [
+    {
+      "id": "duck",
+      "question": "鸭子类型关注对象的什么？",
+      "answer": "关注对象是否提供当前代码需要的方法或属性，而不是精确类名。"
+    }
+  ],
+  "sources": [
+    {
+      "title": "Python 官方词汇表：duck-typing",
+      "url": "https://docs.python.org/3/glossary.html#term-duck-typing",
+      "attribution": "2026-11-19 实际核对，项目为原创教学练习"
+    },
+    {
+      "title": "Python 官方教程：Classes",
+      "url": "https://docs.python.org/3/tutorial/classes.html",
+      "attribution": "2026-11-19 实际核对，项目为原创教学练习"
+    },
+    {
+      "title": "Python 官方：typing.Protocol",
+      "url": "https://docs.python.org/3/library/typing.html#typing.Protocol",
+      "attribution": "2026-11-19 实际核对，项目为原创教学练习"
+    }
+  ]
+}
