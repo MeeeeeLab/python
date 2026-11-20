@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 1,
+  "projectId": "daily-2026-11-20",
+  "track": "python",
+  "title": "带Protocol的多格式报告",
+  "goal": "用Protocol写明格式器接口，并补上必要的运行时返回值校验。",
+  "prerequisites": [
+    "多态",
+    "鸭子类型",
+    "类型提示"
+  ],
+  "filename": "protocol_reports.py",
+  "runCommand": "python3 protocol_reports.py",
+  "starter": "from typing import Protocol\n\nclass Formatter(Protocol):\n    pass\n\nclass TextFormatter:\n    pass\n\nclass CsvFormatter:\n    pass\n",
+  "solution": "from typing import Protocol\n\n\nclass StudentRecord:\n    def __init__(self, student_id: str, name: str, score: int) -> None:\n        student_id, name = student_id.strip(), name.strip()\n        if not student_id or not name:\n            raise ValueError(\"student_id and name cannot be blank\")\n        if isinstance(score, bool) or not isinstance(score, int) or not 0 <= score <= 100:\n            raise ValueError(\"score must be an integer from 0 to 100\")\n        self.student_id = student_id\n        self.name = name\n        self.score = score\n\n\nclass Formatter(Protocol):\n    def format(self, record: StudentRecord) -> str:\n        ...\n\n\nclass TextFormatter:\n    def format(self, record: StudentRecord) -> str:\n        return f\"{record.student_id} | {record.name} | {record.score}\"\n\n\nclass CsvFormatter:\n    def format(self, record: StudentRecord) -> str:\n        return f\"{record.student_id},{record.name},{record.score}\"\n\n\ndef build_report(record: StudentRecord, formatter: Formatter) -> str:\n    result = formatter.format(record)\n    if not isinstance(result, str):\n        raise TypeError(\"formatter must return str\")\n    return result\n\n\nclass BadFormatter:\n    def format(self, record: StudentRecord) -> int:\n        return record.score\n\n\ndef check_raises(error_type, action) -> None:\n    try:\n        action()\n    except error_type:\n        return\n    raise AssertionError(f\"expected {error_type.__name__}\")\n\n\namy = StudentRecord(\"S01\", \"Amy\", 88)\nassert build_report(amy, TextFormatter()) == \"S01 | Amy | 88\"\nassert build_report(amy, CsvFormatter()) == \"S01,Amy,88\"\ncheck_raises(TypeError, lambda: build_report(amy, BadFormatter()))\ncheck_raises(AttributeError, lambda: build_report(amy, object()))\ncheck_raises(ValueError, lambda: StudentRecord(\"S02\", \" \", 70))\nprint(\"protocol checks: OK\")\n",
+  "solutionExplanation": [
+    "Formatter Protocol写明format的参数与返回类型。",
+    "具体格式器凭结构兼容，无需显式继承Protocol。",
+    "运行时仍显式检查返回值，并覆盖缺少方法与非法学生记录。"
+  ],
+  "steps": [
+    {
+      "id": "protocol",
+      "day": "2026-11-20",
+      "title": "写明接口",
+      "instruction": "定义含format方法的Formatter Protocol。",
+      "hint": "方法体使用省略号。",
+      "knowledge": [
+        "Protocol",
+        "结构化类型"
+      ]
+    },
+    {
+      "id": "implement",
+      "day": "2026-11-20",
+      "title": "实现格式器",
+      "instruction": "文本和CSV类提供兼容方法。",
+      "hint": "无需继承Formatter。",
+      "knowledge": [
+        "多态",
+        "类型提示"
+      ]
+    },
+    {
+      "id": "runtime-check",
+      "day": "2026-11-20",
+      "title": "验证运行时边界",
+      "instruction": "拒绝非字符串结果与缺少方法的对象。",
+      "hint": "注解不会自动检查。",
+      "knowledge": [
+        "TypeError",
+        "测试"
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "id": "t1",
+      "label": "结构兼容",
+      "input": "TextFormatter and CsvFormatter",
+      "output": "protocol checks: OK",
+      "purpose": "验证Protocol接口"
+    },
+    {
+      "id": "t2",
+      "label": "错误协作者",
+      "input": "bad return, missing format, blank name",
+      "output": "protocol checks: OK",
+      "purpose": "验证运行时边界"
+    }
+  ],
+  "recall": [
+    {
+      "id": "protocol-role",
+      "question": "Protocol和普通父类的核心区别是什么？",
+      "answer": "Protocol按所需成员判断结构兼容，具体类不必显式继承它。"
+    }
+  ],
+  "sources": [
+    {
+      "title": "Python 官方：typing.Protocol",
+      "url": "https://docs.python.org/3/library/typing.html#typing.Protocol",
+      "attribution": "2026-11-20 实际核对，项目为原创教学练习"
+    },
+    {
+      "title": "PEP 544：Protocols",
+      "url": "https://peps.python.org/pep-0544/",
+      "attribution": "2026-11-20 实际核对，项目为原创教学练习"
+    },
+    {
+      "title": "Python 官方词汇表：duck-typing",
+      "url": "https://docs.python.org/3/glossary.html#term-duck-typing",
+      "attribution": "2026-11-20 实际核对，项目为原创教学练习"
+    }
+  ]
+}
