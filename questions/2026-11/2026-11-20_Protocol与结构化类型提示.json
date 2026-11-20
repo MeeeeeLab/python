@@ -1,0 +1,112 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-20",
+  "topic": "Protocol与结构化类型提示",
+  "stage": "主线延伸：类与对象",
+  "estimatedMinutes": 30,
+  "notePath": "notes/2026-11/2026-11-20_Protocol与结构化类型提示.md",
+  "collectedAt": "2026-11-20",
+  "sources": [
+    {
+      "title": "Python 官方：typing.Protocol",
+      "url": "https://docs.python.org/3/library/typing.html#typing.Protocol",
+      "kind": "Python 官方标准库"
+    },
+    {
+      "title": "PEP 544：Protocols",
+      "url": "https://peps.python.org/pep-0544/",
+      "kind": "Python 官方 PEP"
+    },
+    {
+      "title": "Python 官方词汇表：duck-typing",
+      "url": "https://docs.python.org/3/glossary.html#term-duck-typing",
+      "kind": "Python 官方文档"
+    }
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "type": "mcq",
+      "title": "Protocol用途",
+      "difficulty": "基础",
+      "prompt": "typing.Protocol主要帮助描述什么？",
+      "answer": 1,
+      "explanation": "Protocol用所需成员描述结构化接口，供静态类型检查器判断兼容性。",
+      "hint": "关注方法集合，不是继承名单。",
+      "sourceIndex": 0,
+      "attribution": "依据 2026-11-20 实际阅读的官方/课程资料原创，非官方原题",
+      "options": [
+        "运行时自动转换对象",
+        "对象应提供的方法和属性结构",
+        "自动捕获所有异常",
+        "生成CSV文件"
+      ]
+    },
+    {
+      "id": "q2",
+      "type": "mcq",
+      "title": "结构兼容",
+      "difficulty": "基础",
+      "prompt": "TextFormatter没有显式继承Formatter，为什么仍可作为Formatter使用？",
+      "answer": 2,
+      "explanation": "它提供签名兼容的format方法，满足结构化子类型。",
+      "hint": "PEP 544的核心是结构。",
+      "sourceIndex": 1,
+      "attribution": "依据 2026-11-20 实际阅读的官方/课程资料原创，非官方原题",
+      "options": [
+        "类名包含Formatter",
+        "Python忽略所有方法",
+        "它实现了Protocol要求的format成员",
+        "Protocol在运行时复制方法"
+      ]
+    },
+    {
+      "id": "q3",
+      "type": "short",
+      "title": "运行时约束",
+      "difficulty": "基础",
+      "prompt": "普通类型注解会不会自动阻止BadFormatter在运行时被传入？请回答“会”或“不会”。",
+      "answer": "不会",
+      "explanation": "Protocol和一般类型注解主要供静态分析；本例用显式返回值检查保证运行时契约。",
+      "hint": "注解通常不自动执行检查。",
+      "sourceIndex": 1,
+      "attribution": "依据 2026-11-20 实际阅读的官方/课程资料原创，非官方原题"
+    },
+    {
+      "id": "q4",
+      "type": "short",
+      "title": "错误返回值",
+      "difficulty": "基础",
+      "prompt": "BadFormatter.format返回int时，build_report显式抛出的异常类名是什么？",
+      "answer": "TypeError",
+      "explanation": "函数检查结果必须是str，否则抛出TypeError。",
+      "hint": "看isinstance之后的raise。",
+      "sourceIndex": 0,
+      "attribution": "依据 2026-11-20 实际阅读的官方/课程资料原创，非官方原题"
+    },
+    {
+      "id": "q5",
+      "type": "code",
+      "title": "带Protocol的成绩报告",
+      "difficulty": "综合",
+      "prompt": "定义Formatter Protocol并实现文本与CSV格式器；覆盖正常替换、错误返回类型、缺少format和空姓名。",
+      "answer": "from typing import Protocol\n\n\nclass StudentRecord:\n    def __init__(self, student_id: str, name: str, score: int) -> None:\n        student_id, name = student_id.strip(), name.strip()\n        if not student_id or not name:\n            raise ValueError(\"student_id and name cannot be blank\")\n        if isinstance(score, bool) or not isinstance(score, int) or not 0 <= score <= 100:\n            raise ValueError(\"score must be an integer from 0 to 100\")\n        self.student_id = student_id\n        self.name = name\n        self.score = score\n\n\nclass Formatter(Protocol):\n    def format(self, record: StudentRecord) -> str:\n        ...\n\n\nclass TextFormatter:\n    def format(self, record: StudentRecord) -> str:\n        return f\"{record.student_id} | {record.name} | {record.score}\"\n\n\nclass CsvFormatter:\n    def format(self, record: StudentRecord) -> str:\n        return f\"{record.student_id},{record.name},{record.score}\"\n\n\ndef build_report(record: StudentRecord, formatter: Formatter) -> str:\n    result = formatter.format(record)\n    if not isinstance(result, str):\n        raise TypeError(\"formatter must return str\")\n    return result\n\n\nclass BadFormatter:\n    def format(self, record: StudentRecord) -> int:\n        return record.score\n\n\ndef check_raises(error_type, action) -> None:\n    try:\n        action()\n    except error_type:\n        return\n    raise AssertionError(f\"expected {error_type.__name__}\")\n\n\namy = StudentRecord(\"S01\", \"Amy\", 88)\nassert build_report(amy, TextFormatter()) == \"S01 | Amy | 88\"\nassert build_report(amy, CsvFormatter()) == \"S01,Amy,88\"\ncheck_raises(TypeError, lambda: build_report(amy, BadFormatter()))\ncheck_raises(AttributeError, lambda: build_report(amy, object()))\ncheck_raises(ValueError, lambda: StudentRecord(\"S02\", \" \", 70))\nprint(\"protocol checks: OK\")\n",
+      "explanation": "Protocol把昨天隐含的统一接口写进类型提示，同时保留必要的运行时边界检查。",
+      "hint": "具体格式器无需显式继承Protocol。",
+      "sourceIndex": 2,
+      "attribution": "依据 2026-11-20 实际阅读的官方/课程资料原创，非官方原题",
+      "language": "python",
+      "starter": "from typing import Protocol\n\nclass Formatter(Protocol):\n    pass\n\nclass TextFormatter:\n    pass\n\nclass CsvFormatter:\n    pass\n",
+      "tests": [
+        {
+          "input": "TextFormatter and CsvFormatter",
+          "output": "protocol checks: OK"
+        },
+        {
+          "input": "bad return, missing format, blank name",
+          "output": "protocol checks: OK"
+        }
+      ]
+    }
+  ]
+}
