@@ -246,6 +246,12 @@
       "topic": "多态与统一接口",
       "path": "questions/2026-11/2026-11-19_多态与统一接口.json",
       "count": 5
+    },
+    {
+      "date": "2026-11-20",
+      "topic": "Protocol与结构化类型提示",
+      "path": "questions/2026-11/2026-11-20_Protocol与结构化类型提示.json",
+      "count": 5
     }
   ]
 }
