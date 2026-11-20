@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-11-19",
+  "updatedAt": "2026-11-20",
   "projects": [
     {
       "id": "weekend-2026-10-10",
@@ -890,6 +890,33 @@
       "javaPath": "projects/2026-11/daily-2026-11-19.json",
       "guidePath": "projects/2026-11/daily-2026-11-19.md",
       "javaGuidePath": "projects/2026-11/daily-2026-11-19.md",
+      "ready": true
+    },
+    {
+      "id": "daily-2026-11-20",
+      "startDate": "2026-11-20",
+      "endDate": "2026-11-20",
+      "kind": "daily",
+      "title": "Protocol多格式报告与链式排队队列",
+      "description": "Python 用 Protocol 写明格式器接口；Java 用单链表实现 O(1) 的 FIFO 队列。",
+      "concepts": [
+        "Protocol",
+        "结构化类型",
+        "类型提示",
+        "运行时校验"
+      ],
+      "javaConcepts": [
+        "链表队列",
+        "head/tail",
+        "FIFO",
+        "O(1)"
+      ],
+      "minutes": 50,
+      "javaMinutes": 25,
+      "pythonPath": "projects/2026-11/daily-2026-11-20.json",
+      "javaPath": "projects/2026-11/daily-2026-11-20.json",
+      "guidePath": "projects/2026-11/daily-2026-11-20.md",
+      "javaGuidePath": "projects/2026-11/daily-2026-11-20.md",
       "ready": true
     }
   ]
