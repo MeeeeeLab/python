@@ -28,9 +28,9 @@
 
 工作日每天一个 Python 小项目；周六、周日合做一个综合项目。Java 数据结构作为同一场景的可选加练。笔记依旧每天更新，原练习网站继续可用；项目的代码、步骤与复盘按账号保存，个人记录不上传到公开仓库。
 
-今日项目：[多格式成绩报告](projects/2026-11/daily-2026-11-19.md)（主线延伸安排；多态与统一接口）。
+今日项目：[带Protocol的多格式报告](projects/2026-11/daily-2026-11-20.md)（主线延伸安排；结构化类型提示）。
 
-上一项目：[学生联系方式组合模型](projects/2026-11/daily-2026-11-17.md)（主线延伸安排；历史项目 ID 保留）。
+上一项目：[多格式成绩报告](projects/2026-11/daily-2026-11-19.md)（主线延伸安排；历史项目 ID 保留）。
 
 上个周末项目：[成绩册备份与恢复工具](projects/2026-11/weekend-2026-11-14.md)（11 月 14–15 日使用同一项目 ID；历史资料与记录保留）。
 
@@ -92,6 +92,7 @@
 | 2026-11-16 | [继承与方法重写](notes/2026-11/2026-11-16_继承与方法重写.md) | [打开每日练习](https://python-daily-lab.sillywood.chatgpt.site) · [题目数据](questions/2026-11/2026-11-16_继承与方法重写.json) |
 | 2026-11-17 | [对象组合与职责拆分](notes/2026-11/2026-11-17_对象组合与职责拆分.md) | [打开每日练习](https://python-daily-lab.sillywood.chatgpt.site) · [题目数据](questions/2026-11/2026-11-17_对象组合与职责拆分.json) |
 | 2026-11-19 | [多态与统一接口](notes/2026-11/2026-11-19_多态与统一接口.md) | [打开每日练习](https://python-daily-lab.sillywood.chatgpt.site) · [题目数据](questions/2026-11/2026-11-19_多态与统一接口.json) |
+| 2026-11-20 | [Protocol 与结构化类型提示](notes/2026-11/2026-11-20_Protocol与结构化类型提示.md) | [打开每日练习](https://python-daily-lab.sillywood.chatgpt.site) · [题目数据](questions/2026-11/2026-11-20_Protocol与结构化类型提示.json) |
 <!-- DAILY_NOTES_END -->
 
 ## ✅ 学习方法
