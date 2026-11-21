@@ -1,0 +1,112 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-22",
+  "topic": "周末项目可插拔成绩报告器综合验收",
+  "stage": "主线延伸：类与对象综合",
+  "estimatedMinutes": 35,
+  "notePath": "notes/2026-11/2026-11-22_周末项目可插拔成绩报告器综合验收.md",
+  "collectedAt": "2026-11-22",
+  "sources": [
+    {
+      "title": "Python 官方：typing.Protocol",
+      "url": "https://docs.python.org/3/library/typing.html#typing.Protocol",
+      "kind": "Python 官方标准库"
+    },
+    {
+      "title": "Python 官方：csv",
+      "url": "https://docs.python.org/3/library/csv.html",
+      "kind": "Python 官方标准库"
+    },
+    {
+      "title": "Python 官方：io.StringIO",
+      "url": "https://docs.python.org/3/library/io.html#io.StringIO",
+      "kind": "Python 官方标准库"
+    }
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "type": "mcq",
+      "title": "职责拆分",
+      "difficulty": "基础",
+      "prompt": "GradeBook.export依赖Formatter Protocol的主要好处是什么？",
+      "answer": 1,
+      "explanation": "成绩册只依赖format结构，新增具体输出格式时不必修改集合管理逻辑。",
+      "hint": "关注调用者依赖的最小接口。",
+      "sourceIndex": 0,
+      "attribution": "依据 2026-11-22 实际阅读的官方/课程资料原创，非官方原题",
+      "options": [
+        "自动把所有异常吞掉",
+        "输出策略可替换而GradeBook不依赖具体格式器",
+        "运行时强制每个类型注解",
+        "CSV无需处理转义"
+      ]
+    },
+    {
+      "id": "q2",
+      "type": "short",
+      "title": "空CSV契约",
+      "difficulty": "基础",
+      "prompt": "空成绩册导出CSV时仍应保留什么？",
+      "answer": "表头 student_id,name,score",
+      "explanation": "稳定表头让下游程序即使面对零条记录也能识别字段。",
+      "hint": "空数据不等于无格式。",
+      "sourceIndex": 1,
+      "attribution": "依据 2026-11-22 实际阅读的官方/课程资料原创，非官方原题"
+    },
+    {
+      "id": "q3",
+      "type": "mcq",
+      "title": "运行时边界",
+      "difficulty": "基础",
+      "prompt": "格式器返回int而不是str时，GradeBook.export应如何处理？",
+      "answer": 2,
+      "explanation": "Protocol主要供静态检查，示例用显式检查在运行时抛出TypeError。",
+      "hint": "类型注解通常不会自动拒绝调用。",
+      "sourceIndex": 0,
+      "attribution": "依据 2026-11-22 实际阅读的官方/课程资料原创，非官方原题",
+      "options": [
+        "把int自动转成str",
+        "返回空字符串",
+        "抛出TypeError",
+        "删除全部记录"
+      ]
+    },
+    {
+      "id": "q4",
+      "type": "short",
+      "title": "导出复杂度",
+      "difficulty": "基础",
+      "prompt": "n条记录按学号排序后导出的主导时间复杂度是什么？",
+      "answer": "O(n log n)",
+      "explanation": "排序是O(n log n)，随后线性格式化不改变主导项。",
+      "hint": "先排序再写出。",
+      "sourceIndex": 2,
+      "attribution": "依据 2026-11-22 实际阅读的官方/课程资料原创，非官方原题"
+    },
+    {
+      "id": "q5",
+      "type": "code",
+      "title": "可插拔成绩报告器",
+      "difficulty": "综合",
+      "prompt": "实现记录校验、去重成绩册、文本与CSV格式器；覆盖空集合、稳定排序、逗号转义、重复学号、非法记录与错误返回类型。",
+      "answer": "import csv\nimport io\nfrom dataclasses import dataclass\nfrom typing import Protocol\n\n\n@dataclass(frozen=True)\nclass StudentRecord:\n    student_id: str\n    name: str\n    score: int\n\n    def __post_init__(self) -> None:\n        object.__setattr__(self, \"student_id\", self.student_id.strip())\n        object.__setattr__(self, \"name\", self.name.strip())\n        if not self.student_id or not self.name:\n            raise ValueError(\"student_id and name cannot be blank\")\n        if isinstance(self.score, bool) or not isinstance(self.score, int) or not 0 <= self.score <= 100:\n            raise ValueError(\"score must be an integer from 0 to 100\")\n\n\nclass Formatter(Protocol):\n    def format(self, records: list[StudentRecord]) -> str: ...\n\n\nclass TextFormatter:\n    def format(self, records: list[StudentRecord]) -> str:\n        if not records:\n            return \"(empty)\"\n        return \"\\n\".join(f\"{r.student_id} | {r.name} | {r.score}\" for r in records)\n\n\nclass CsvFormatter:\n    def format(self, records: list[StudentRecord]) -> str:\n        stream = io.StringIO(newline=\"\")\n        writer = csv.writer(stream, lineterminator=\"\\n\")\n        writer.writerow([\"student_id\", \"name\", \"score\"])\n        writer.writerows([r.student_id, r.name, r.score] for r in records)\n        return stream.getvalue()\n\n\nclass GradeBook:\n    def __init__(self) -> None:\n        self._records: dict[str, StudentRecord] = {}\n\n    def add(self, record: StudentRecord) -> bool:\n        if record.student_id in self._records:\n            return False\n        self._records[record.student_id] = record\n        return True\n\n    def export(self, formatter: Formatter) -> str:\n        ordered = sorted(self._records.values(), key=lambda r: r.student_id)\n        result = formatter.format(ordered)\n        if not isinstance(result, str):\n            raise TypeError(\"formatter must return str\")\n        return result\n\n\nclass BadFormatter:\n    def format(self, records: list[StudentRecord]) -> int:\n        return len(records)\n\n\ndef expect(error_type: type[Exception], action) -> None:\n    try:\n        action()\n    except error_type:\n        return\n    raise AssertionError(f\"expected {error_type.__name__}\")\n\n\ndef run_checks() -> None:\n    empty = GradeBook()\n    assert empty.export(TextFormatter()) == \"(empty)\"\n    assert empty.export(CsvFormatter()) == \"student_id,name,score\\n\"\n\n    book = GradeBook()\n    assert book.add(StudentRecord(\"S02\", \"林安\", 0))\n    assert book.add(StudentRecord(\"S01\", \"Amy, A.\", 95))\n    assert not book.add(StudentRecord(\"S01\", \"Other\", 60))\n    assert book.export(TextFormatter()) == \"S01 | Amy, A. | 95\\nS02 | 林安 | 0\"\n    assert book.export(CsvFormatter()) == 'student_id,name,score\\nS01,\"Amy, A.\",95\\nS02,林安,0\\n'\n\n    expect(ValueError, lambda: StudentRecord(\"S03\", \" \", 70))\n    expect(ValueError, lambda: StudentRecord(\"S03\", \"Bo\", True))\n    expect(ValueError, lambda: StudentRecord(\"S03\", \"Bo\", 101))\n    expect(TypeError, lambda: book.export(BadFormatter()))\n\n\nif __name__ == \"__main__\":\n    run_checks()\n    print(\"weekend-report checks: OK\")\n",
+      "explanation": "Protocol固定最小接口，GradeBook管理集合，具体格式器分别负责文本和CSV；断言覆盖正常与边界路径。",
+      "hint": "先排序记录，再交给格式器；CSV使用标准库writer。",
+      "sourceIndex": 1,
+      "attribution": "依据 2026-11-22 实际阅读的官方/课程资料原创，非官方原题",
+      "language": "python",
+      "starter": "from typing import Protocol\n\nclass Formatter(Protocol):\n    def format(self, records): ...\n\nclass GradeBook:\n    # TODO\n    pass\n",
+      "tests": [
+        {
+          "input": "empty; S02 then S01; comma in name",
+          "output": "weekend-report checks: OK"
+        },
+        {
+          "input": "duplicate; blank; bool/101 score; bad formatter",
+          "output": "weekend-report checks: OK"
+        }
+      ]
+    }
+  ]
+}
