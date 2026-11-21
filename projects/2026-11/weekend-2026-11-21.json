@@ -1,0 +1,130 @@
+{
+  "schemaVersion": 1,
+  "projectId": "weekend-2026-11-21",
+  "track": "python",
+  "title": "可插拔成绩报告器综合验收",
+  "goal": "用统一格式器接口把经过校验的对象集合稳定导出为文本和CSV。",
+  "prerequisites": [
+    "类与对象",
+    "Protocol",
+    "CSV",
+    "边界测试"
+  ],
+  "filename": "pluggable_report_project.py",
+  "runCommand": "python3 pluggable_report_project.py",
+  "starter": "from typing import Protocol\n\nclass Formatter(Protocol):\n    def format(self, records): ...\n\nclass GradeBook:\n    # TODO\n    pass\n",
+  "solution": "import csv\nimport io\nfrom dataclasses import dataclass\nfrom typing import Protocol\n\n\n@dataclass(frozen=True)\nclass StudentRecord:\n    student_id: str\n    name: str\n    score: int\n\n    def __post_init__(self) -> None:\n        object.__setattr__(self, \"student_id\", self.student_id.strip())\n        object.__setattr__(self, \"name\", self.name.strip())\n        if not self.student_id or not self.name:\n            raise ValueError(\"student_id and name cannot be blank\")\n        if isinstance(self.score, bool) or not isinstance(self.score, int) or not 0 <= self.score <= 100:\n            raise ValueError(\"score must be an integer from 0 to 100\")\n\n\nclass Formatter(Protocol):\n    def format(self, records: list[StudentRecord]) -> str: ...\n\n\nclass TextFormatter:\n    def format(self, records: list[StudentRecord]) -> str:\n        if not records:\n            return \"(empty)\"\n        return \"\\n\".join(f\"{r.student_id} | {r.name} | {r.score}\" for r in records)\n\n\nclass CsvFormatter:\n    def format(self, records: list[StudentRecord]) -> str:\n        stream = io.StringIO(newline=\"\")\n        writer = csv.writer(stream, lineterminator=\"\\n\")\n        writer.writerow([\"student_id\", \"name\", \"score\"])\n        writer.writerows([r.student_id, r.name, r.score] for r in records)\n        return stream.getvalue()\n\n\nclass GradeBook:\n    def __init__(self) -> None:\n        self._records: dict[str, StudentRecord] = {}\n\n    def add(self, record: StudentRecord) -> bool:\n        if record.student_id in self._records:\n            return False\n        self._records[record.student_id] = record\n        return True\n\n    def export(self, formatter: Formatter) -> str:\n        ordered = sorted(self._records.values(), key=lambda r: r.student_id)\n        result = formatter.format(ordered)\n        if not isinstance(result, str):\n            raise TypeError(\"formatter must return str\")\n        return result\n\n\nclass BadFormatter:\n    def format(self, records: list[StudentRecord]) -> int:\n        return len(records)\n\n\ndef expect(error_type: type[Exception], action) -> None:\n    try:\n        action()\n    except error_type:\n        return\n    raise AssertionError(f\"expected {error_type.__name__}\")\n\n\ndef run_checks() -> None:\n    empty = GradeBook()\n    assert empty.export(TextFormatter()) == \"(empty)\"\n    assert empty.export(CsvFormatter()) == \"student_id,name,score\\n\"\n\n    book = GradeBook()\n    assert book.add(StudentRecord(\"S02\", \"林安\", 0))\n    assert book.add(StudentRecord(\"S01\", \"Amy, A.\", 95))\n    assert not book.add(StudentRecord(\"S01\", \"Other\", 60))\n    assert book.export(TextFormatter()) == \"S01 | Amy, A. | 95\\nS02 | 林安 | 0\"\n    assert book.export(CsvFormatter()) == 'student_id,name,score\\nS01,\"Amy, A.\",95\\nS02,林安,0\\n'\n\n    expect(ValueError, lambda: StudentRecord(\"S03\", \" \", 70))\n    expect(ValueError, lambda: StudentRecord(\"S03\", \"Bo\", True))\n    expect(ValueError, lambda: StudentRecord(\"S03\", \"Bo\", 101))\n    expect(TypeError, lambda: book.export(BadFormatter()))\n\n\nif __name__ == \"__main__\":\n    run_checks()\n    print(\"weekend-report checks: OK\")\n",
+  "solutionExplanation": [
+    "使用稳定周末项目ID；今天的完整材料可独立完成，不声称11月21日已经完成。",
+    "GradeBook、记录与格式器分离职责，新增格式无需改动集合管理。",
+    "公开仓库只保存教学材料，不保存个人答案、草稿或完成状态。"
+  ],
+  "steps": [
+    {
+      "id": "record-contract",
+      "day": "2026-11-22",
+      "title": "固定记录契约",
+      "instruction": "校验学号、姓名和0到100整数成绩。",
+      "hint": "bool是int的子类，要显式拒绝。",
+      "knowledge": [
+        "对象",
+        "不变量"
+      ]
+    },
+    {
+      "id": "formatter-protocol",
+      "day": "2026-11-22",
+      "title": "定义格式器接口",
+      "instruction": "用Protocol声明列表到字符串的format方法。",
+      "hint": "具体类无需显式继承。",
+      "knowledge": [
+        "Protocol",
+        "结构化类型"
+      ]
+    },
+    {
+      "id": "text-csv",
+      "day": "2026-11-22",
+      "title": "实现两种输出",
+      "instruction": "输出稳定排序的文本和标准CSV。",
+      "hint": "使用csv.writer处理转义。",
+      "knowledge": [
+        "多态",
+        "CSV"
+      ]
+    },
+    {
+      "id": "boundary-checks",
+      "day": "2026-11-22",
+      "title": "边界测试",
+      "instruction": "覆盖空、重复、非法记录和错误返回类型。",
+      "hint": "断言精确字符串。",
+      "knowledge": [
+        "异常",
+        "测试"
+      ]
+    },
+    {
+      "id": "sunday-acceptance",
+      "day": "2026-11-22",
+      "title": "独立实现验收",
+      "instruction": "不看参考实现完成并运行全部断言。",
+      "hint": "先写契约再实现。",
+      "knowledge": [
+        "综合验收"
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "id": "t1",
+      "label": "正常多格式输出",
+      "input": "S02/林安/0; S01/Amy, A./95",
+      "output": "weekend-report checks: OK",
+      "purpose": "验证排序、文本和CSV转义"
+    },
+    {
+      "id": "t2",
+      "label": "空与重复",
+      "input": "empty; duplicate S01",
+      "output": "weekend-report checks: OK",
+      "purpose": "验证空输出和去重"
+    },
+    {
+      "id": "t3",
+      "label": "非法契约",
+      "input": "blank; bool/101 score; bad formatter",
+      "output": "weekend-report checks: OK",
+      "purpose": "验证运行时边界"
+    }
+  ],
+  "recall": [
+    {
+      "id": "protocol",
+      "question": "为什么具体格式器无需继承Protocol？",
+      "answer": "结构化子类型只要求提供签名兼容的成员。"
+    },
+    {
+      "id": "complexity",
+      "question": "为什么导出是O(n log n)？",
+      "answer": "先按学号排序n条记录，再线性写出。"
+    }
+  ],
+  "sources": [
+    {
+      "title": "Python 官方：typing.Protocol",
+      "url": "https://docs.python.org/3/library/typing.html#typing.Protocol",
+      "attribution": "2026-11-22 实际核对，项目为原创教学练习"
+    },
+    {
+      "title": "Python 官方：csv",
+      "url": "https://docs.python.org/3/library/csv.html",
+      "attribution": "2026-11-22 实际核对，项目为原创教学练习"
+    },
+    {
+      "title": "Python 官方：io.StringIO",
+      "url": "https://docs.python.org/3/library/io.html#io.StringIO",
+      "attribution": "2026-11-22 实际核对，项目为原创教学练习"
+    }
+  ]
+}
