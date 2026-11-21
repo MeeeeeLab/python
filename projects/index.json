@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-11-20",
+  "updatedAt": "2026-11-22",
   "projects": [
     {
       "id": "weekend-2026-10-10",
@@ -917,6 +917,33 @@
       "javaPath": "projects/2026-11/daily-2026-11-20.json",
       "guidePath": "projects/2026-11/daily-2026-11-20.md",
       "javaGuidePath": "projects/2026-11/daily-2026-11-20.md",
+      "ready": true
+    },
+    {
+      "id": "weekend-2026-11-21",
+      "startDate": "2026-11-21",
+      "endDate": "2026-11-22",
+      "kind": "weekend",
+      "title": "可插拔成绩报告器与排队叫号系统",
+      "description": "Python 用 Protocol 综合验收可替换文本/CSV输出；Java 用同一接口验收循环数组队列和链表队列。",
+      "concepts": [
+        "Protocol",
+        "对象集合",
+        "多格式报告",
+        "综合验收"
+      ],
+      "javaConcepts": [
+        "循环数组队列",
+        "链表队列",
+        "FIFO",
+        "章节验收"
+      ],
+      "minutes": 90,
+      "javaMinutes": 60,
+      "pythonPath": "projects/2026-11/weekend-2026-11-21.json",
+      "javaPath": "projects/2026-11/weekend-2026-11-21.json",
+      "guidePath": "projects/2026-11/weekend-2026-11-21.md",
+      "javaGuidePath": "projects/2026-11/weekend-2026-11-21.md",
       "ready": true
     }
   ]
