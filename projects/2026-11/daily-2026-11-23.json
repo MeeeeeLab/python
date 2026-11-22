@@ -1,0 +1,113 @@
+{
+  "schemaVersion": 1,
+  "projectId": "daily-2026-11-23",
+  "track": "python",
+  "title": "不可变成绩记录排序器",
+  "goal": "用dataclass减少数据类样板代码，并用不可变记录安全表达成绩更正。",
+  "prerequisites": [
+    "类与对象",
+    "类型注解",
+    "字典",
+    "边界测试"
+  ],
+  "filename": "dataclass_record_project.py",
+  "runCommand": "python3 dataclass_record_project.py",
+  "starter": "from dataclasses import dataclass, replace\n\n@dataclass(frozen=True, order=True)\nclass StudentRecord:\n    # TODO\n    pass\n\nclass RecordBook:\n    # TODO\n    pass\n",
+  "solution": "from dataclasses import FrozenInstanceError, dataclass, replace\n\n\n@dataclass(frozen=True, order=True)\nclass StudentRecord:\n    student_id: str\n    name: str\n    score: int\n\n    def __post_init__(self) -> None:\n        object.__setattr__(self, \"student_id\", self.student_id.strip())\n        object.__setattr__(self, \"name\", self.name.strip())\n        if not self.student_id or not self.name:\n            raise ValueError(\"student_id and name cannot be blank\")\n        if isinstance(self.score, bool) or not isinstance(self.score, int) or not 0 <= self.score <= 100:\n            raise ValueError(\"score must be an integer from 0 to 100\")\n\n\nclass RecordBook:\n    def __init__(self) -> None:\n        self._records: dict[str, StudentRecord] = {}\n\n    def add(self, record: StudentRecord) -> bool:\n        if record.student_id in self._records:\n            return False\n        self._records[record.student_id] = record\n        return True\n\n    def corrected_score(self, student_id: str, score: int) -> StudentRecord:\n        old = self._records[student_id]\n        corrected = replace(old, score=score)\n        self._records[student_id] = corrected\n        return corrected\n\n    def ordered(self) -> tuple[StudentRecord, ...]:\n        return tuple(sorted(self._records.values()))\n\n\ndef expect(error_type: type[BaseException], action) -> None:\n    try:\n        action()\n    except error_type:\n        return\n    raise AssertionError(f\"expected {error_type.__name__}\")\n\n\ndef run_checks() -> None:\n    amy = StudentRecord(\" S02 \", \" Amy \", 88)\n    same = StudentRecord(\"S02\", \"Amy\", 88)\n    assert amy == same\n    assert repr(amy) == \"StudentRecord(student_id='S02', name='Amy', score=88)\"\n    expect(FrozenInstanceError, lambda: setattr(amy, \"score\", 90))\n\n    book = RecordBook()\n    assert book.add(amy)\n    assert book.add(StudentRecord(\"S01\", \"林安\", 0))\n    assert not book.add(StudentRecord(\"S01\", \"Other\", 60))\n    corrected = book.corrected_score(\"S02\", 91)\n    assert amy.score == 88 and corrected.score == 91\n    assert [r.student_id for r in book.ordered()] == [\"S01\", \"S02\"]\n\n    expect(ValueError, lambda: StudentRecord(\"\", \"Bo\", 70))\n    expect(ValueError, lambda: StudentRecord(\"S03\", \"Bo\", True))\n    expect(ValueError, lambda: book.corrected_score(\"S02\", 101))\n    expect(KeyError, lambda: book.corrected_score(\"missing\", 80))\n\n\nif __name__ == \"__main__\":\n    run_checks()\n    print(\"dataclass-record checks: OK\")\n",
+  "solutionExplanation": [
+    "@dataclass生成构造、显示和相等比较所需的常用方法。",
+    "frozen=True阻止原地改字段；replace生成新记录，旧记录不变。",
+    "公开仓库只保存教学材料，不保存个人作答或完成状态。"
+  ],
+  "steps": [
+    {
+      "id": "declare-fields",
+      "day": "2026-11-23",
+      "title": "声明数据字段",
+      "instruction": "用类型注解声明学号、姓名和成绩。",
+      "hint": "字段顺序影响比较顺序。",
+      "knowledge": [
+        "dataclass",
+        "类型注解"
+      ]
+    },
+    {
+      "id": "validate",
+      "day": "2026-11-23",
+      "title": "维护记录不变量",
+      "instruction": "在__post_init__中清理文本并校验成绩。",
+      "hint": "frozen类初始化阶段用object.__setattr__。",
+      "knowledge": [
+        "不变量",
+        "__post_init__"
+      ]
+    },
+    {
+      "id": "immutable-update",
+      "day": "2026-11-23",
+      "title": "安全更正成绩",
+      "instruction": "用replace创建新记录并替换字典值。",
+      "hint": "旧记录保持不变。",
+      "knowledge": [
+        "frozen",
+        "replace"
+      ]
+    },
+    {
+      "id": "acceptance",
+      "day": "2026-11-23",
+      "title": "运行边界验收",
+      "instruction": "覆盖排序、重复、冻结和非法输入。",
+      "hint": "断言旧对象和新对象的分数。",
+      "knowledge": [
+        "测试",
+        "边界"
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "id": "t1",
+      "label": "正常记录与排序",
+      "input": "S02 then S01; correct S02",
+      "output": "dataclass-record checks: OK",
+      "purpose": "验证生成方法、排序与replace"
+    },
+    {
+      "id": "t2",
+      "label": "不可变与非法输入",
+      "input": "assign; duplicate; blank/bool/101; missing",
+      "output": "dataclass-record checks: OK",
+      "purpose": "验证对象不变量"
+    }
+  ],
+  "recall": [
+    {
+      "id": "generated",
+      "question": "dataclass为什么适合纯记录类？",
+      "answer": "它可根据字段自动生成常用样板方法。"
+    },
+    {
+      "id": "frozen",
+      "question": "为什么更正成绩时创建新对象？",
+      "answer": "不可变记录用新状态替换旧状态，避免其他引用观察到原地修改。"
+    }
+  ],
+  "sources": [
+    {
+      "title": "Python 官方：dataclasses",
+      "url": "https://docs.python.org/3/library/dataclasses.html",
+      "attribution": "2026-11-23 实际核对，项目为原创教学练习"
+    },
+    {
+      "title": "Python 官方教程：Classes",
+      "url": "https://docs.python.org/3/tutorial/classes.html",
+      "attribution": "2026-11-23 实际核对，项目为原创教学练习"
+    },
+    {
+      "title": "Python 官方：dataclasses.replace",
+      "url": "https://docs.python.org/3/library/dataclasses.html#dataclasses.replace",
+      "attribution": "2026-11-23 实际核对，项目为原创教学练习"
+    }
+  ]
+}
