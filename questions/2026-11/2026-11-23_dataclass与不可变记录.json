@@ -1,0 +1,112 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-23",
+  "topic": "dataclass与不可变记录",
+  "stage": "主线延伸：类与对象",
+  "estimatedMinutes": 30,
+  "notePath": "notes/2026-11/2026-11-23_dataclass与不可变记录.md",
+  "collectedAt": "2026-11-23",
+  "sources": [
+    {
+      "title": "Python 官方：dataclasses",
+      "url": "https://docs.python.org/3/library/dataclasses.html",
+      "kind": "Python 官方标准库"
+    },
+    {
+      "title": "Python 官方教程：Classes",
+      "url": "https://docs.python.org/3/tutorial/classes.html",
+      "kind": "Python 官方教程"
+    },
+    {
+      "title": "Python 官方：dataclasses.replace",
+      "url": "https://docs.python.org/3/library/dataclasses.html#dataclasses.replace",
+      "kind": "Python 官方标准库"
+    }
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "type": "mcq",
+      "title": "自动生成的方法",
+      "difficulty": "基础",
+      "prompt": "默认@dataclass主要根据带类型注解的字段自动生成哪些常用方法？",
+      "answer": 1,
+      "explanation": "dataclass默认生成__init__、__repr__和__eq__等方法，减少纯数据类样板代码。",
+      "hint": "想想创建、显示和比较对象。",
+      "sourceIndex": 0,
+      "attribution": "依据 2026-11-23 实际阅读的官方/课程资料原创，非官方原题",
+      "options": [
+        "open、read、write",
+        "__init__、__repr__、__eq__",
+        "append、pop、sort",
+        "encode、decode、split"
+      ]
+    },
+    {
+      "id": "q2",
+      "type": "short",
+      "title": "冻结对象",
+      "difficulty": "基础",
+      "prompt": "给@dataclass设置frozen=True后，给实例字段重新赋值通常抛出什么异常？",
+      "answer": "FrozenInstanceError",
+      "explanation": "frozen=True模拟不可变实例，生成的设置/删除字段逻辑会拒绝修改。",
+      "hint": "异常名直接描述冻结实例。",
+      "sourceIndex": 0,
+      "attribution": "依据 2026-11-23 实际阅读的官方/课程资料原创，非官方原题"
+    },
+    {
+      "id": "q3",
+      "type": "mcq",
+      "title": "安全更正",
+      "difficulty": "基础",
+      "prompt": "不可变记录需要把score从88改成91时，哪种做法更符合本课设计？",
+      "answer": 2,
+      "explanation": "dataclasses.replace创建带有修改字段的新实例，旧实例保持不变。",
+      "hint": "不可变对象用新对象表达新状态。",
+      "sourceIndex": 2,
+      "attribution": "依据 2026-11-23 实际阅读的官方/课程资料原创，非官方原题",
+      "options": [
+        "直接amy.score=91",
+        "删除frozen参数后原地修改",
+        "replace(amy, score=91)",
+        "修改amy.__dict__"
+      ]
+    },
+    {
+      "id": "q4",
+      "type": "short",
+      "title": "字段顺序",
+      "difficulty": "基础",
+      "prompt": "设置order=True时，默认比较顺序依据什么？",
+      "answer": "按类定义中的字段顺序逐个比较",
+      "explanation": "dataclass生成的排序方法把实例视为按字段定义顺序排列的元组。",
+      "hint": "字段声明顺序也影响生成的方法。",
+      "sourceIndex": 0,
+      "attribution": "依据 2026-11-23 实际阅读的官方/课程资料原创，非官方原题"
+    },
+    {
+      "id": "q5",
+      "type": "code",
+      "title": "不可变成绩记录排序器",
+      "difficulty": "综合",
+      "prompt": "用frozen且可排序的dataclass实现成绩记录和记录簿；覆盖自动相等、稳定排序、重复学号、replace更正、冻结修改、非法字段和缺失学号。",
+      "answer": "from dataclasses import FrozenInstanceError, dataclass, replace\n\n\n@dataclass(frozen=True, order=True)\nclass StudentRecord:\n    student_id: str\n    name: str\n    score: int\n\n    def __post_init__(self) -> None:\n        object.__setattr__(self, \"student_id\", self.student_id.strip())\n        object.__setattr__(self, \"name\", self.name.strip())\n        if not self.student_id or not self.name:\n            raise ValueError(\"student_id and name cannot be blank\")\n        if isinstance(self.score, bool) or not isinstance(self.score, int) or not 0 <= self.score <= 100:\n            raise ValueError(\"score must be an integer from 0 to 100\")\n\n\nclass RecordBook:\n    def __init__(self) -> None:\n        self._records: dict[str, StudentRecord] = {}\n\n    def add(self, record: StudentRecord) -> bool:\n        if record.student_id in self._records:\n            return False\n        self._records[record.student_id] = record\n        return True\n\n    def corrected_score(self, student_id: str, score: int) -> StudentRecord:\n        old = self._records[student_id]\n        corrected = replace(old, score=score)\n        self._records[student_id] = corrected\n        return corrected\n\n    def ordered(self) -> tuple[StudentRecord, ...]:\n        return tuple(sorted(self._records.values()))\n\n\ndef expect(error_type: type[BaseException], action) -> None:\n    try:\n        action()\n    except error_type:\n        return\n    raise AssertionError(f\"expected {error_type.__name__}\")\n\n\ndef run_checks() -> None:\n    amy = StudentRecord(\" S02 \", \" Amy \", 88)\n    same = StudentRecord(\"S02\", \"Amy\", 88)\n    assert amy == same\n    assert repr(amy) == \"StudentRecord(student_id='S02', name='Amy', score=88)\"\n    expect(FrozenInstanceError, lambda: setattr(amy, \"score\", 90))\n\n    book = RecordBook()\n    assert book.add(amy)\n    assert book.add(StudentRecord(\"S01\", \"林安\", 0))\n    assert not book.add(StudentRecord(\"S01\", \"Other\", 60))\n    corrected = book.corrected_score(\"S02\", 91)\n    assert amy.score == 88 and corrected.score == 91\n    assert [r.student_id for r in book.ordered()] == [\"S01\", \"S02\"]\n\n    expect(ValueError, lambda: StudentRecord(\"\", \"Bo\", 70))\n    expect(ValueError, lambda: StudentRecord(\"S03\", \"Bo\", True))\n    expect(ValueError, lambda: book.corrected_score(\"S02\", 101))\n    expect(KeyError, lambda: book.corrected_score(\"missing\", 80))\n\n\nif __name__ == \"__main__\":\n    run_checks()\n    print(\"dataclass-record checks: OK\")\n",
+      "explanation": "dataclass承载稳定记录，RecordBook管理唯一学号；replace返回新对象，避免破坏旧记录。",
+      "hint": "校验放在__post_init__，排序字段按声明顺序。",
+      "sourceIndex": 0,
+      "attribution": "依据 2026-11-23 实际阅读的官方/课程资料原创，非官方原题",
+      "language": "python",
+      "starter": "from dataclasses import dataclass, replace\n\n@dataclass(frozen=True, order=True)\nclass StudentRecord:\n    # TODO\n    pass\n\nclass RecordBook:\n    # TODO\n    pass\n",
+      "tests": [
+        {
+          "input": "S02/Amy/88; S01/林安/0; correct S02 to 91",
+          "output": "dataclass-record checks: OK"
+        },
+        {
+          "input": "duplicate; frozen assignment; blank/bool/101; missing id",
+          "output": "dataclass-record checks: OK"
+        }
+      ]
+    }
+  ]
+}
