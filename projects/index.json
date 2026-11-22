@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-11-22",
+  "updatedAt": "2026-11-23",
   "projects": [
     {
       "id": "weekend-2026-10-10",
@@ -944,6 +944,33 @@
       "javaPath": "projects/2026-11/weekend-2026-11-21.json",
       "guidePath": "projects/2026-11/weekend-2026-11-21.md",
       "javaGuidePath": "projects/2026-11/weekend-2026-11-21.md",
+      "ready": true
+    },
+    {
+      "id": "daily-2026-11-23",
+      "startDate": "2026-11-23",
+      "endDate": "2026-11-23",
+      "kind": "daily",
+      "title": "不可变成绩记录与递归求和追踪",
+      "description": "Python 用 dataclass、frozen 和 replace 表达稳定记录；Java 用终止条件与递减参数追踪递归调用和返回。",
+      "concepts": [
+        "dataclass",
+        "frozen",
+        "replace",
+        "对象不变量"
+      ],
+      "javaConcepts": [
+        "递归",
+        "终止条件",
+        "调用栈",
+        "O(n)"
+      ],
+      "minutes": 50,
+      "javaMinutes": 30,
+      "pythonPath": "projects/2026-11/daily-2026-11-23.json",
+      "javaPath": "projects/2026-11/daily-2026-11-23.json",
+      "guidePath": "projects/2026-11/daily-2026-11-23.md",
+      "javaGuidePath": "projects/2026-11/daily-2026-11-23.md",
       "ready": true
     }
   ]
