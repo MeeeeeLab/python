@@ -264,6 +264,12 @@
       "topic": "dataclass与不可变记录",
       "path": "questions/2026-11/2026-11-23_dataclass与不可变记录.json",
       "count": 5
+    },
+    {
+      "date": "2026-11-24",
+      "topic": "Enum与有限状态建模",
+      "path": "questions/2026-11/2026-11-24_Enum与有限状态建模.json",
+      "count": 5
     }
   ]
 }
