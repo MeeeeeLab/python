@@ -1,0 +1,112 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-24",
+  "topic": "Enum与有限状态建模",
+  "stage": "主线延伸：类与对象",
+  "estimatedMinutes": 30,
+  "notePath": "notes/2026-11/2026-11-24_Enum与有限状态建模.md",
+  "collectedAt": "2026-11-24",
+  "sources": [
+    {
+      "title": "Python 官方：enum",
+      "url": "https://docs.python.org/3/library/enum.html",
+      "kind": "Python 官方标准库"
+    },
+    {
+      "title": "Python 官方：Enum HOWTO",
+      "url": "https://docs.python.org/3/howto/enum.html",
+      "kind": "Python 官方指南"
+    },
+    {
+      "title": "Python 官方：dataclasses.replace",
+      "url": "https://docs.python.org/3/library/dataclasses.html#dataclasses.replace",
+      "kind": "Python 官方标准库"
+    }
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "type": "mcq",
+      "title": "Enum适用场景",
+      "difficulty": "基础",
+      "prompt": "哪种情况最适合使用Enum？",
+      "answer": 2,
+      "explanation": "Enum适合表达一组有限、命名清楚的合法值，避免任意字符串混入。",
+      "hint": "变量只能在少数几个状态中选择。",
+      "sourceIndex": 1,
+      "attribution": "依据 2026-11-24 实际阅读的官方/课程资料原创，非官方原题",
+      "options": [
+        "任意长度的用户留言",
+        "不断增长的成绩列表",
+        "ACTIVE、SUSPENDED、GRADUATED三种状态",
+        "任意浮点数计算"
+      ]
+    },
+    {
+      "id": "q2",
+      "type": "short",
+      "title": "成员属性",
+      "difficulty": "基础",
+      "prompt": "EnrollmentStatus.ACTIVE.name返回什么字符串？",
+      "answer": "ACTIVE",
+      "explanation": "Enum成员的name保存定义时的成员名。",
+      "hint": "不要和value混淆。",
+      "sourceIndex": 0,
+      "attribution": "依据 2026-11-24 实际阅读的官方/课程资料原创，非官方原题"
+    },
+    {
+      "id": "q3",
+      "type": "mcq",
+      "title": "按名称查找",
+      "difficulty": "基础",
+      "prompt": "已有字符串\"ACTIVE\"时，哪种写法按成员名得到枚举成员？",
+      "answer": 1,
+      "explanation": "方括号访问按成员名查找；圆括号调用通常按value查找。",
+      "hint": "官方HOWTO区分by name与by value。",
+      "sourceIndex": 1,
+      "attribution": "依据 2026-11-24 实际阅读的官方/课程资料原创，非官方原题",
+      "options": [
+        "EnrollmentStatus(\"ACTIVE\")",
+        "EnrollmentStatus[\"ACTIVE\"]",
+        "EnrollmentStatus.name(\"ACTIVE\")",
+        "Enum.ACTIVE(\"ACTIVE\")"
+      ]
+    },
+    {
+      "id": "q4",
+      "type": "short",
+      "title": "不可变状态更新",
+      "difficulty": "基础",
+      "prompt": "为什么move_to返回新的StudentProfile而不是直接修改原对象？",
+      "answer": "StudentProfile是frozen dataclass，replace创建新状态并保留旧对象不变",
+      "explanation": "有限状态与昨日不可变记录结合，用新对象表达合法转换结果。",
+      "hint": "复习frozen和replace。",
+      "sourceIndex": 2,
+      "attribution": "依据 2026-11-24 实际阅读的官方/课程资料原创，非官方原题"
+    },
+    {
+      "id": "q5",
+      "type": "code",
+      "title": "学生状态流转器",
+      "difficulty": "综合",
+      "prompt": "用Enum和不可变dataclass实现ACTIVE、SUSPENDED、GRADUATED状态；覆盖解析、合法转换、毕业后禁止回退、相同状态复用、错误字符串和错误类型。",
+      "answer": "from dataclasses import dataclass, replace\nfrom enum import Enum, auto, unique\n\n\n@unique\nclass EnrollmentStatus(Enum):\n    ACTIVE = auto()\n    SUSPENDED = auto()\n    GRADUATED = auto()\n\n\n@dataclass(frozen=True)\nclass StudentProfile:\n    student_id: str\n    name: str\n    status: EnrollmentStatus = EnrollmentStatus.ACTIVE\n\n    def __post_init__(self) -> None:\n        object.__setattr__(self, \"student_id\", self.student_id.strip())\n        object.__setattr__(self, \"name\", self.name.strip())\n        if not self.student_id or not self.name:\n            raise ValueError(\"student_id and name cannot be blank\")\n        if not isinstance(self.status, EnrollmentStatus):\n            raise TypeError(\"status must be EnrollmentStatus\")\n\n\nALLOWED_TRANSITIONS = {\n    EnrollmentStatus.ACTIVE: {EnrollmentStatus.SUSPENDED, EnrollmentStatus.GRADUATED},\n    EnrollmentStatus.SUSPENDED: {EnrollmentStatus.ACTIVE, EnrollmentStatus.GRADUATED},\n    EnrollmentStatus.GRADUATED: set(),\n}\n\n\ndef parse_status(text: str) -> EnrollmentStatus:\n    if not isinstance(text, str):\n        raise TypeError(\"status text must be str\")\n    try:\n        return EnrollmentStatus[text.strip().upper()]\n    except KeyError as error:\n        raise ValueError(\"unknown status\") from error\n\n\ndef move_to(profile: StudentProfile, target: EnrollmentStatus) -> StudentProfile:\n    if not isinstance(target, EnrollmentStatus):\n        raise TypeError(\"target must be EnrollmentStatus\")\n    if target == profile.status:\n        return profile\n    if target not in ALLOWED_TRANSITIONS[profile.status]:\n        raise ValueError(f\"cannot move from {profile.status.name} to {target.name}\")\n    return replace(profile, status=target)\n\n\ndef expect(error_type: type[BaseException], action) -> None:\n    try:\n        action()\n    except error_type:\n        return\n    raise AssertionError(f\"expected {error_type.__name__}\")\n\n\ndef run_checks() -> None:\n    assert [status.name for status in EnrollmentStatus] == [\"ACTIVE\", \"SUSPENDED\", \"GRADUATED\"]\n    assert parse_status(\" active \") is EnrollmentStatus.ACTIVE\n\n    original = StudentProfile(\" S01 \", \" Amy \")\n    suspended = move_to(original, EnrollmentStatus.SUSPENDED)\n    active_again = move_to(suspended, EnrollmentStatus.ACTIVE)\n    graduated = move_to(active_again, EnrollmentStatus.GRADUATED)\n    assert original.status is EnrollmentStatus.ACTIVE\n    assert suspended.status is EnrollmentStatus.SUSPENDED\n    assert graduated.status is EnrollmentStatus.GRADUATED\n    assert move_to(graduated, EnrollmentStatus.GRADUATED) is graduated\n\n    expect(ValueError, lambda: move_to(graduated, EnrollmentStatus.ACTIVE))\n    expect(ValueError, lambda: parse_status(\"unknown\"))\n    expect(TypeError, lambda: move_to(original, \"SUSPENDED\"))\n    expect(TypeError, lambda: StudentProfile(\"S02\", \"Bo\", \"ACTIVE\"))\n    expect(ValueError, lambda: StudentProfile(\"\", \"Bo\"))\n\n\nif __name__ == \"__main__\":\n    run_checks()\n    print(\"enum-status checks: OK\")\n",
+      "explanation": "Enum限制合法状态集合，转换表明确允许的方向，replace返回新记录而不污染旧对象。",
+      "hint": "按名称解析使用EnrollmentStatus[text]。",
+      "sourceIndex": 1,
+      "attribution": "依据 2026-11-24 实际阅读的官方/课程资料原创，非官方原题",
+      "language": "python",
+      "starter": "from dataclasses import dataclass, replace\nfrom enum import Enum, auto\n\nclass EnrollmentStatus(Enum):\n    # TODO\n    pass\n\n@dataclass(frozen=True)\nclass StudentProfile:\n    # TODO\n    pass\n",
+      "tests": [
+        {
+          "input": "ACTIVE -> SUSPENDED -> ACTIVE -> GRADUATED",
+          "output": "enum-status checks: OK"
+        },
+        {
+          "input": "graduated rollback; unknown; string target; blank id",
+          "output": "enum-status checks: OK"
+        }
+      ]
+    }
+  ]
+}
