@@ -28,7 +28,9 @@
 
 工作日每天一个 Python 小项目；周六、周日合做一个综合项目。Java 数据结构作为同一场景的可选加练。笔记依旧每天更新，原练习网站继续可用；项目的代码、步骤与复盘按账号保存，个人记录不上传到公开仓库。
 
-今日项目：[不可变成绩记录排序器](projects/2026-11/daily-2026-11-23.md)（主线延伸安排；dataclass 与不可变记录）。
+今日项目：[学生状态流转器](projects/2026-11/daily-2026-11-24.md)（主线延伸安排；Enum 与有限状态）。
+
+上一项目：[不可变成绩记录排序器](projects/2026-11/daily-2026-11-23.md)（历史资料与项目 ID 保留）。
 
 上一周末项目：[可插拔成绩报告器综合验收](projects/2026-11/weekend-2026-11-21.md)（11 月 21–22 日固定项目 ID；历史资料与记录保留）。
 
@@ -97,6 +99,7 @@
 | 2026-11-20 | [Protocol 与结构化类型提示](notes/2026-11/2026-11-20_Protocol与结构化类型提示.md) | [打开每日练习](https://python-daily-lab.sillywood.chatgpt.site) · [题目数据](questions/2026-11/2026-11-20_Protocol与结构化类型提示.json) |
 | 2026-11-22 | [周末项目：可插拔成绩报告器综合验收](notes/2026-11/2026-11-22_周末项目可插拔成绩报告器综合验收.md) | [打开每日练习](https://python-daily-lab.sillywood.chatgpt.site) · [题目数据](questions/2026-11/2026-11-22_周末项目可插拔成绩报告器综合验收.json) |
 | 2026-11-23 | [dataclass 与不可变记录](notes/2026-11/2026-11-23_dataclass与不可变记录.md) | [打开每日练习](https://python-daily-lab.sillywood.chatgpt.site) · [题目数据](questions/2026-11/2026-11-23_dataclass与不可变记录.json) |
+| 2026-11-24 | [Enum 与有限状态建模](notes/2026-11/2026-11-24_Enum与有限状态建模.md) | [打开每日练习](https://python-daily-lab.sillywood.chatgpt.site) · [题目数据](questions/2026-11/2026-11-24_Enum与有限状态建模.json) |
 <!-- DAILY_NOTES_END -->
 
 ## ✅ 学习方法
