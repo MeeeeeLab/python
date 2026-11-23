@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-11-23",
+  "updatedAt": "2026-11-24",
   "projects": [
     {
       "id": "weekend-2026-10-10",
@@ -971,6 +971,33 @@
       "javaPath": "projects/2026-11/daily-2026-11-23.json",
       "guidePath": "projects/2026-11/daily-2026-11-23.md",
       "javaGuidePath": "projects/2026-11/daily-2026-11-23.md",
+      "ready": true
+    },
+    {
+      "id": "daily-2026-11-24",
+      "startDate": "2026-11-24",
+      "endDate": "2026-11-24",
+      "kind": "daily",
+      "title": "学生状态流转与递归阶乘追踪",
+      "description": "Python 用 Enum 和不可变记录表达合法状态转换；Java 用阶乘练习递归调用栈与long边界。",
+      "concepts": [
+        "Enum",
+        "有限状态",
+        "不可变记录",
+        "replace"
+      ],
+      "javaConcepts": [
+        "递归阶乘",
+        "终止条件",
+        "调用栈",
+        "O(n)"
+      ],
+      "minutes": 50,
+      "javaMinutes": 30,
+      "pythonPath": "projects/2026-11/daily-2026-11-24.json",
+      "javaPath": "projects/2026-11/daily-2026-11-24.json",
+      "guidePath": "projects/2026-11/daily-2026-11-24.md",
+      "javaGuidePath": "projects/2026-11/daily-2026-11-24.md",
       "ready": true
     }
   ]
