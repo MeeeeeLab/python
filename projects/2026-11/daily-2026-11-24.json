@@ -1,0 +1,124 @@
+{
+  "schemaVersion": 1,
+  "projectId": "daily-2026-11-24",
+  "track": "python",
+  "title": "学生状态流转器",
+  "goal": "用Enum限制合法状态，并用不可变记录表达可验证的状态转换。",
+  "prerequisites": [
+    "dataclass",
+    "frozen",
+    "字典",
+    "异常"
+  ],
+  "filename": "enum_status_project.py",
+  "runCommand": "python3 enum_status_project.py",
+  "starter": "from dataclasses import dataclass, replace\nfrom enum import Enum, auto\n\nclass EnrollmentStatus(Enum):\n    # TODO\n    pass\n\n@dataclass(frozen=True)\nclass StudentProfile:\n    # TODO\n    pass\n",
+  "solution": "from dataclasses import dataclass, replace\nfrom enum import Enum, auto, unique\n\n\n@unique\nclass EnrollmentStatus(Enum):\n    ACTIVE = auto()\n    SUSPENDED = auto()\n    GRADUATED = auto()\n\n\n@dataclass(frozen=True)\nclass StudentProfile:\n    student_id: str\n    name: str\n    status: EnrollmentStatus = EnrollmentStatus.ACTIVE\n\n    def __post_init__(self) -> None:\n        object.__setattr__(self, \"student_id\", self.student_id.strip())\n        object.__setattr__(self, \"name\", self.name.strip())\n        if not self.student_id or not self.name:\n            raise ValueError(\"student_id and name cannot be blank\")\n        if not isinstance(self.status, EnrollmentStatus):\n            raise TypeError(\"status must be EnrollmentStatus\")\n\n\nALLOWED_TRANSITIONS = {\n    EnrollmentStatus.ACTIVE: {EnrollmentStatus.SUSPENDED, EnrollmentStatus.GRADUATED},\n    EnrollmentStatus.SUSPENDED: {EnrollmentStatus.ACTIVE, EnrollmentStatus.GRADUATED},\n    EnrollmentStatus.GRADUATED: set(),\n}\n\n\ndef parse_status(text: str) -> EnrollmentStatus:\n    if not isinstance(text, str):\n        raise TypeError(\"status text must be str\")\n    try:\n        return EnrollmentStatus[text.strip().upper()]\n    except KeyError as error:\n        raise ValueError(\"unknown status\") from error\n\n\ndef move_to(profile: StudentProfile, target: EnrollmentStatus) -> StudentProfile:\n    if not isinstance(target, EnrollmentStatus):\n        raise TypeError(\"target must be EnrollmentStatus\")\n    if target == profile.status:\n        return profile\n    if target not in ALLOWED_TRANSITIONS[profile.status]:\n        raise ValueError(f\"cannot move from {profile.status.name} to {target.name}\")\n    return replace(profile, status=target)\n\n\ndef expect(error_type: type[BaseException], action) -> None:\n    try:\n        action()\n    except error_type:\n        return\n    raise AssertionError(f\"expected {error_type.__name__}\")\n\n\ndef run_checks() -> None:\n    assert [status.name for status in EnrollmentStatus] == [\"ACTIVE\", \"SUSPENDED\", \"GRADUATED\"]\n    assert parse_status(\" active \") is EnrollmentStatus.ACTIVE\n\n    original = StudentProfile(\" S01 \", \" Amy \")\n    suspended = move_to(original, EnrollmentStatus.SUSPENDED)\n    active_again = move_to(suspended, EnrollmentStatus.ACTIVE)\n    graduated = move_to(active_again, EnrollmentStatus.GRADUATED)\n    assert original.status is EnrollmentStatus.ACTIVE\n    assert suspended.status is EnrollmentStatus.SUSPENDED\n    assert graduated.status is EnrollmentStatus.GRADUATED\n    assert move_to(graduated, EnrollmentStatus.GRADUATED) is graduated\n\n    expect(ValueError, lambda: move_to(graduated, EnrollmentStatus.ACTIVE))\n    expect(ValueError, lambda: parse_status(\"unknown\"))\n    expect(TypeError, lambda: move_to(original, \"SUSPENDED\"))\n    expect(TypeError, lambda: StudentProfile(\"S02\", \"Bo\", \"ACTIVE\"))\n    expect(ValueError, lambda: StudentProfile(\"\", \"Bo\"))\n\n\nif __name__ == \"__main__\":\n    run_checks()\n    print(\"enum-status checks: OK\")\n",
+  "solutionExplanation": [
+    "Enum把任意字符串收紧为有限的命名成员。",
+    "转换表集中记录允许方向，毕业状态不能回退。",
+    "replace创建新对象，旧记录与公开材料中的完成状态都不被改写。"
+  ],
+  "steps": [
+    {
+      "id": "define-enum",
+      "day": "2026-11-24",
+      "title": "定义有限状态",
+      "instruction": "用Enum和auto声明三个状态。",
+      "hint": "成员名使用大写。",
+      "knowledge": [
+        "Enum",
+        "auto"
+      ]
+    },
+    {
+      "id": "profile-contract",
+      "day": "2026-11-24",
+      "title": "固定记录契约",
+      "instruction": "在frozen dataclass中验证状态类型。",
+      "hint": "拒绝普通字符串。",
+      "knowledge": [
+        "dataclass",
+        "不变量"
+      ]
+    },
+    {
+      "id": "parse",
+      "day": "2026-11-24",
+      "title": "按名称解析",
+      "instruction": "清理输入并用方括号查找成员。",
+      "hint": "把KeyError转换为ValueError。",
+      "knowledge": [
+        "name lookup",
+        "异常"
+      ]
+    },
+    {
+      "id": "transition",
+      "day": "2026-11-24",
+      "title": "实现合法转换",
+      "instruction": "检查转换表并用replace返回新记录。",
+      "hint": "毕业状态的目标集合为空。",
+      "knowledge": [
+        "状态转换",
+        "replace"
+      ]
+    },
+    {
+      "id": "acceptance",
+      "day": "2026-11-24",
+      "title": "运行边界验收",
+      "instruction": "覆盖回退、未知值和错误类型。",
+      "hint": "原对象状态不变。",
+      "knowledge": [
+        "测试",
+        "边界"
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "id": "t1",
+      "label": "合法流转",
+      "input": "ACTIVE-SUSPENDED-ACTIVE-GRADUATED",
+      "output": "enum-status checks: OK",
+      "purpose": "验证解析和允许的状态转换"
+    },
+    {
+      "id": "t2",
+      "label": "非法流转与类型",
+      "input": "graduated rollback; unknown; str target; blank",
+      "output": "enum-status checks: OK",
+      "purpose": "验证有限状态边界"
+    }
+  ],
+  "recall": [
+    {
+      "id": "finite",
+      "question": "为什么不用任意字符串保存状态？",
+      "answer": "Enum只允许预先定义的成员，拼写错误和非法值更容易被拒绝。"
+    },
+    {
+      "id": "lookup",
+      "question": "EnumClass[name]与EnumClass(value)有何区别？",
+      "answer": "方括号按成员名查找，圆括号通常按成员值查找。"
+    }
+  ],
+  "sources": [
+    {
+      "title": "Python 官方：enum",
+      "url": "https://docs.python.org/3/library/enum.html",
+      "attribution": "2026-11-24 实际核对，项目为原创教学练习"
+    },
+    {
+      "title": "Python 官方：Enum HOWTO",
+      "url": "https://docs.python.org/3/howto/enum.html",
+      "attribution": "2026-11-24 实际核对，项目为原创教学练习"
+    },
+    {
+      "title": "Python 官方：dataclasses.replace",
+      "url": "https://docs.python.org/3/library/dataclasses.html#dataclasses.replace",
+      "attribution": "2026-11-24 实际核对，项目为原创教学练习"
+    }
+  ]
+}
