@@ -1,0 +1,112 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-26",
+  "topic": "自定义异常与错误边界",
+  "stage": "主线延伸：类与对象",
+  "estimatedMinutes": 30,
+  "notePath": "notes/2026-11/2026-11-26_自定义异常与错误边界.md",
+  "collectedAt": "2026-11-26",
+  "sources": [
+    {
+      "title": "Python 官方教程：错误与异常",
+      "url": "https://docs.python.org/3/tutorial/errors.html",
+      "kind": "Python 官方教程"
+    },
+    {
+      "title": "Python 官方：内置异常",
+      "url": "https://docs.python.org/3/library/exceptions.html",
+      "kind": "Python 官方标准库"
+    },
+    {
+      "title": "Python 官方：raise 语句",
+      "url": "https://docs.python.org/3/reference/simple_stmts.html#the-raise-statement",
+      "kind": "Python 官方语言参考"
+    }
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "type": "mcq",
+      "title": "异常基类",
+      "difficulty": "基础",
+      "prompt": "业务代码中的自定义异常通常应直接或间接继承哪个类？",
+      "answer": 1,
+      "explanation": "官方教程建议用户自定义异常通常继承Exception，而不是直接继承BaseException。",
+      "hint": "不要拦截SystemExit等控制信号。",
+      "sourceIndex": 0,
+      "attribution": "依据 2026-11-26 实际阅读的官方资料原创，非官方原题",
+      "options": [
+        "BaseException",
+        "Exception",
+        "object",
+        "Enum"
+      ]
+    },
+    {
+      "id": "q2",
+      "type": "short",
+      "title": "异常链",
+      "difficulty": "基础",
+      "prompt": "执行 raise UnknownStatusError(...) from error 后，原始异常可通过新异常的哪个属性访问？",
+      "answer": "__cause__",
+      "explanation": "显式from把原异常设置为新异常的直接原因。",
+      "hint": "属性名前后各有两个下划线。",
+      "sourceIndex": 2,
+      "attribution": "依据 2026-11-26 实际阅读的官方资料原创，非官方原题"
+    },
+    {
+      "id": "q3",
+      "type": "mcq",
+      "title": "精确捕获",
+      "difficulty": "基础",
+      "prompt": "解析枚举名称时只打算把查找失败转换成UnknownStatusError，最合适捕获什么？",
+      "answer": 2,
+      "explanation": "枚举按名称查找失败产生KeyError；精确捕获不会遮住无关缺陷。",
+      "hint": "捕获你能够转换的底层错误。",
+      "sourceIndex": 0,
+      "attribution": "依据 2026-11-26 实际阅读的官方资料原创，非官方原题",
+      "options": [
+        "BaseException",
+        "所有Exception",
+        "KeyError",
+        "不写except直接返回None"
+      ]
+    },
+    {
+      "id": "q4",
+      "type": "short",
+      "title": "错误边界",
+      "difficulty": "基础",
+      "prompt": "底层状态转换函数遇到禁止方向时，应返回None还是抛出明确异常？",
+      "answer": "抛出明确异常",
+      "explanation": "底层函数返回有效结果或报告明确失败，由应用边界决定如何展示。",
+      "hint": "不要把失败伪装成普通返回值。",
+      "sourceIndex": 1,
+      "attribution": "依据 2026-11-26 实际阅读的官方资料原创，非官方原题"
+    },
+    {
+      "id": "q5",
+      "type": "code",
+      "title": "学生状态错误报告器",
+      "difficulty": "综合",
+      "prompt": "实现领域异常、异常链和状态转换边界；覆盖合法转换、相同状态、未知状态、禁止回退、错误类型与空学号。",
+      "answer": "from dataclasses import dataclass, replace\nfrom enum import Enum, auto\n\n\nclass DomainError(Exception):\n    \"\"\"Base class for errors the caller may handle as business failures.\"\"\"\n\n\nclass UnknownStatusError(DomainError):\n    pass\n\n\nclass InvalidTransitionError(DomainError):\n    pass\n\n\nclass EnrollmentStatus(Enum):\n    ACTIVE = auto()\n    SUSPENDED = auto()\n    GRADUATED = auto()\n\n\n@dataclass(frozen=True)\nclass StudentProfile:\n    student_id: str\n    status: EnrollmentStatus = EnrollmentStatus.ACTIVE\n\n    def __post_init__(self) -> None:\n        if not isinstance(self.student_id, str):\n            raise TypeError(\"student_id must be str\")\n        object.__setattr__(self, \"student_id\", self.student_id.strip())\n        if not self.student_id:\n            raise ValueError(\"student_id cannot be blank\")\n        if not isinstance(self.status, EnrollmentStatus):\n            raise TypeError(\"status must be EnrollmentStatus\")\n\n\nALLOWED = {\n    EnrollmentStatus.ACTIVE: {EnrollmentStatus.SUSPENDED, EnrollmentStatus.GRADUATED},\n    EnrollmentStatus.SUSPENDED: {EnrollmentStatus.ACTIVE, EnrollmentStatus.GRADUATED},\n    EnrollmentStatus.GRADUATED: set(),\n}\n\n\ndef parse_status(text: str) -> EnrollmentStatus:\n    if not isinstance(text, str):\n        raise TypeError(\"status text must be str\")\n    try:\n        return EnrollmentStatus[text.strip().upper()]\n    except KeyError as error:\n        raise UnknownStatusError(f\"unknown status: {text!r}\") from error\n\n\ndef move_to(profile: StudentProfile, target: EnrollmentStatus) -> StudentProfile:\n    if not isinstance(profile, StudentProfile):\n        raise TypeError(\"profile must be StudentProfile\")\n    if not isinstance(target, EnrollmentStatus):\n        raise TypeError(\"target must be EnrollmentStatus\")\n    if target is profile.status:\n        return profile\n    if target not in ALLOWED[profile.status]:\n        raise InvalidTransitionError(\n            f\"cannot move from {profile.status.name} to {target.name}\"\n        )\n    return replace(profile, status=target)\n\n\ndef expect(error_type: type[BaseException], action) -> BaseException:\n    try:\n        action()\n    except error_type as error:\n        return error\n    raise AssertionError(f\"expected {error_type.__name__}\")\n\n\ndef run_checks() -> None:\n    original = StudentProfile(\" S01 \")\n    assert original.student_id == \"S01\"\n    assert parse_status(\" suspended \") is EnrollmentStatus.SUSPENDED\n    suspended = move_to(original, EnrollmentStatus.SUSPENDED)\n    graduated = move_to(suspended, EnrollmentStatus.GRADUATED)\n    assert original.status is EnrollmentStatus.ACTIVE\n    assert graduated.status is EnrollmentStatus.GRADUATED\n    assert move_to(graduated, EnrollmentStatus.GRADUATED) is graduated\n\n    unknown = expect(UnknownStatusError, lambda: parse_status(\"paused\"))\n    assert isinstance(unknown.__cause__, KeyError)\n    expect(InvalidTransitionError, lambda: move_to(graduated, EnrollmentStatus.ACTIVE))\n    expect(TypeError, lambda: parse_status(None))\n    expect(TypeError, lambda: move_to(original, \"SUSPENDED\"))\n    expect(ValueError, lambda: StudentProfile(\"   \"))\n\n\nif __name__ == \"__main__\":\n    run_checks()\n    print(\"domain-errors checks: OK\")\n",
+      "explanation": "自定义异常区分业务失败，from保留KeyError，转换表只允许声明过的方向。",
+      "hint": "让UnknownStatusError和InvalidTransitionError共同继承DomainError。",
+      "sourceIndex": 0,
+      "attribution": "依据 2026-11-26 实际阅读的官方资料原创，非官方原题",
+      "language": "python",
+      "starter": "class DomainError(Exception):\\n    pass\\n\\nclass UnknownStatusError(DomainError):\\n    pass\\n\\n# TODO: parse_status and move_to\\n",
+      "tests": [
+        {
+          "input": "合法转换与相同状态",
+          "output": "domain-errors checks: OK"
+        },
+        {
+          "input": "unknown/rollback/non-string/blank",
+          "output": "domain-errors checks: OK"
+        }
+      ]
+    }
+  ]
+}
