@@ -1,0 +1,113 @@
+{
+  "schemaVersion": 1,
+  "projectId": "daily-2026-11-26",
+  "track": "python",
+  "title": "学生状态错误报告器",
+  "goal": "用自定义异常和异常链区分领域失败，并把捕获放在合适的错误边界。",
+  "prerequisites": [
+    "Enum",
+    "dataclass",
+    "异常处理",
+    "状态转换"
+  ],
+  "filename": "domain_errors_project.py",
+  "runCommand": "python3 domain_errors_project.py",
+  "starter": "class DomainError(Exception):\\n    pass\\n\\nclass UnknownStatusError(DomainError):\\n    pass\\n\\n# TODO: parse_status and move_to\\n",
+  "solution": "from dataclasses import dataclass, replace\nfrom enum import Enum, auto\n\n\nclass DomainError(Exception):\n    \"\"\"Base class for errors the caller may handle as business failures.\"\"\"\n\n\nclass UnknownStatusError(DomainError):\n    pass\n\n\nclass InvalidTransitionError(DomainError):\n    pass\n\n\nclass EnrollmentStatus(Enum):\n    ACTIVE = auto()\n    SUSPENDED = auto()\n    GRADUATED = auto()\n\n\n@dataclass(frozen=True)\nclass StudentProfile:\n    student_id: str\n    status: EnrollmentStatus = EnrollmentStatus.ACTIVE\n\n    def __post_init__(self) -> None:\n        if not isinstance(self.student_id, str):\n            raise TypeError(\"student_id must be str\")\n        object.__setattr__(self, \"student_id\", self.student_id.strip())\n        if not self.student_id:\n            raise ValueError(\"student_id cannot be blank\")\n        if not isinstance(self.status, EnrollmentStatus):\n            raise TypeError(\"status must be EnrollmentStatus\")\n\n\nALLOWED = {\n    EnrollmentStatus.ACTIVE: {EnrollmentStatus.SUSPENDED, EnrollmentStatus.GRADUATED},\n    EnrollmentStatus.SUSPENDED: {EnrollmentStatus.ACTIVE, EnrollmentStatus.GRADUATED},\n    EnrollmentStatus.GRADUATED: set(),\n}\n\n\ndef parse_status(text: str) -> EnrollmentStatus:\n    if not isinstance(text, str):\n        raise TypeError(\"status text must be str\")\n    try:\n        return EnrollmentStatus[text.strip().upper()]\n    except KeyError as error:\n        raise UnknownStatusError(f\"unknown status: {text!r}\") from error\n\n\ndef move_to(profile: StudentProfile, target: EnrollmentStatus) -> StudentProfile:\n    if not isinstance(profile, StudentProfile):\n        raise TypeError(\"profile must be StudentProfile\")\n    if not isinstance(target, EnrollmentStatus):\n        raise TypeError(\"target must be EnrollmentStatus\")\n    if target is profile.status:\n        return profile\n    if target not in ALLOWED[profile.status]:\n        raise InvalidTransitionError(\n            f\"cannot move from {profile.status.name} to {target.name}\"\n        )\n    return replace(profile, status=target)\n\n\ndef expect(error_type: type[BaseException], action) -> BaseException:\n    try:\n        action()\n    except error_type as error:\n        return error\n    raise AssertionError(f\"expected {error_type.__name__}\")\n\n\ndef run_checks() -> None:\n    original = StudentProfile(\" S01 \")\n    assert original.student_id == \"S01\"\n    assert parse_status(\" suspended \") is EnrollmentStatus.SUSPENDED\n    suspended = move_to(original, EnrollmentStatus.SUSPENDED)\n    graduated = move_to(suspended, EnrollmentStatus.GRADUATED)\n    assert original.status is EnrollmentStatus.ACTIVE\n    assert graduated.status is EnrollmentStatus.GRADUATED\n    assert move_to(graduated, EnrollmentStatus.GRADUATED) is graduated\n\n    unknown = expect(UnknownStatusError, lambda: parse_status(\"paused\"))\n    assert isinstance(unknown.__cause__, KeyError)\n    expect(InvalidTransitionError, lambda: move_to(graduated, EnrollmentStatus.ACTIVE))\n    expect(TypeError, lambda: parse_status(None))\n    expect(TypeError, lambda: move_to(original, \"SUSPENDED\"))\n    expect(ValueError, lambda: StudentProfile(\"   \"))\n\n\nif __name__ == \"__main__\":\n    run_checks()\n    print(\"domain-errors checks: OK\")\n",
+  "solutionExplanation": [
+    "领域异常让调用者能按业务语义精确捕获。",
+    "raise ... from ... 把底层KeyError保留为__cause__。",
+    "状态函数只返回有效结果或抛明确异常，不把失败伪装成None。"
+  ],
+  "steps": [
+    {
+      "id": "error-family",
+      "day": "2026-11-26",
+      "title": "定义错误族",
+      "instruction": "定义DomainError及两个具体子类。",
+      "hint": "继承Exception。",
+      "knowledge": [
+        "自定义异常",
+        "继承"
+      ]
+    },
+    {
+      "id": "chain",
+      "day": "2026-11-26",
+      "title": "保留异常链",
+      "instruction": "把KeyError转换为UnknownStatusError。",
+      "hint": "使用raise ... from error。",
+      "knowledge": [
+        "异常链",
+        "__cause__"
+      ]
+    },
+    {
+      "id": "boundary",
+      "day": "2026-11-26",
+      "title": "实现状态边界",
+      "instruction": "区分相同状态、允许方向与禁止方向。",
+      "hint": "禁止方向抛InvalidTransitionError。",
+      "knowledge": [
+        "错误边界",
+        "状态转换"
+      ]
+    },
+    {
+      "id": "acceptance",
+      "day": "2026-11-26",
+      "title": "运行边界验收",
+      "instruction": "覆盖正常、未知、回退、类型和空值。",
+      "hint": "检查原对象保持不变。",
+      "knowledge": [
+        "测试",
+        "边界"
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "id": "t1",
+      "label": "合法流程",
+      "input": "ACTIVE-SUSPENDED-GRADUATED",
+      "output": "domain-errors checks: OK",
+      "purpose": "验证正常返回与不可变记录"
+    },
+    {
+      "id": "t2",
+      "label": "失败边界",
+      "input": "unknown/rollback/type/blank",
+      "output": "domain-errors checks: OK",
+      "purpose": "验证异常类型与因果链"
+    }
+  ],
+  "recall": [
+    {
+      "id": "base",
+      "question": "为何自定义异常通常继承Exception？",
+      "answer": "便于业务代码捕获，同时不误拦截SystemExit等BaseException控制信号。"
+    },
+    {
+      "id": "cause",
+      "question": "from error带来什么？",
+      "answer": "把原异常保存为新异常的显式__cause__，保留调试因果链。"
+    }
+  ],
+  "sources": [
+    {
+      "title": "Python 官方教程：错误与异常",
+      "url": "https://docs.python.org/3/tutorial/errors.html",
+      "attribution": "2026-11-26 实际核对，项目为原创教学练习"
+    },
+    {
+      "title": "Python 官方：内置异常",
+      "url": "https://docs.python.org/3/library/exceptions.html",
+      "attribution": "2026-11-26 实际核对，项目为原创教学练习"
+    },
+    {
+      "title": "Python 官方：raise 语句",
+      "url": "https://docs.python.org/3/reference/simple_stmts.html#the-raise-statement",
+      "attribution": "2026-11-26 实际核对，项目为原创教学练习"
+    }
+  ]
+}
