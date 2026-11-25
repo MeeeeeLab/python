@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-11-24",
+  "updatedAt": "2026-11-26",
   "projects": [
     {
       "id": "weekend-2026-10-10",
@@ -998,6 +998,33 @@
       "javaPath": "projects/2026-11/daily-2026-11-24.json",
       "guidePath": "projects/2026-11/daily-2026-11-24.md",
       "javaGuidePath": "projects/2026-11/daily-2026-11-24.md",
+      "ready": true
+    },
+    {
+      "id": "daily-2026-11-26",
+      "startDate": "2026-11-26",
+      "endDate": "2026-11-26",
+      "kind": "daily",
+      "title": "领域错误处理与递归字符串工具",
+      "description": "Python 用自定义异常与异常链表达领域失败；Java 用递减索引和双端收缩完成递归字符串练习。",
+      "concepts": [
+        "自定义异常",
+        "异常链",
+        "错误边界",
+        "状态转换"
+      ],
+      "javaConcepts": [
+        "字符串递归",
+        "终止条件",
+        "双端索引",
+        "O(n)"
+      ],
+      "minutes": 50,
+      "javaMinutes": 30,
+      "pythonPath": "projects/2026-11/daily-2026-11-26.json",
+      "javaPath": "projects/2026-11/daily-2026-11-26.json",
+      "guidePath": "projects/2026-11/daily-2026-11-26.md",
+      "javaGuidePath": "projects/2026-11/daily-2026-11-26.md",
       "ready": true
     }
   ]
