@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-11-26",
+  "updatedAt": "2026-11-27",
   "projects": [
     {
       "id": "weekend-2026-10-10",
@@ -1025,6 +1025,33 @@
       "javaPath": "projects/2026-11/daily-2026-11-26.json",
       "guidePath": "projects/2026-11/daily-2026-11-26.md",
       "javaGuidePath": "projects/2026-11/daily-2026-11-26.md",
+      "ready": true
+    },
+    {
+      "id": "daily-2026-11-27",
+      "startDate": "2026-11-27",
+      "endDate": "2026-11-27",
+      "kind": "daily",
+      "title": "显式报告接口与递归数组区间求和",
+      "description": "Python 用ABC声明并验收报告格式器接口；Java 用半开区间递归计算数组子区间之和。",
+      "concepts": [
+        "ABC",
+        "abstractmethod",
+        "名义子类型",
+        "方法重写"
+      ],
+      "javaConcepts": [
+        "数组递归",
+        "半开区间",
+        "终止条件",
+        "O(k)"
+      ],
+      "minutes": 50,
+      "javaMinutes": 30,
+      "pythonPath": "projects/2026-11/daily-2026-11-27.json",
+      "javaPath": "projects/2026-11/daily-2026-11-27.json",
+      "guidePath": "projects/2026-11/daily-2026-11-27.md",
+      "javaGuidePath": "projects/2026-11/daily-2026-11-27.md",
       "ready": true
     }
   ]
