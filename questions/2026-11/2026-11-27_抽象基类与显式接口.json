@@ -1,0 +1,112 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-27",
+  "topic": "抽象基类与显式接口",
+  "stage": "主线延伸：类与对象",
+  "estimatedMinutes": 30,
+  "notePath": "notes/2026-11/2026-11-27_抽象基类与显式接口.md",
+  "collectedAt": "2026-11-27",
+  "sources": [
+    {
+      "title": "Python 官方：abc—抽象基类",
+      "url": "https://docs.python.org/3/library/abc.html",
+      "kind": "Python 官方标准库"
+    },
+    {
+      "title": "Python 官方：typing—名义与结构化子类型",
+      "url": "https://docs.python.org/3/library/typing.html#nominal-vs-structural-subtyping",
+      "kind": "Python 官方标准库"
+    },
+    {
+      "title": "Python 官方：csv",
+      "url": "https://docs.python.org/3/library/csv.html",
+      "kind": "Python 官方标准库"
+    }
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "type": "mcq",
+      "title": "声明抽象基类",
+      "difficulty": "基础",
+      "prompt": "哪种写法是官方推荐的简洁抽象基类定义方式？",
+      "answer": 1,
+      "explanation": "继承abc.ABC即可使用ABCMeta提供的抽象基类机制。",
+      "hint": "需要从abc导入两个名字。",
+      "sourceIndex": 0,
+      "attribution": "依据 2026-11-27 实际阅读的官方资料原创，非官方原题",
+      "options": [
+        "class Formatter(object):",
+        "class Formatter(ABC):",
+        "class Formatter(Protocol):",
+        "class Formatter(Enum):"
+      ]
+    },
+    {
+      "id": "q2",
+      "type": "short",
+      "title": "遗漏实现",
+      "difficulty": "基础",
+      "prompt": "子类仍有未实现的@abstractmethod时，尝试实例化会抛出什么异常类型？",
+      "answer": "TypeError",
+      "explanation": "含抽象方法的类不能实例化，Python以TypeError报告。",
+      "hint": "这是类型契约未完成。",
+      "sourceIndex": 0,
+      "attribution": "依据 2026-11-27 实际阅读的官方资料原创，非官方原题"
+    },
+    {
+      "id": "q3",
+      "type": "mcq",
+      "title": "共享普通方法",
+      "difficulty": "基础",
+      "prompt": "抽象基类中的普通已实现方法，具体子类能否直接继承使用？",
+      "answer": 0,
+      "explanation": "ABC可以同时包含抽象契约和普通共享实现。",
+      "hint": "ABC不是只有空方法的接口。",
+      "sourceIndex": 0,
+      "attribution": "依据 2026-11-27 实际阅读的官方资料原创，非官方原题",
+      "options": [
+        "可以",
+        "不可以",
+        "只有Protocol可以",
+        "只有静态方法可以"
+      ]
+    },
+    {
+      "id": "q4",
+      "type": "short",
+      "title": "ABC与Protocol",
+      "difficulty": "基础",
+      "prompt": "ABC通常强调哪种子类型关系，而Protocol强调哪种子类型关系？",
+      "answer": "ABC强调名义子类型，Protocol强调结构化子类型",
+      "explanation": "名义关系依赖显式继承；结构化关系关注所需方法与属性是否存在。",
+      "hint": "nominal vs structural。",
+      "sourceIndex": 1,
+      "attribution": "依据 2026-11-27 实际阅读的官方资料原创，非官方原题"
+    },
+    {
+      "id": "q5",
+      "type": "code",
+      "title": "显式报告格式器接口",
+      "difficulty": "综合",
+      "prompt": "用ABC实现文本与CSV报告格式器，复用公共校验，并覆盖空记录、未完成子类、错误格式器、错误元素和越界成绩。",
+      "answer": "from abc import ABC, abstractmethod\nfrom dataclasses import dataclass\nimport csv\nimport io\n\n\n@dataclass(frozen=True)\nclass StudentScore:\n    student_id: str\n    score: int\n\n    def __post_init__(self) -> None:\n        if not self.student_id.strip():\n            raise ValueError(\"student_id cannot be blank\")\n        if not 0 <= self.score <= 100:\n            raise ValueError(\"score must be from 0 to 100\")\n\n\nclass ReportFormatter(ABC):\n    @abstractmethod\n    def format(self, records: list[StudentScore]) -> str:\n        \"\"\"Return a complete report for records.\"\"\"\n\n    def checked_records(self, records: list[StudentScore]) -> list[StudentScore]:\n        if not isinstance(records, list):\n            raise TypeError(\"records must be list\")\n        if not all(isinstance(item, StudentScore) for item in records):\n            raise TypeError(\"every record must be StudentScore\")\n        return records\n\n\nclass TextFormatter(ReportFormatter):\n    def format(self, records: list[StudentScore]) -> str:\n        records = self.checked_records(records)\n        if not records:\n            return \"No records\"\n        return \"\\n\".join(f\"{item.student_id}: {item.score}\" for item in records)\n\n\nclass CsvFormatter(ReportFormatter):\n    def format(self, records: list[StudentScore]) -> str:\n        records = self.checked_records(records)\n        output = io.StringIO(newline=\"\")\n        writer = csv.writer(output, lineterminator=\"\\n\")\n        writer.writerow([\"student_id\", \"score\"])\n        writer.writerows((item.student_id, item.score) for item in records)\n        return output.getvalue()\n\n\nclass IncompleteFormatter(ReportFormatter):\n    pass\n\n\ndef render(formatter: ReportFormatter, records: list[StudentScore]) -> str:\n    if not isinstance(formatter, ReportFormatter):\n        raise TypeError(\"formatter must inherit ReportFormatter\")\n    return formatter.format(records)\n\n\ndef expect(error_type: type[BaseException], action) -> None:\n    try:\n        action()\n    except error_type:\n        return\n    raise AssertionError(f\"expected {error_type.__name__}\")\n\n\ndef run_checks() -> None:\n    records = [StudentScore(\"S01\", 92), StudentScore(\"S02\", 78)]\n    assert render(TextFormatter(), records) == \"S01: 92\\nS02: 78\"\n    assert render(CsvFormatter(), records) == \"student_id,score\\nS01,92\\nS02,78\\n\"\n    assert render(TextFormatter(), []) == \"No records\"\n    assert render(CsvFormatter(), []) == \"student_id,score\\n\"\n    assert issubclass(TextFormatter, ReportFormatter)\n    expect(TypeError, IncompleteFormatter)\n    expect(TypeError, lambda: render(object(), records))\n    expect(TypeError, lambda: render(TextFormatter(), [\"bad\"]))\n    expect(ValueError, lambda: StudentScore(\"S03\", 101))\n\n\nif __name__ == \"__main__\":\n    run_checks()\n    print(\"abc-report checks: OK\")\n",
+      "explanation": "ABC声明必须实现的format，具体格式器显式继承；公共校验在父类中复用。",
+      "hint": "给format加@abstractmethod，IncompleteFormatter保持不实现用于边界测试。",
+      "sourceIndex": 0,
+      "attribution": "依据 2026-11-27 实际阅读的官方资料原创，非官方原题",
+      "language": "python",
+      "starter": "from abc import ABC, abstractmethod\\n\\nclass ReportFormatter(ABC):\\n    @abstractmethod\\n    def format(self, records):\\n        pass\\n\\n# TODO: TextFormatter and CsvFormatter\\n",
+      "tests": [
+        {
+          "input": "two records; empty records",
+          "output": "abc-report checks: OK"
+        },
+        {
+          "input": "incomplete formatter; wrong type; invalid score",
+          "output": "abc-report checks: OK"
+        }
+      ]
+    }
+  ]
+}
