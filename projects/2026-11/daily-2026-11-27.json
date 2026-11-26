@@ -1,0 +1,113 @@
+{
+  "schemaVersion": 1,
+  "projectId": "daily-2026-11-27",
+  "track": "python",
+  "title": "显式成绩报告格式器",
+  "goal": "用ABC声明报告接口，复用校验并实现文本与CSV两种具体格式。",
+  "prerequisites": [
+    "类与继承",
+    "方法重写",
+    "Protocol",
+    "异常"
+  ],
+  "filename": "abc_report_project.py",
+  "runCommand": "python3 abc_report_project.py",
+  "starter": "from abc import ABC, abstractmethod\\n\\nclass ReportFormatter(ABC):\\n    @abstractmethod\\n    def format(self, records):\\n        pass\\n",
+  "solution": "from abc import ABC, abstractmethod\nfrom dataclasses import dataclass\nimport csv\nimport io\n\n\n@dataclass(frozen=True)\nclass StudentScore:\n    student_id: str\n    score: int\n\n    def __post_init__(self) -> None:\n        if not self.student_id.strip():\n            raise ValueError(\"student_id cannot be blank\")\n        if not 0 <= self.score <= 100:\n            raise ValueError(\"score must be from 0 to 100\")\n\n\nclass ReportFormatter(ABC):\n    @abstractmethod\n    def format(self, records: list[StudentScore]) -> str:\n        \"\"\"Return a complete report for records.\"\"\"\n\n    def checked_records(self, records: list[StudentScore]) -> list[StudentScore]:\n        if not isinstance(records, list):\n            raise TypeError(\"records must be list\")\n        if not all(isinstance(item, StudentScore) for item in records):\n            raise TypeError(\"every record must be StudentScore\")\n        return records\n\n\nclass TextFormatter(ReportFormatter):\n    def format(self, records: list[StudentScore]) -> str:\n        records = self.checked_records(records)\n        if not records:\n            return \"No records\"\n        return \"\\n\".join(f\"{item.student_id}: {item.score}\" for item in records)\n\n\nclass CsvFormatter(ReportFormatter):\n    def format(self, records: list[StudentScore]) -> str:\n        records = self.checked_records(records)\n        output = io.StringIO(newline=\"\")\n        writer = csv.writer(output, lineterminator=\"\\n\")\n        writer.writerow([\"student_id\", \"score\"])\n        writer.writerows((item.student_id, item.score) for item in records)\n        return output.getvalue()\n\n\nclass IncompleteFormatter(ReportFormatter):\n    pass\n\n\ndef render(formatter: ReportFormatter, records: list[StudentScore]) -> str:\n    if not isinstance(formatter, ReportFormatter):\n        raise TypeError(\"formatter must inherit ReportFormatter\")\n    return formatter.format(records)\n\n\ndef expect(error_type: type[BaseException], action) -> None:\n    try:\n        action()\n    except error_type:\n        return\n    raise AssertionError(f\"expected {error_type.__name__}\")\n\n\ndef run_checks() -> None:\n    records = [StudentScore(\"S01\", 92), StudentScore(\"S02\", 78)]\n    assert render(TextFormatter(), records) == \"S01: 92\\nS02: 78\"\n    assert render(CsvFormatter(), records) == \"student_id,score\\nS01,92\\nS02,78\\n\"\n    assert render(TextFormatter(), []) == \"No records\"\n    assert render(CsvFormatter(), []) == \"student_id,score\\n\"\n    assert issubclass(TextFormatter, ReportFormatter)\n    expect(TypeError, IncompleteFormatter)\n    expect(TypeError, lambda: render(object(), records))\n    expect(TypeError, lambda: render(TextFormatter(), [\"bad\"]))\n    expect(ValueError, lambda: StudentScore(\"S03\", 101))\n\n\nif __name__ == \"__main__\":\n    run_checks()\n    print(\"abc-report checks: OK\")\n",
+  "solutionExplanation": [
+    "ABC明确声明具体格式器必须实现format。",
+    "父类的checked_records提供所有子类共用的运行时边界。",
+    "未完成抽象方法的子类在实例化时立刻TypeError。"
+  ],
+  "steps": [
+    {
+      "id": "contract",
+      "day": "2026-11-27",
+      "title": "声明抽象契约",
+      "instruction": "继承ABC并用abstractmethod标记format。",
+      "hint": "方法体可只放文档字符串。",
+      "knowledge": [
+        "ABC",
+        "abstractmethod"
+      ]
+    },
+    {
+      "id": "shared-check",
+      "day": "2026-11-27",
+      "title": "复用公共校验",
+      "instruction": "在父类检查列表与元素类型。",
+      "hint": "普通方法可被子类继承。",
+      "knowledge": [
+        "继承",
+        "边界"
+      ]
+    },
+    {
+      "id": "formatters",
+      "day": "2026-11-27",
+      "title": "实现两种格式",
+      "instruction": "分别生成文本和CSV。",
+      "hint": "CSV使用标准库csv.writer。",
+      "knowledge": [
+        "方法重写",
+        "csv"
+      ]
+    },
+    {
+      "id": "acceptance",
+      "day": "2026-11-27",
+      "title": "运行抽象边界验收",
+      "instruction": "覆盖空数据、未实现子类和错误类型。",
+      "hint": "实例化IncompleteFormatter应TypeError。",
+      "knowledge": [
+        "测试",
+        "名义子类型"
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "id": "t1",
+      "label": "具体格式器",
+      "input": "two records; empty",
+      "output": "abc-report checks: OK",
+      "purpose": "验证多种实现和空边界"
+    },
+    {
+      "id": "t2",
+      "label": "抽象与类型边界",
+      "input": "incomplete/wrong type/invalid score",
+      "output": "abc-report checks: OK",
+      "purpose": "验证显式接口契约"
+    }
+  ],
+  "recall": [
+    {
+      "id": "abstract",
+      "question": "abstractmethod解决什么问题？",
+      "answer": "声明具体子类必须实现的操作，遗漏时阻止实例化。"
+    },
+    {
+      "id": "compare",
+      "question": "ABC与Protocol的核心差别是什么？",
+      "answer": "ABC通常依赖显式继承的名义子类型，Protocol侧重按形状判断的结构化子类型。"
+    }
+  ],
+  "sources": [
+    {
+      "title": "Python 官方：abc—抽象基类",
+      "url": "https://docs.python.org/3/library/abc.html",
+      "attribution": "2026-11-27 实际核对，项目为原创教学练习"
+    },
+    {
+      "title": "Python 官方：typing—名义与结构化子类型",
+      "url": "https://docs.python.org/3/library/typing.html#nominal-vs-structural-subtyping",
+      "attribution": "2026-11-27 实际核对，项目为原创教学练习"
+    },
+    {
+      "title": "Python 官方：csv",
+      "url": "https://docs.python.org/3/library/csv.html",
+      "attribution": "2026-11-27 实际核对，项目为原创教学练习"
+    }
+  ]
+}
