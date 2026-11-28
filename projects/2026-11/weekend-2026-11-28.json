@@ -1,0 +1,127 @@
+{
+  "schemaVersion": 1,
+  "projectId": "weekend-2026-11-28",
+  "track": "python",
+  "title": "可靠学生状态报告器",
+  "goal": "综合不可变记录、有限状态、领域异常与抽象格式器，生成可验证的学生状态报告。",
+  "prerequisites": [
+    "dataclass与replace",
+    "Enum",
+    "自定义异常",
+    "ABC"
+  ],
+  "filename": "reliable_status_report.py",
+  "runCommand": "python3 reliable_status_report.py",
+  "starter": "from abc import ABC, abstractmethod\\nfrom dataclasses import dataclass, replace\\nfrom enum import Enum, auto\\n\\nclass Status(Enum):\\n    # TODO\\n    pass\\n",
+  "solution": "from abc import ABC, abstractmethod\nimport csv\nfrom dataclasses import dataclass, replace\nfrom enum import Enum, auto\nimport io\n\n\nclass DomainError(Exception):\n    pass\n\n\nclass UnknownStatusError(DomainError):\n    pass\n\n\nclass InvalidTransitionError(DomainError):\n    pass\n\n\nclass Status(Enum):\n    ACTIVE = auto()\n    SUSPENDED = auto()\n    GRADUATED = auto()\n\n\n@dataclass(frozen=True)\nclass StudentProfile:\n    student_id: str\n    name: str\n    status: Status = Status.ACTIVE\n\n    def __post_init__(self) -> None:\n        object.__setattr__(self, \"student_id\", self.student_id.strip())\n        object.__setattr__(self, \"name\", self.name.strip())\n        if not self.student_id or not self.name:\n            raise ValueError(\"student_id and name cannot be blank\")\n        if not isinstance(self.status, Status):\n            raise TypeError(\"status must be Status\")\n\n\nALLOWED = {\n    Status.ACTIVE: {Status.SUSPENDED, Status.GRADUATED},\n    Status.SUSPENDED: {Status.ACTIVE, Status.GRADUATED},\n    Status.GRADUATED: set(),\n}\n\n\ndef parse_status(text: str) -> Status:\n    if not isinstance(text, str):\n        raise TypeError(\"status text must be str\")\n    try:\n        return Status[text.strip().upper()]\n    except KeyError as error:\n        raise UnknownStatusError(f\"unknown status: {text!r}\") from error\n\n\ndef move_to(profile: StudentProfile, target: Status) -> StudentProfile:\n    if not isinstance(target, Status):\n        raise TypeError(\"target must be Status\")\n    if target is profile.status:\n        return profile\n    if target not in ALLOWED[profile.status]:\n        raise InvalidTransitionError(\n            f\"cannot move from {profile.status.name} to {target.name}\"\n        )\n    return replace(profile, status=target)\n\n\nclass ProfileFormatter(ABC):\n    @abstractmethod\n    def format(self, profiles: list[StudentProfile]) -> str:\n        \"\"\"Return a report for profiles.\"\"\"\n\n    def checked(self, profiles: list[StudentProfile]) -> list[StudentProfile]:\n        if not isinstance(profiles, list):\n            raise TypeError(\"profiles must be list\")\n        if not all(isinstance(item, StudentProfile) for item in profiles):\n            raise TypeError(\"every item must be StudentProfile\")\n        return profiles\n\n\nclass TextFormatter(ProfileFormatter):\n    def format(self, profiles: list[StudentProfile]) -> str:\n        profiles = self.checked(profiles)\n        if not profiles:\n            return \"No profiles\"\n        return \"\\n\".join(\n            f\"{item.student_id} | {item.name} | {item.status.name}\"\n            for item in profiles\n        )\n\n\nclass CsvFormatter(ProfileFormatter):\n    def format(self, profiles: list[StudentProfile]) -> str:\n        profiles = self.checked(profiles)\n        stream = io.StringIO(newline=\"\")\n        writer = csv.writer(stream, lineterminator=\"\\n\")\n        writer.writerow([\"student_id\", \"name\", \"status\"])\n        writer.writerows(\n            (item.student_id, item.name, item.status.name) for item in profiles\n        )\n        return stream.getvalue()\n\n\ndef render(formatter: ProfileFormatter, profiles: list[StudentProfile]) -> str:\n    if not isinstance(formatter, ProfileFormatter):\n        raise TypeError(\"formatter must inherit ProfileFormatter\")\n    profiles = formatter.checked(profiles)\n    return formatter.format(sorted(profiles, key=lambda item: item.student_id))\n\n\ndef expect(error_type: type[BaseException], action) -> BaseException:\n    try:\n        action()\n    except error_type as error:\n        return error\n    raise AssertionError(f\"expected {error_type.__name__}\")\n\n\ndef run_checks() -> None:\n    amy = StudentProfile(\" S02 \", \" Amy \")\n    bo = StudentProfile(\"S01\", \"Bo\", parse_status(\" suspended \"))\n    graduated = move_to(amy, Status.GRADUATED)\n    assert amy.status is Status.ACTIVE\n    assert graduated.status is Status.GRADUATED\n    assert move_to(graduated, Status.GRADUATED) is graduated\n\n    text = render(TextFormatter(), [graduated, bo])\n    assert text == \"S01 | Bo | SUSPENDED\\nS02 | Amy | GRADUATED\"\n    csv_text = render(CsvFormatter(), [graduated, bo])\n    assert csv_text == (\n        \"student_id,name,status\\n\"\n        \"S01,Bo,SUSPENDED\\n\"\n        \"S02,Amy,GRADUATED\\n\"\n    )\n    assert render(TextFormatter(), []) == \"No profiles\"\n\n    unknown = expect(UnknownStatusError, lambda: parse_status(\"paused\"))\n    assert isinstance(unknown.__cause__, KeyError)\n    expect(InvalidTransitionError, lambda: move_to(graduated, Status.ACTIVE))\n    expect(ValueError, lambda: StudentProfile(\"\", \"Bo\"))\n    expect(TypeError, lambda: render(object(), []))\n    expect(TypeError, lambda: render(TextFormatter(), [\"bad\"]))\n\n\nif __name__ == \"__main__\":\n    run_checks()\n    print(\"weekend-status-report checks: OK\")\n",
+  "solutionExplanation": [
+    "周六先建立状态模型、错误边界和两种输出，周日继续同一项目做独立验收。",
+    "replace创建新记录，禁止方向以领域异常报告，旧对象不被污染。",
+    "ABC让文本与CSV格式器遵守同一显式接口并复用校验。"
+  ],
+  "steps": [
+    {
+      "id": "state-model",
+      "day": "2026-11-28",
+      "title": "建立不可变状态模型",
+      "instruction": "定义Status和frozen StudentProfile。",
+      "hint": "在__post_init__校验空白和类型。",
+      "knowledge": [
+        "dataclass",
+        "Enum"
+      ]
+    },
+    {
+      "id": "transition-boundary",
+      "day": "2026-11-28",
+      "title": "实现状态与错误边界",
+      "instruction": "解析名称、保留异常链并拒绝禁止方向。",
+      "hint": "使用raise ... from error。",
+      "knowledge": [
+        "自定义异常",
+        "replace"
+      ]
+    },
+    {
+      "id": "formatters",
+      "day": "2026-11-28",
+      "title": "实现显式报告接口",
+      "instruction": "用ABC实现文本与CSV格式器。",
+      "hint": "共享记录类型检查。",
+      "knowledge": [
+        "ABC",
+        "方法重写"
+      ]
+    },
+    {
+      "id": "saturday-checks",
+      "day": "2026-11-28",
+      "title": "第一阶段边界测试",
+      "instruction": "覆盖排序、空列表、未知值和错误元素。",
+      "hint": "断言精确输出。",
+      "knowledge": [
+        "边界测试"
+      ]
+    },
+    {
+      "id": "sunday-independent",
+      "day": "2026-11-29",
+      "title": "独立实现与综合验收",
+      "instruction": "不看参考实现重建核心流程并解释设计取舍。",
+      "hint": "先写契约和测试，再补实现。",
+      "knowledge": [
+        "综合验收"
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "id": "t1",
+      "label": "正常状态与报告",
+      "input": "S02 active->graduated; S01 suspended",
+      "output": "weekend-status-report checks: OK",
+      "purpose": "验证不可变转换、排序与多格式输出"
+    },
+    {
+      "id": "t2",
+      "label": "失败边界",
+      "input": "unknown/rollback/blank/wrong formatter/item",
+      "output": "weekend-status-report checks: OK",
+      "purpose": "验证异常类型和输入契约"
+    }
+  ],
+  "recall": [
+    {
+      "id": "immutability",
+      "question": "为什么状态转换返回新对象？",
+      "answer": "frozen记录表达稳定快照，replace生成新状态而不改写旧对象。"
+    },
+    {
+      "id": "interface",
+      "question": "ABC在项目中保护什么契约？",
+      "answer": "所有具体格式器必须实现接收记录列表并返回报告字符串的format。"
+    }
+  ],
+  "sources": [
+    {
+      "title": "Python 官方：dataclasses",
+      "url": "https://docs.python.org/3/library/dataclasses.html",
+      "attribution": "2026-11-28 实际核对，项目为原创教学练习"
+    },
+    {
+      "title": "Python 官方：enum",
+      "url": "https://docs.python.org/3/library/enum.html",
+      "attribution": "2026-11-28 实际核对，项目为原创教学练习"
+    },
+    {
+      "title": "Python 官方：abc",
+      "url": "https://docs.python.org/3/library/abc.html",
+      "attribution": "2026-11-28 实际核对，项目为原创教学练习"
+    },
+    {
+      "title": "Python 官方教程：错误与异常",
+      "url": "https://docs.python.org/3/tutorial/errors.html",
+      "attribution": "2026-11-28 实际核对，项目为原创教学练习"
+    }
+  ]
+}
