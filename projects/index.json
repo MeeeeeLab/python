@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-11-27",
+  "updatedAt": "2026-11-28",
   "projects": [
     {
       "id": "weekend-2026-10-10",
@@ -1052,6 +1052,33 @@
       "javaPath": "projects/2026-11/daily-2026-11-27.json",
       "guidePath": "projects/2026-11/daily-2026-11-27.md",
       "javaGuidePath": "projects/2026-11/daily-2026-11-27.md",
+      "ready": true
+    },
+    {
+      "id": "weekend-2026-11-28",
+      "startDate": "2026-11-28",
+      "endDate": "2026-11-29",
+      "kind": "weekend",
+      "title": "可靠学生状态报告与递归文本工具",
+      "description": "Python综合不可变记录、有限状态、领域异常和ABC报告；Java综合反转、回文与字符计数递归，周日继续同一项目验收。",
+      "concepts": [
+        "dataclass",
+        "Enum",
+        "自定义异常",
+        "ABC"
+      ],
+      "javaConcepts": [
+        "字符串递归",
+        "终止条件",
+        "双端索引",
+        "章节验收"
+      ],
+      "minutes": 165,
+      "javaMinutes": 70,
+      "pythonPath": "projects/2026-11/weekend-2026-11-28.json",
+      "javaPath": "projects/2026-11/weekend-2026-11-28.json",
+      "guidePath": "projects/2026-11/weekend-2026-11-28.md",
+      "javaGuidePath": "projects/2026-11/weekend-2026-11-28.md",
       "ready": true
     }
   ]
