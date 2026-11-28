@@ -1,0 +1,117 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-28",
+  "topic": "周末项目可靠学生状态报告器",
+  "stage": "主线延伸：类与对象综合",
+  "estimatedMinutes": 35,
+  "notePath": "notes/2026-11/2026-11-28_周末项目可靠学生状态报告器.md",
+  "collectedAt": "2026-11-28",
+  "sources": [
+    {
+      "title": "Python 官方：dataclasses",
+      "url": "https://docs.python.org/3/library/dataclasses.html",
+      "kind": "Python 官方标准库"
+    },
+    {
+      "title": "Python 官方：enum",
+      "url": "https://docs.python.org/3/library/enum.html",
+      "kind": "Python 官方标准库"
+    },
+    {
+      "title": "Python 官方：abc",
+      "url": "https://docs.python.org/3/library/abc.html",
+      "kind": "Python 官方标准库"
+    },
+    {
+      "title": "Python 官方教程：错误与异常",
+      "url": "https://docs.python.org/3/tutorial/errors.html",
+      "kind": "Python 官方教程"
+    }
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "type": "mcq",
+      "title": "不可变状态转换",
+      "difficulty": "基础",
+      "prompt": "frozen dataclass的状态需要合法更新时，哪种做法最合适？",
+      "answer": 2,
+      "explanation": "dataclasses.replace创建同类型新对象并重新执行初始化校验，旧对象保持不变。",
+      "hint": "不要绕过frozen直接改字段。",
+      "sourceIndex": 0,
+      "attribution": "依据 2026-11-28 实际阅读的官方资料原创，非官方原题",
+      "options": [
+        "直接profile.status = target",
+        "用object.__setattr__改旧对象",
+        "用replace(profile, status=target)创建新对象",
+        "把状态改成任意字符串"
+      ]
+    },
+    {
+      "id": "q2",
+      "type": "short",
+      "title": "按名称解析Enum",
+      "difficulty": "基础",
+      "prompt": "已有字符串\"ACTIVE\"时，按成员名取得Status成员应写什么表达式？",
+      "answer": "Status[\"ACTIVE\"]",
+      "explanation": "Enum方括号按成员名查找；圆括号通常按value查找。",
+      "hint": "复习方括号与圆括号的差别。",
+      "sourceIndex": 1,
+      "attribution": "依据 2026-11-28 实际阅读的官方资料原创，非官方原题"
+    },
+    {
+      "id": "q3",
+      "type": "short",
+      "title": "保留异常原因",
+      "difficulty": "基础",
+      "prompt": "raise UnknownStatusError(...) from error后，原始KeyError保存在哪个属性？",
+      "answer": "__cause__",
+      "explanation": "显式异常链把底层失败保存为新异常的直接原因。",
+      "hint": "属性前后各有两个下划线。",
+      "sourceIndex": 3,
+      "attribution": "依据 2026-11-28 实际阅读的官方资料原创，非官方原题"
+    },
+    {
+      "id": "q4",
+      "type": "mcq",
+      "title": "抽象格式器",
+      "difficulty": "基础",
+      "prompt": "具体格式器没有实现ProfileFormatter的抽象format方法时会怎样？",
+      "answer": 1,
+      "explanation": "仍含抽象方法的子类不能实例化。",
+      "hint": "契约在实例化阶段检查。",
+      "sourceIndex": 2,
+      "attribution": "依据 2026-11-28 实际阅读的官方资料原创，非官方原题",
+      "options": [
+        "自动继承空字符串实现",
+        "实例化时抛TypeError",
+        "第一次排序时抛KeyError",
+        "自动变成Protocol"
+      ]
+    },
+    {
+      "id": "q5",
+      "type": "code",
+      "title": "可靠学生状态报告器",
+      "difficulty": "综合",
+      "prompt": "组合不可变记录、Enum、领域异常、异常链与ABC格式器，覆盖合法转换、排序输出、空列表、未知状态、禁止回退和错误类型。",
+      "answer": "from abc import ABC, abstractmethod\nimport csv\nfrom dataclasses import dataclass, replace\nfrom enum import Enum, auto\nimport io\n\n\nclass DomainError(Exception):\n    pass\n\n\nclass UnknownStatusError(DomainError):\n    pass\n\n\nclass InvalidTransitionError(DomainError):\n    pass\n\n\nclass Status(Enum):\n    ACTIVE = auto()\n    SUSPENDED = auto()\n    GRADUATED = auto()\n\n\n@dataclass(frozen=True)\nclass StudentProfile:\n    student_id: str\n    name: str\n    status: Status = Status.ACTIVE\n\n    def __post_init__(self) -> None:\n        object.__setattr__(self, \"student_id\", self.student_id.strip())\n        object.__setattr__(self, \"name\", self.name.strip())\n        if not self.student_id or not self.name:\n            raise ValueError(\"student_id and name cannot be blank\")\n        if not isinstance(self.status, Status):\n            raise TypeError(\"status must be Status\")\n\n\nALLOWED = {\n    Status.ACTIVE: {Status.SUSPENDED, Status.GRADUATED},\n    Status.SUSPENDED: {Status.ACTIVE, Status.GRADUATED},\n    Status.GRADUATED: set(),\n}\n\n\ndef parse_status(text: str) -> Status:\n    if not isinstance(text, str):\n        raise TypeError(\"status text must be str\")\n    try:\n        return Status[text.strip().upper()]\n    except KeyError as error:\n        raise UnknownStatusError(f\"unknown status: {text!r}\") from error\n\n\ndef move_to(profile: StudentProfile, target: Status) -> StudentProfile:\n    if not isinstance(target, Status):\n        raise TypeError(\"target must be Status\")\n    if target is profile.status:\n        return profile\n    if target not in ALLOWED[profile.status]:\n        raise InvalidTransitionError(\n            f\"cannot move from {profile.status.name} to {target.name}\"\n        )\n    return replace(profile, status=target)\n\n\nclass ProfileFormatter(ABC):\n    @abstractmethod\n    def format(self, profiles: list[StudentProfile]) -> str:\n        \"\"\"Return a report for profiles.\"\"\"\n\n    def checked(self, profiles: list[StudentProfile]) -> list[StudentProfile]:\n        if not isinstance(profiles, list):\n            raise TypeError(\"profiles must be list\")\n        if not all(isinstance(item, StudentProfile) for item in profiles):\n            raise TypeError(\"every item must be StudentProfile\")\n        return profiles\n\n\nclass TextFormatter(ProfileFormatter):\n    def format(self, profiles: list[StudentProfile]) -> str:\n        profiles = self.checked(profiles)\n        if not profiles:\n            return \"No profiles\"\n        return \"\\n\".join(\n            f\"{item.student_id} | {item.name} | {item.status.name}\"\n            for item in profiles\n        )\n\n\nclass CsvFormatter(ProfileFormatter):\n    def format(self, profiles: list[StudentProfile]) -> str:\n        profiles = self.checked(profiles)\n        stream = io.StringIO(newline=\"\")\n        writer = csv.writer(stream, lineterminator=\"\\n\")\n        writer.writerow([\"student_id\", \"name\", \"status\"])\n        writer.writerows(\n            (item.student_id, item.name, item.status.name) for item in profiles\n        )\n        return stream.getvalue()\n\n\ndef render(formatter: ProfileFormatter, profiles: list[StudentProfile]) -> str:\n    if not isinstance(formatter, ProfileFormatter):\n        raise TypeError(\"formatter must inherit ProfileFormatter\")\n    profiles = formatter.checked(profiles)\n    return formatter.format(sorted(profiles, key=lambda item: item.student_id))\n\n\ndef expect(error_type: type[BaseException], action) -> BaseException:\n    try:\n        action()\n    except error_type as error:\n        return error\n    raise AssertionError(f\"expected {error_type.__name__}\")\n\n\ndef run_checks() -> None:\n    amy = StudentProfile(\" S02 \", \" Amy \")\n    bo = StudentProfile(\"S01\", \"Bo\", parse_status(\" suspended \"))\n    graduated = move_to(amy, Status.GRADUATED)\n    assert amy.status is Status.ACTIVE\n    assert graduated.status is Status.GRADUATED\n    assert move_to(graduated, Status.GRADUATED) is graduated\n\n    text = render(TextFormatter(), [graduated, bo])\n    assert text == \"S01 | Bo | SUSPENDED\\nS02 | Amy | GRADUATED\"\n    csv_text = render(CsvFormatter(), [graduated, bo])\n    assert csv_text == (\n        \"student_id,name,status\\n\"\n        \"S01,Bo,SUSPENDED\\n\"\n        \"S02,Amy,GRADUATED\\n\"\n    )\n    assert render(TextFormatter(), []) == \"No profiles\"\n\n    unknown = expect(UnknownStatusError, lambda: parse_status(\"paused\"))\n    assert isinstance(unknown.__cause__, KeyError)\n    expect(InvalidTransitionError, lambda: move_to(graduated, Status.ACTIVE))\n    expect(ValueError, lambda: StudentProfile(\"\", \"Bo\"))\n    expect(TypeError, lambda: render(object(), []))\n    expect(TypeError, lambda: render(TextFormatter(), [\"bad\"]))\n\n\nif __name__ == \"__main__\":\n    run_checks()\n    print(\"weekend-status-report checks: OK\")\n",
+      "explanation": "不可变模型保护旧状态，领域异常表达失败，抽象格式器统一文本与CSV输出。",
+      "hint": "先完成数据契约和状态转换，再实现格式器。",
+      "sourceIndex": 0,
+      "attribution": "依据 2026-11-28 实际阅读的官方资料原创，非官方原题",
+      "language": "python",
+      "starter": "from abc import ABC, abstractmethod\\nfrom dataclasses import dataclass, replace\\nfrom enum import Enum, auto\\n\\nclass Status(Enum):\\n    # TODO\\n    pass\\n\\n@dataclass(frozen=True)\\nclass StudentProfile:\\n    # TODO\\n    pass\\n",
+      "tests": [
+        {
+          "input": "valid transitions; text/csv; empty",
+          "output": "weekend-status-report checks: OK"
+        },
+        {
+          "input": "unknown/rollback/blank/wrong formatter/wrong item",
+          "output": "weekend-status-report checks: OK"
+        }
+      ]
+    }
+  ]
+}
